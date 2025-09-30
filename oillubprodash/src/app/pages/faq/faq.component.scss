@@ -1,0 +1,166 @@
+// Expand/collapse animation
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes expandOut {
+  from {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+}
+
+// FAQ item transitions
+.faq-answer {
+  overflow: hidden;
+  animation: expandIn 0.3s ease-out forwards;
+
+  &.ng-leave {
+    animation: expandOut 0.3s ease-in forwards;
+  }
+}
+
+// Category button transitions
+button {
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Search input enhancements
+input[type="text"] {
+  transition: all 0.2s ease;
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  }
+}
+
+// Chevron rotation
+.rotate-180 {
+  transition: transform 0.2s ease;
+}
+
+// Dark mode styles
+@media (prefers-color-scheme: dark) {
+  :host {
+    .bg-gray-50 {
+      background-color: #1f2937;
+    }
+
+    .text-gray-900 {
+      color: #f9fafb;
+    }
+
+    .text-gray-600 {
+      color: #d1d5db;
+    }
+
+    .text-gray-500 {
+      color: #9ca3af;
+    }
+
+    .text-gray-400 {
+      color: #6b7280;
+    }
+
+    .divide-gray-200 > * + * {
+      border-color: #374151;
+    }
+
+    input[type="text"] {
+      background-color: #111827;
+      border-color: #374151;
+      color: #f9fafb;
+
+      &::placeholder {
+        color: #6b7280;
+      }
+
+      &:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+      }
+    }
+
+    button {
+      &.bg-gray-100 {
+        background-color: #1f2937;
+      }
+
+      &.text-gray-500 {
+        color: #9ca3af;
+      }
+
+      &:hover {
+        background-color: #374151;
+      }
+
+      &.bg-indigo-100 {
+        background-color: rgba(99, 102, 241, 0.2);
+      }
+
+      &.text-indigo-700 {
+        color: #818cf8;
+      }
+    }
+
+    .bg-indigo-600 {
+      background-color: #4f46e5;
+
+      &:hover {
+        background-color: #4338ca;
+      }
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .bg-gray-50 {
+    background-color: white !important;
+  }
+
+  button {
+    display: none !important;
+  }
+
+  .faq-answer {
+    display: block !important;
+    animation: none !important;
+    max-height: none !important;
+  }
+
+  .divide-gray-200 > * + * {
+    border-color: #e5e7eb !important;
+  }
+
+  .shadow-sm {
+    box-shadow: none !important;
+  }
+
+  .contact-support {
+    display: none !important;
+  }
+}

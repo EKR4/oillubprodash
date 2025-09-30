@@ -1,0 +1,148 @@
+// Loading spinner animation
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+// Image gallery transitions
+.aspect-w-1 {
+  img {
+    transition: transform 0.3s ease-in-out;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Package selection animations
+button {
+  &.ring-2 {
+    transition: all 0.2s ease-in-out;
+    
+    &:hover:not([disabled]) {
+      transform: translateY(-2px);
+    }
+  }
+  
+  &[disabled] {
+    cursor: not-allowed;
+  }
+}
+
+// Tab transitions
+.border-b-2 {
+  transition: border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+// Quantity controls
+.quantity-control {
+  button {
+    transition: all 0.2s ease;
+    
+    &:hover:not([disabled]) {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    &[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Add to cart button
+.bg-indigo-600 {
+  transition: background-color 0.2s ease-in-out;
+  
+  &:hover:not([disabled]) {
+    background-color: #4338ca;
+  }
+  
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Related products
+.group {
+  .aspect-w-1 {
+    overflow: hidden;
+    
+    img {
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+  }
+  
+  &:hover {
+    .aspect-w-1 img {
+      opacity: 0.75;
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .bg-white {
+    background-color: #1a1a1a;
+  }
+  
+  .text-gray-900 {
+    color: #e5e5e5;
+  }
+  
+  .text-gray-700 {
+    color: #d1d1d1;
+  }
+  
+  .text-gray-500 {
+    color: #9ca3af;
+  }
+  
+  .border-gray-200 {
+    border-color: #374151;
+  }
+  
+  .bg-indigo-600 {
+    &:hover:not([disabled]) {
+      background-color: #4f46e5;
+    }
+  }
+  
+  .prose {
+    color: #e5e5e5;
+    
+    h3 {
+      color: #e5e5e5;
+    }
+    
+    a {
+      color: #60a5fa;
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .aspect-w-1 {
+    page-break-inside: avoid;
+  }
+  
+  button {
+    display: none;
+  }
+  
+  .prose {
+    max-width: none;
+  }
+}

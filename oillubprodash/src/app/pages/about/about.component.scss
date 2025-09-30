@@ -1,0 +1,179 @@
+// Timeline animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-out forwards;
+  opacity: 0;
+
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.2}s;
+    }
+  }
+}
+
+// Card hover effects
+.bg-white.rounded-lg.shadow-lg {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Timeline line animation
+.timeline-line {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, #4f46e5, transparent);
+  opacity: 0.3;
+  animation: expandLine 2s ease-out forwards;
+}
+
+@keyframes expandLine {
+  from {
+    height: 0;
+  }
+  to {
+    height: 100%;
+  }
+}
+
+// Team member card transitions
+.team-member {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, #4f46e5, #818cf8);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: left;
+  }
+
+  &:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+// Testimonial quote animation
+.testimonial-quote {
+  position: relative;
+  
+  svg {
+    transition: transform 0.3s ease;
+  }
+
+  &:hover svg {
+    transform: scale(1.1);
+  }
+}
+
+// Dark mode styles
+@media (prefers-color-scheme: dark) {
+  :host {
+    .bg-white {
+      background-color: #1f2937;
+    }
+
+    .text-gray-900 {
+      color: #f9fafb;
+    }
+
+    .text-gray-500 {
+      color: #9ca3af;
+    }
+
+    .text-indigo-600 {
+      color: #818cf8;
+    }
+
+    .bg-indigo-500 {
+      background-color: #6366f1;
+    }
+
+    .bg-indigo-700 {
+      background-color: #4338ca;
+    }
+
+    .border-gray-200 {
+      border-color: #374151;
+    }
+
+    .shadow-lg {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
+                  0 4px 6px -2px rgba(0, 0, 0, 0.2);
+    }
+
+    .timeline-line {
+      background: linear-gradient(to bottom, transparent, #818cf8, transparent);
+    }
+
+    .team-member::after {
+      background: linear-gradient(to right, #818cf8, #6366f1);
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .bg-indigo-800,
+  .bg-indigo-700 {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  .text-white,
+  .text-indigo-100,
+  .text-indigo-200 {
+    color: black !important;
+  }
+
+  .shadow-lg,
+  .shadow-xl {
+    box-shadow: none !important;
+  }
+
+  .timeline-line {
+    display: none !important;
+  }
+
+  .animate-fadeIn {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .team-member::after {
+    display: none !important;
+  }
+
+  a[routerLink] {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  .bg-indigo-500,
+  .bg-indigo-600,
+  .bg-indigo-700 {
+    background-color: transparent !important;
+    border: 1px solid #000 !important;
+  }
+}

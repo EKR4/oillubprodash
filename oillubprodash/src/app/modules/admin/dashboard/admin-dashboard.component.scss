@@ -1,0 +1,117 @@
+// Admin Dashboard Component Styles
+:host {
+    display: block;
+}
+
+// Card hover effects
+.bg-white {
+    transition: all 0.3s ease-in-out;
+}
+
+// Stat cards
+.grid-cols-4>div:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+// Custom scrollbar for tables and overflow containers
+.overflow-x-auto,
+.max-h-40 {
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 8px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 8px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background: #ccc;
+    }
+}
+
+// Activity table row hover effect
+tbody tr {
+    transition: background-color 0.2s;
+    &:hover {
+        background-color: rgba(243, 244, 246, 0.5);
+    }
+}
+
+// Quick action buttons animation
+.quick-actions a {
+    transition: all 0.3s ease;
+    &:hover {
+        transform: translateY(-3px);
+    }
+    .bg-blue-100,
+    .bg-yellow-100,
+    .bg-green-100,
+    .bg-purple-100 {
+        transition: all 0.2s ease;
+    }
+    &:hover .bg-blue-100 {
+        background-color: rgba(191, 219, 254, 0.5);
+    }
+    &:hover .bg-yellow-100 {
+        background-color: rgba(254, 243, 199, 0.5);
+    }
+    &:hover .bg-green-100 {
+        background-color: rgba(209, 250, 229, 0.5);
+    }
+    &:hover .bg-purple-100 {
+        background-color: rgba(237, 233, 254, 0.5);
+    }
+}
+
+// Low stock alerts
+.border-red-300,
+.border-yellow-300 {
+    transition: all 0.2s ease;
+    &:hover {
+        transform: translateX(3px);
+    }
+}
+
+// Pending tasks
+.border-yellow-500 {
+    transition: border-color 0.3s ease;
+}
+
+// Status badge pulse effect for critical items
+.bg-red-100 {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(248, 113, 113, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(248, 113, 113, 0);
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .quick-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-cols-4,
+    .quick-actions {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+}

@@ -1,0 +1,208 @@
+<div class="bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="error" class="rounded-md bg-red-50 p-4 my-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Error</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        <p>{{ error }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-6 pb-24">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-x-8 gap-y-10">
+                <!-- Filters Sidebar -->
+                <div class="hidden lg:block">
+                    <div class="space-y-6">
+                        <!-- Category Filter -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Categories</h3>
+                            <div class="mt-4 space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" [checked]="!selectedCategory" (change)="onCategoryChange(null)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                    <label class="ml-3 text-sm text-gray-600">All Products</label>
+                                </div>
+                                <div *ngFor="let category of categories" class="flex items-center">
+                                    <input type="radio" [checked]="selectedCategory?.id === category.id" (change)="onCategoryChange(category)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                    <label class="ml-3 text-sm text-gray-600">{{ category.name }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Brand Filter -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Brands</h3>
+                            <div class="mt-4 space-y-2">
+                                <div *ngFor="let brand of brands" class="flex items-center">
+                                    <input type="checkbox" [checked]="selectedBrands.includes(brand)" (change)="onBrandChange(brand, $event)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label class="ml-3 text-sm text-gray-600">{{ brand }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Viscosity Filter -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Viscosity Grades</h3>
+                            <div class="mt-4 space-y-2">
+                                <div *ngFor="let viscosity of viscosityGrades" class="flex items-center">
+                                    <input type="checkbox" [checked]="selectedViscosities.includes(viscosity)" (change)="onViscosityChange(viscosity, $event)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label class="ml-3 text-sm text-gray-600">{{ viscosity }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vehicle Type Filter -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Vehicle Types</h3>
+                            <div class="mt-4 space-y-2">
+                                <div *ngFor="let type of vehicleTypes" class="flex items-center">
+                                    <input type="checkbox" [checked]="selectedVehicleTypes.includes(type)" (change)="onVehicleTypeChange(type, $event)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label class="ml-3 text-sm text-gray-600">{{ type }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clear Filters -->
+                        <div class="mt-8">
+                            <button (click)="clearFilters()" class="w-full px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md">
+                Clear All Filters
+              </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Grid -->
+                <div class="lg:col-span-3">
+                    <!-- Toolbar -->
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                        <!-- Search -->
+                        <div class="relative flex-grow max-w-lg mb-4 sm:mb-0">
+                            <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search products..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-4">
+                            <!-- Sort Options -->
+                            <select [(ngModel)]="sortOption" (ngModelChange)="onSortChange()" class="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <option value="name_asc">Name (A-Z)</option>
+                <option value="name_desc">Name (Z-A)</option>
+                <option value="price_asc">Price (Low to High)</option>
+                <option value="price_desc">Price (High to Low)</option>
+              </select>
+
+                            <!-- View Mode Toggle -->
+                            <div class="flex items-center space-x-2">
+                                <button aria-label="Switch to grid view" title="Grid view" (click)="onViewModeChange('grid')" [class.text-indigo-600]="viewMode === 'grid'" [class.text-gray-400]="viewMode !== 'grid'" class="p-2 hover:text-indigo-600">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
+                                <button aria-label="Switch to list view" title="List view" (click)="onViewModeChange('list')" [class.text-indigo-600]="viewMode === 'list'" [class.text-gray-400]="viewMode !== 'list'" class="p-2 hover:text-indigo-600">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Results -->
+                    <div *ngIf="filteredProducts.length === 0" class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No products found</h3>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Try adjusting your search or filter criteria
+                        </p>
+                    </div>
+
+                    <!-- Grid View -->
+                    <div *ngIf="viewMode === 'grid'" class="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <div *ngFor="let product of filteredProducts" class="group relative">
+                            <div class="aspect-w-4 aspect-h-3 rounded-lg overflow-hidden bg-gray-100">
+                                <img alt="" [src]="getProductImage(product)" [alt]="product.name + ' - ' + product.brand" [title]="product.description" class="object-center object-cover group-hover:opacity-75">
+                            </div>
+                            <div class="mt-4 flex items-center justify-between space-x-8">
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-900">
+                                        <a [routerLink]="['/products', product.id]">
+                      {{ product.name }}
+                    </a>
+                                    </h3>
+                                    <p class="mt-1 text-sm text-gray-500">{{ product.brand }}</p>
+                                </div>
+                                <p class="text-sm font-medium text-gray-900">{{ getFormattedPrice(product) }}</p>
+                            </div>
+                            <div class="mt-2">
+                                <span *ngIf="isProductInStock(product)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  In Stock
+                </span>
+                                <span *ngIf="!isProductInStock(product)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  Out of Stock
+                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- List View -->
+                    <div *ngIf="viewMode === 'list'" class="space-y-6">
+                        <div *ngFor="let product of filteredProducts" class="flex border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                            <div class="w-48 h-48 flex-shrink-0">
+                                <img alt="" [src]="getProductImage(product)" [alt]="product.name + ' - ' + product.brand" [title]="product.description" class="w-full h-full object-center object-cover">
+                            </div>
+                            <div class="flex-1 px-6 py-4">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-gray-900">
+                                        <a [routerLink]="['/products', product.id]">
+                      {{ product.name }}
+                    </a>
+                                    </h3>
+                                    <p class="text-lg font-medium text-gray-900">{{ getFormattedPrice(product) }}</p>
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">{{ product.brand }}</p>
+                                <p class="mt-2 text-sm text-gray-600">{{ product.description }}</p>
+                                <div class="mt-4">
+                                    <h4 class="text-sm font-medium text-gray-900">Available Sizes:</h4>
+                                    <div class="mt-2 flex flex-wrap gap-2">
+                                        <span *ngFor="let size of getAvailablePackageSizes(product)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      {{ size }}
+                    </span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex items-center space-x-4">
+                                    <span *ngIf="isProductInStock(product)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    In Stock
+                  </span>
+                                    <span *ngIf="!isProductInStock(product)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Out of Stock
+                  </span>
+                                    <a [routerLink]="['/products', product.id]" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded text-indigo-600 bg-indigo-50 hover:bg-indigo-100">
+                    View Details
+                  </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

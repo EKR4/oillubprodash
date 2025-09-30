@@ -1,0 +1,105 @@
+/* You can add global styles to this file, and also import other style files */
+
+@use '@angular/material' as mat;
+
+/* You can add global styles to this file, and also import other style files */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Google Fonts: Inter and Inter Tight */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Angular Material Theming */
+
+@include mat.core();
+:root {
+    --primary-color: #FEBD17;
+    --secondary-color: #1F2937;
+    --accent-color: #FF4081;
+    --warning-color: #F44336;
+    --success-color: #4CAF50;
+    --info-color: #2196F3;
+}
+
+
+/* Custom Utility Classes */
+
+.container-fluid {
+    width: 100%;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.container {
+    width: 100%;
+    max-width: 1280px;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+
+/* Responsive fixes */
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+
+/* Material theme overrides */
+
+.mat-mdc-card {
+    @apply rounded-lg;
+}
+
+.mat-mdc-button.mat-primary {
+    color: var(--primary-color);
+}
+
+.mat-mdc-raised-button.mat-primary {
+    background-color: var(--primary-color);
+    color: #1F2937;
+}
+
+.mat-mdc-progress-bar.mat-primary .mat-mdc-progress-bar-fill::after {
+    background-color: var(--primary-color);
+}
+
+
+/* Custom button styles inspired by the reference design */
+
+.btn-primary {
+    @apply bg-primary text-secondary-800 font-medium py-2 px-4 rounded-md transition-colors;
+}
+
+.btn-secondary {
+    @apply bg-secondary-800 text-white font-medium py-2 px-4 rounded-md transition-colors;
+}
+
+.btn-outline {
+    @apply bg-transparent border border-gray-300 text-secondary-800 font-medium py-2 px-4 rounded-md transition-colors;
+}
+
+
+/* Custom button styles inspired by the reference design */
+
+.btn-primary {
+    @apply bg-primary text-secondary-800 font-medium py-2 px-4 rounded-md transition-colors;
+}
+
+.btn-secondary {
+    @apply bg-secondary-800 text-white font-medium py-2 px-4 rounded-md transition-colors;
+}
+
+.btn-outline {
+    @apply bg-transparent border border-gray-300 text-secondary-800 font-medium py-2 px-4 rounded-md transition-colors;
+}

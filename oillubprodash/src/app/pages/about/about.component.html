@@ -1,0 +1,234 @@
+<div class="bg-white">
+  <!-- Hero Section -->
+  <div class="relative bg-indigo-800">
+    <div class="absolute inset-0">
+      <img class="w-full h-full object-cover" src="assets/images/about-hero.jpg" alt="Company Overview">
+      <div class="absolute inset-0 bg-indigo-800 mix-blend-multiply"></div>
+    </div>
+    <div class="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
+      <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">About {{ companyInfo.name }}</h1>
+      <p class="mt-6 text-xl text-indigo-100 max-w-3xl">
+        Founded in {{ companyInfo.foundedYear }}, we've grown to become a leading provider of premium lubricants in East Africa.
+      </p>
+    </div>
+  </div>
+
+  <!-- Mission and Vision -->
+  <div class="bg-white py-16 sm:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="lg:text-center">
+        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Our Purpose</h2>
+        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+          Mission & Vision
+        </p>
+      </div>
+
+      <div class="mt-10">
+        <dl class="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+          <!-- Mission -->
+          <div class="relative">
+            <dt>
+              <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Mission</p>
+            </dt>
+            <dd class="mt-2 ml-16 text-base text-gray-500">
+              {{ companyInfo.mission }}
+            </dd>
+          </div>
+
+          <!-- Vision -->
+          <div class="relative">
+            <dt>
+              <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </div>
+              <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Vision</p>
+            </dt>
+            <dd class="mt-2 ml-16 text-base text-gray-500">
+              {{ companyInfo.vision }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- Values -->
+  <div class="bg-gray-50 py-16 sm:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="lg:text-center">
+        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Our Values</h2>
+        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+          What Drives Us
+        </p>
+      </div>
+
+      <div class="mt-10">
+        <dl class="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
+          <div *ngFor="let value of companyInfo.values" class="relative">
+            <dt>
+              <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p class="ml-16 text-lg leading-6 font-medium text-gray-900">{{ value.title }}</p>
+            </dt>
+            <dd class="mt-2 ml-16 text-base text-gray-500">
+              {{ value.description }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="bg-white py-16 sm:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="lg:text-center mb-16">
+        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Our Journey</h2>
+        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+          Key Milestones
+        </p>
+      </div>
+
+      <div class="relative">
+        <div class="absolute h-full w-0.5 bg-gray-200 left-1/2 transform -translate-x-1/2"></div>
+        <div class="space-y-12">
+          <div *ngFor="let milestone of companyInfo.milestones; let i = index" 
+               class="relative" [class.animate-fadeIn]="true">
+            <div class="flex items-center justify-center">
+              <div class="flex items-center w-full mx-auto">
+                <div [class.order-1]="i % 2 === 0" [class.order-2]="i % 2 !== 0" class="w-5/12"></div>
+                <div class="z-20 flex items-center order-1 bg-indigo-500 shadow-xl w-8 h-8 rounded-full">
+                  <h1 class="mx-auto font-semibold text-lg text-white">{{ milestone.year }}</h1>
+                </div>
+                <div [class.order-2]="i % 2 === 0" [class.order-1]="i % 2 !== 0" class="w-5/12"></div>
+              </div>
+            </div>
+            <div class="mt-6 sm:mt-0" [class.ml-auto]="i % 2 !== 0" [style.width]="'45%'">
+              <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-medium text-gray-900">{{ milestone.year }}</h3>
+                <p class="mt-2 text-base text-gray-500">{{ milestone.event }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team -->
+  <div class="bg-gray-50 py-16 sm:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="lg:text-center">
+        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Our Leadership</h2>
+        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+          Meet the Team
+        </p>
+      </div>
+
+      <div class="mt-10 space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
+        <div *ngFor="let member of companyInfo.team" class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+              {{ member.name }}
+            </h3>
+            <p class="mt-1 text-sm text-indigo-600">
+              {{ member.position }}
+            </p>
+            <p class="mt-3 text-base text-gray-500">
+              {{ member.bio }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Facilities -->
+  <div class="bg-white py-16 sm:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="lg:text-center">
+        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Our Facilities</h2>
+        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+          State-of-the-Art Infrastructure
+        </p>
+      </div>
+
+      <div class="mt-10 space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
+        <div *ngFor="let facility of companyInfo.facilities" class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+              {{ facility.name }}
+            </h3>
+            <p class="mt-1 text-sm text-indigo-600">
+              {{ facility.location }}
+            </p>
+            <ul class="mt-3 list-disc list-inside text-base text-gray-500">
+              <li *ngFor="let feature of facility.features">{{ feature }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Testimonials -->
+  <div class="bg-gray-50 py-16 sm:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="lg:text-center">
+        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Testimonials</h2>
+        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+          What Our Clients Say
+        </p>
+      </div>
+
+      <div class="mt-10 space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
+        <div *ngFor="let testimonial of testimonials" class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="px-4 py-5 sm:p-6">
+            <div class="text-indigo-600">
+              <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+              </svg>
+            </div>
+            <p class="mt-4 text-base text-gray-500 italic">
+              "{{ testimonial.quote }}"
+            </p>
+            <div class="mt-6">
+              <p class="text-base font-medium text-gray-900">{{ testimonial.name }}</p>
+              <p class="text-sm text-gray-500">
+                {{ testimonial.position }} at {{ testimonial.company }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact CTA -->
+  <div class="bg-indigo-700">
+    <div class="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-extrabold text-white sm:text-4xl">
+        <span class="block">Want to learn more?</span>
+        <span class="block">Get in touch with us.</span>
+      </h2>
+      <p class="mt-4 text-lg leading-6 text-indigo-200">
+        Our team is ready to answer your questions and discuss how we can help your business.
+      </p>
+      <a routerLink="/contact"
+         class="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto">
+        Contact Us
+      </a>
+    </div>
+  </div>
+</div>

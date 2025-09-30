@@ -1,0 +1,193 @@
+// Section transitions
+.section-enter {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Product card hover effects
+.product-card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Feature icon hover effects
+.feature-icon {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    background-color: #4f46e5;
+  }
+}
+
+// Testimonial card hover effects
+.testimonial-card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+    .quote-icon {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Loading spinner animation
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+// Certification card hover effects
+.certification-card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+    img {
+      transform: scale(1.1);
+    }
+  }
+
+  img {
+    transition: transform 0.3s ease;
+  }
+}
+
+// Dark mode styles
+@media (prefers-color-scheme: dark) {
+  :host {
+    .bg-white {
+      background-color: #111827;
+    }
+
+    .bg-gray-50 {
+      background-color: #1f2937;
+    }
+
+    .text-gray-900 {
+      color: #f9fafb;
+    }
+
+    .text-gray-700 {
+      color: #e5e7eb;
+    }
+
+    .text-gray-600 {
+      color: #d1d5db;
+    }
+
+    .text-gray-500 {
+      color: #9ca3af;
+    }
+
+    .border-gray-300 {
+      border-color: #374151;
+    }
+
+    .product-card {
+      background-color: #1f2937;
+      border-color: #374151;
+
+      &:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    .testimonial-card {
+      background-color: #1f2937;
+      border-color: #374151;
+
+      &:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    .certification-card {
+      background-color: #1f2937;
+      border-color: #374151;
+
+      &:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    .feature-icon {
+      &:hover {
+        background-color: #6366f1;
+      }
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .bg-indigo-800,
+  .bg-indigo-700 {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  .text-white,
+  .text-indigo-100,
+  .text-indigo-200 {
+    color: black !important;
+  }
+
+  .shadow,
+  .shadow-lg,
+  .shadow-sm {
+    box-shadow: none !important;
+  }
+
+  .product-card,
+  .testimonial-card,
+  .certification-card {
+    break-inside: avoid;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: none !important;
+  }
+
+  .feature-icon {
+    border: 1px solid #e5e7eb !important;
+    background-color: transparent !important;
+  }
+
+  .animate-spin {
+    animation: none !important;
+  }
+
+  a[routerLink] {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  .bg-indigo-500,
+  .bg-indigo-600 {
+    background-color: transparent !important;
+    border: 1px solid #000 !important;
+    color: #000 !important;
+  }
+}

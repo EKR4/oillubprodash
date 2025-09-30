@@ -1,0 +1,75 @@
+// Layout component styles
+:host {
+    display: block;
+    min-height: 100vh;
+}
+
+// Header styles
+header {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    .text-yellow-500 {
+        color: #f59e0b;
+    }
+    nav a {
+        position: relative;
+        &.text-yellow-500::after,
+        &:hover::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 100%;
+            height: 2px;
+            background-color: #f59e0b;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        &.text-yellow-500::after,
+        &:hover::after {
+            transform: scaleX(1);
+        }
+    }
+}
+
+// User menu dropdown animation
+@keyframes menuFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+[role="menu"] {
+    animation: menuFadeIn 0.2s ease-out;
+}
+
+// Mobile menu transitions
+#mobile-menu {
+    transition: height 0.3s ease;
+    overflow: hidden;
+}
+
+// Footer styles
+footer {
+    .text-yellow-500 {
+        color: #f59e0b;
+    }
+    a {
+        transition: color 0.2s ease;
+    }
+}
+
+// Feather icons styling
+[data-feather] {
+    width: 1.25em;
+    height: 1.25em;
+    stroke-width: 2;
+    stroke: currentColor;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}

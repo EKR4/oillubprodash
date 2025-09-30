@@ -1,0 +1,200 @@
+// Loading spinner animation
+.animate-spin {
+    animation: spin 1s linear infinite;
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+}
+
+// Status message transitions
+.rounded-md {
+    transition: all 0.3s ease;
+    &.bg-red-50,
+    &.bg-green-50,
+    &.bg-blue-50 {
+        animation: slideIn 0.3s ease-out;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Button hover effects
+button {
+    transition: all 0.2s ease;
+    &:not(:disabled):hover {
+        transform: translateY(-1px);
+    }
+    &:active {
+        transform: translateY(0);
+    }
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+}
+
+// Icon animations
+svg {
+    transition: transform 0.2s ease;
+    &:hover {
+        transform: scale(1.1);
+    }
+}
+
+// Dark mode styles
+@media (prefers-color-scheme: dark) {
+     :host {
+        .bg-gray-50 {
+            color: #111827;
+            /* text color override */
+        }
+        .bg-white {
+            color: #1f2937;
+            /* text color override */
+        }
+        .text-gray-900 {
+            color: #ffffff;
+        }
+        .text-gray-600 {
+            color: #9ca3af;
+        }
+        /* 🔴 Status messages: Red */
+        .bg-red-50 {
+            background-color: rgba(127, 29, 29, 0.2);
+            /* bg-red-900 with 20% opacity */
+        }
+        .bg-red-50 .text-red-400 {
+            color: #f87171;
+        }
+        .bg-red-50 .text-red-800 {
+            color: #fecaca;
+        }
+        .bg-red-50 .text-red-700 {
+            color: #fca5a5;
+        }
+        /* 🟢 Status messages: Green */
+        .bg-green-50 {
+            background-color: rgba(6, 78, 59, 0.2);
+            /* bg-green-900 with 20% opacity */
+        }
+        .bg-green-50 .text-green-400 {
+            color: #4ade80;
+        }
+        .bg-green-50 .text-green-800 {
+            color: #bbf7d0;
+        }
+        .bg-green-50 .text-green-700 {
+            color: #86efac;
+        }
+        /* 🔵 Status messages: Blue */
+        .bg-blue-50 {
+            background-color: rgba(30, 58, 138, 0.2);
+            /* bg-blue-900 with 20% opacity */
+        }
+        .bg-blue-50 .text-blue-400 {
+            color: #60a5fa;
+        }
+        .bg-blue-50 .text-blue-800 {
+            color: #bfdbfe;
+        }
+        .bg-blue-50 .text-blue-700 {
+            color: #93c5fd;
+        }
+        /* 🧵 Button states */
+        button {
+            &.bg-red-600 {
+                background-color: #b91c1c;
+                /* bg-red-700 */
+            }
+            &.bg-red-600:hover {
+                color: #dc2626;
+                /* red-600 */
+            }
+            &.bg-green-600 {
+                background-color: #15803d;
+                /* bg-green-700 */
+            }
+            &.bg-green-600:hover {
+                color: #16a34a;
+                /* green-600 */
+            }
+            &.bg-blue-600 {
+                background-color: #1d4ed8;
+                /* bg-blue-700 */
+            }
+        }
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+    .sm\:px-6 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .sm\:mx-auto {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+    .rounded-md {
+        border-radius: 0.375rem;
+    }
+}
+
+// Print styles
+@media print {
+    .bg-gray-50 {
+        background-color: white !important;
+    }
+    .shadow {
+        box-shadow: none !important;
+    }
+    button {
+        display: none !important;
+    }
+    .animate-spin {
+        animation: none !important;
+    }
+    .bg-red-50,
+    .bg-green-50,
+    .bg-blue-50 {
+        background-color: white !important;
+        border: 1px solid #ddd;
+        svg {
+            display: none;
+        }
+    }
+}
+
+// CSS Variables
+:root {
+    --color-primary: #3b82f6;
+    --color-primary-light: #60a5fa;
+    --color-primary-dark: #2563eb;
+}
+
+// Dark mode variables
+@media (prefers-color-scheme: dark) {
+     :root {
+        --color-primary: #3b82f6;
+        --color-primary-light: #60a5fa;
+        --color-primary-dark: #2563eb;
+    }
+}

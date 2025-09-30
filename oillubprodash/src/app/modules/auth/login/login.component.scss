@@ -1,0 +1,233 @@
+// Loading spinner animation
+.animate-spin {
+    animation: spin 1s linear infinite;
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+}
+
+// Form control transitions
+input {
+    transition: all 0.2s ease;
+    &:hover {
+        @apply border-gray-400;
+    }
+    &:focus {
+        @apply ring-2 ring-primary ring-opacity-50 border-primary;
+        outline: none;
+    }
+    &.border-red-300 {
+        @apply ring-2 ring-red-500 ring-opacity-50;
+    }
+}
+
+// Checkbox styles
+input[type="checkbox"] {
+    @apply rounded border-gray-300 text-primary;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    &:hover {
+        @apply border-blue-400;
+    }
+}
+
+// Button transitions
+button {
+    transition: all 0.2s ease;
+    &:not(:disabled):hover {
+        transform: translateY(-1px);
+    }
+    &:active {
+        transform: translateY(0);
+    }
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+}
+
+// Social login buttons
+.social-button {
+    transition: all 0.2s ease;
+    svg {
+        transition: transform 0.2s ease;
+    }
+    &:hover {
+        @apply bg-gray-50;
+        svg {
+            transform: scale(1.1);
+        }
+    }
+}
+
+// Error message animation
+.bg-red-50 {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Dark mode styles
+@media (prefers-color-scheme: dark) {
+     :host {
+        .bg-gray-50 {
+            background-color: #111827;
+            /* bg-gray-900 */
+        }
+        .bg-white {
+            background-color: #1f2937;
+            /* bg-gray-800 */
+        }
+        .text-gray-900 {
+            color: #ffffff;
+            /* text-white */
+        }
+        .text-gray-600,
+        .text-gray-500 {
+            color: #9ca3af;
+            /* text-gray-400 */
+        }
+        input {
+            background-color: #374151;
+            /* bg-gray-700 */
+            border-color: #4b5563;
+            /* border-gray-600 */
+            color: #ffffff;
+            /* text-white */
+        }
+        input::placeholder {
+            color: #9ca3af;
+            /* text-gray-400 */
+        }
+        input:hover {
+            border-color: #6b7280;
+            /* border-gray-500 */
+        }
+        input:focus {
+            border-color: #3b82f6;
+            /* border-primary (blue-500) */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+            /* ring-primary ring-opacity-50 */
+        }
+        input[type="checkbox"] {
+            border-color: #4b5563;
+            /* border-gray-600 */
+            background-color: #374151;
+            /* bg-gray-700 */
+        }
+        input[type="checkbox"]:checked {
+            background-color: #3b82f6;
+            /* bg-primary */
+            border-color: transparent;
+        }
+        .bg-red-50 {
+            background-color: rgba(127, 29, 29, 0.2);
+            /* bg-red-900 with bg-opacity-20 */
+        }
+        .bg-red-50 .text-red-400 {
+            color: #f87171;
+            /* text-red-400 */
+        }
+        .bg-red-50 .text-red-800 {
+            color: #fecaca;
+            /* text-red-200 */
+        }
+        button[type="submit"] {
+            background-color: #3b82f6;
+            /* bg-primary */
+        }
+        button.social-button {
+            background-color: #1f2937;
+            /* bg-gray-800 */
+            border-color: #4b5563;
+            /* border-gray-600 */
+            color: #d1d5db;
+            /* text-gray-300 */
+        }
+        button.social-button:hover {
+            background-color: #374151;
+            /* bg-gray-700 */
+        }
+        .border-gray-300 {
+            border-color: #4b5563;
+            /* border-gray-600 */
+        }
+        .bg-white.text-gray-500 {
+            background-color: #1f2937;
+            /* bg-gray-800 */
+            color: #9ca3af;
+            /* text-gray-400 */
+        }
+    }
+}
+
+// Print styles
+@media print {
+    .bg-gray-50 {
+        background-color: white !important;
+    }
+    .shadow {
+        box-shadow: none !important;
+    }
+    button {
+        display: none !important;
+    }
+    input[type="password"] {
+        -webkit-text-security: disc;
+    }
+    .animate-spin {
+        animation: none !important;
+    }
+}
+
+// CSS Variables
+:root {
+    --color-primary: #3b82f6;
+    --color-primary-light: #60a5fa;
+    --color-primary-dark: #2563eb;
+}
+
+// Dark mode variables
+@media (prefers-color-scheme: dark) {
+     :root {
+        --color-primary: #3b82f6;
+        --color-primary-light: #60a5fa;
+        --color-primary-dark: #2563eb;
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+    .sm\:px-6 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .sm\:mx-auto {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+    .social-button {
+        span {
+            display: none;
+        }
+        svg {
+            margin: 0 auto;
+        }
+    }
+}
