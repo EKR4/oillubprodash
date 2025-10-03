@@ -1,0 +1,111 @@
+// Most styling is handled by Tailwind CSS classes in the HTML template
+// This file contains additional custom styles that can't be easily achieved with Tailwind
+// Smooth transitions for quantity changes
+.bg-gray-100.text-gray-800.font-medium {
+    transition: all 0.2s ease;
+}
+
+// Enhance hover effects for buttons
+button {
+    transition: all 0.2s ease;
+    &.text-red-600:hover {
+        svg {
+            transform: translateX(-2px);
+        }
+    }
+    &.bg-yellow-500:hover {
+        transform: translateY(-1px);
+    }
+}
+
+// Add shadow effect to cart items on hover
+.p-6.flex.flex-col.md\:flex-row {
+    transition: all 0.2s ease;
+    &:hover {
+        background-color: #fafafa;
+    }
+}
+
+// Make the order summary section sticky during scrolling
+.sticky.top-6 {
+    transition: box-shadow 0.2s ease;
+    &:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+}
+
+// Enhanced product image hover effect
+img.w-full.h-32 {
+    transition: transform 0.5s ease;
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+// Smooth animations for items being added or removed
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.3s ease-in-out;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .gap-8 {
+        gap: 1.5rem;
+    }
+}
+
+// Empty cart illustration animation
+svg.h-16.w-16 {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+// Payment method indicators
+.bg-gray-100.rounded {
+    transition: all 0.2s ease;
+    &:hover {
+        background-color: #f3f4f6;
+        transform: translateY(-2px);
+    }
+}

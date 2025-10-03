@@ -1,5 +1,5 @@
 import { ApplicationConfig, isDevMode } from '@angular/core';
-import { provideRouter, withViewTransitions } from '@angular/router';
+import { provideRouter, withViewTransitions, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -9,21 +9,20 @@ import { authInterceptor } from './cores/interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // Router configuration
+    // Router configuration with enhanced SSR features
     provideRouter(
       routes,
-      withViewTransitions()
+      withViewTransitions(),
+      withComponentInputBinding()
     ),
 
     // HTTP client configuration
     provideHttpClient(
       withFetch(),
-      withInterceptors([
-        authInterceptor
-      ])
+      withInterceptors([authInterceptor])
     ),
 
-    // Client hydration for SSR
+    // Client hydration and SSR optimizations
     provideClientHydration(),
 
     // Animations

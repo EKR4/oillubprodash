@@ -1,9 +1,30 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, map, of } from 'rxjs';
-import { User, UserRole, AuthResponse } from '../models/user';
+import { BehaviorSubject, Observable, catchError, map, of } from 'rxjs';
 import { SupabaseService } from './supabase.service';
-import { AuthError, User as SupabaseAuthUser, Session, AuthChangeEvent } from '@supabase/supabase-js';
+import { AuthError, User as SupabaseAuthUser, Session } from '@supabase/supabase-js';
+
+// Define types locally to avoid TSX import issues
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  created_at: Date;
+  is_active: boolean;
+  phone?: string;
+  company_id?: string;
+  profile_image_url?: string;
+  loyalty_points?: number;
+}
+
+export type UserRole = 'admin' | 'company' | 'customer';
+
+export interface AuthResponse {
+  user: User | null;
+  session: Session | null;
+  error: Error | null;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -21,11 +42,17 @@ export class AuthService {
     this.initAuthState();
   }
 
+  /**
+   * Get the current access token for API calls
+   */
   getAccessToken(): string | null {
     const session = this.sessionSubject.value;
     return session?.access_token || null;
   }
 
+  /**
+   * Initialize auth state by listening for Supabase auth changes
+   */
   private initAuthState(): void {
     if (this.isInitialized) return;
 
@@ -48,69 +75,42 @@ export class AuthService {
           break;
         case 'SIGNED_IN':
         case 'USER_UPDATED':
-        if (session?.user) {
-          this.loadUserData(session.user.id);
-        }
+          if (session?.user) {
+            this.loadUserData(session.user.id);
+          }
+          break;
       }
     });
 
     this.isInitialized = true;
   }
 
-  private async loadUserData(userId: string | undefined): Promise<void> {
+  /**
+   * Load user data from the profiles table (linked to auth.users)
+   */
+  private async loadUserData(userId: string): Promise<void> {
     if (!userId) return;
 
     try {
-      // First, try to get user from users table
-      const { data: userData, error: userError } = await this.supabaseService
+      // Get user from profiles table (linked to auth.users)
+      const { data: profileData, error: profileError } = await this.supabaseService
         .getSupabase()
-        .from('users')
+        .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (userError && userError.code !== 'PGRST116') {
-        console.error('Error fetching user data:', userError);
+      if (profileError) {
+        console.error('Error fetching profile data:', profileError);
         return;
       }
 
       const session = this.sessionSubject.value;
       const authUser = session?.user;
 
-      if (!userData && authUser) {
-        // User exists in auth but not in users table
-        const { error: createError } = await this.supabaseService
-          .getSupabase()
-          .from('users')
-          .insert([{
-            id: authUser.id,
-            email: authUser.email,
-            full_name: authUser.user_metadata?.['full_name'] || '',
-            role: authUser.user_metadata?.['role'] || 'customer',
-            created_at: new Date().toISOString(),
-            is_active: true
-          }])
-          .single();
-
-        if (createError) {
-          console.error('Error creating user record:', createError);
-          return;
-        }
-
-        // Fetch the newly created user data
-        const { data: newUserData } = await this.supabaseService
-          .getSupabase()
-          .from('users')
-          .select('*')
-          .eq('id', userId)
-          .single();
-
-        if (newUserData) {
-          const appUser: User = this.mapToAppUser(newUserData, authUser);
-          this.currentUserSubject.next(appUser);
-        }
-      } else if (userData && authUser) {
-        const appUser: User = this.mapToAppUser(userData, authUser);
+      if (profileData && authUser) {
+        // Create user object from profile data
+        const appUser: User = this.mapToAppUser(profileData, authUser);
         this.currentUserSubject.next(appUser);
       }
     } catch (error) {
@@ -119,10 +119,12 @@ export class AuthService {
     }
   }
 
+  /**
+   * Map Supabase user and profile data to our application User model
+   */
   private mapToAppUser(
-    userData: { 
+    profileData: { 
       id: string;
-      email: string;
       full_name: string;
       role: string;
       created_at: string;
@@ -135,71 +137,60 @@ export class AuthService {
     authUser: SupabaseAuthUser
   ): User {
     return {
-      id: userData.id,
-      email: userData.email,
-      full_name: userData.full_name || authUser.user_metadata?.['full_name'] || '',
-      role: userData.role as UserRole,
-      created_at: new Date(userData.created_at),
-      is_active: userData.is_active,
-      phone: userData.phone || authUser.user_metadata?.['phone'],
-      company_id: userData.company_id,
-      profile_image_url: userData.profile_image_url,
-      loyalty_points: userData.loyalty_points || 0
+      id: profileData.id,
+      email: authUser.email || '',
+      full_name: profileData.full_name || authUser.user_metadata?.['full_name'] || '',
+      role: profileData.role as UserRole,
+      created_at: new Date(profileData.created_at),
+      is_active: profileData.is_active,
+      phone: profileData.phone || authUser.user_metadata?.['phone'],
+      company_id: profileData.company_id,
+      profile_image_url: profileData.profile_image_url,
+      loyalty_points: profileData.loyalty_points || 0
     };
   }
 
-  private async isFirstUser(): Promise<boolean> {
-    const { data, error } = await this.supabaseService
-      .getSupabase()
-      .from('users')
-      .select('id', { count: 'exact', head: true });
-    
-    if (error) {
-      console.error('Error checking for first user:', error);
-      return false;
-    }
-    
-    return data?.length === 0;
-  }
-
+  /**
+   * Register a new user using Supabase auth with profile integration
+   */
   register(email: string, password: string, userData: Partial<User>): Observable<AuthResponse> {
     return new Observable<AuthResponse>(observer => {
-      this.isFirstUser().then(isFirst => {
-        const role = isFirst ? 'admin' : (userData.role || 'customer');
-        
-        this.supabaseService.signUp(email, password, { ...userData, role })
-          .then(response => {
-            if (response.error) {
-              observer.error(response.error);
-              observer.complete();
-              return;
-            }
+      // SupabaseService handles role determination with server-side RPC
+      this.supabaseService.signUp(email, password, userData)
+        .then(response => {
+          if (response.error) {
+            observer.error(response.error);
+            observer.complete();
+            return;
+          }
 
-            if (response.data?.user && !response.data.session) {
-              observer.next({
-                user: null,
-                session: null,
-                error: new Error('Please check your email for a confirmation link')
-              });
-            } else if (response.data?.user) {
-              // User will be created by auth state change handler
-              observer.next({
-                user: null,
-                session: response.data.session,
-                error: null
-              });
-            }
-            
-            observer.complete();
-          })
-          .catch(error => {
-            observer.error(error);
-            observer.complete();
-          });
-      });
+          if (response.data?.user && !response.data.session) {
+            observer.next({
+              user: null,
+              session: null,
+              error: new Error('Please check your email for a confirmation link')
+            });
+          } else if (response.data?.user) {
+            // User will be created by auth state change handler
+            observer.next({
+              user: null,
+              session: response.data.session,
+              error: null
+            });
+          }
+          
+          observer.complete();
+        })
+        .catch(error => {
+          observer.error(error);
+          observer.complete();
+        });
     });
   }
 
+  /**
+   * Login using Supabase auth
+   */
   login(email: string, password: string): Observable<AuthResponse> {
     return new Observable<AuthResponse>(observer => {
       this.supabaseService.signIn(email, password)
@@ -232,6 +223,9 @@ export class AuthService {
     });
   }
 
+  /**
+   * Logout using Supabase auth
+   */
   logout(): Observable<{ success: boolean; error: Error | null }> {
     return new Observable(observer => {
       this.supabaseService.signOut()
@@ -263,31 +257,43 @@ export class AuthService {
     });
   }
 
+  /**
+   * Get current logged in user
+   */
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
   }
 
+  /**
+   * Check if user is authenticated
+   */
   isAuthenticated(): Observable<boolean> {
     return this.currentUser$.pipe(
       map(user => !!user)
     );
   }
 
-  hasRole(role: UserRole | UserRole[]): Observable<boolean> {
+  /**
+   * Check if user has the specified role(s)
+   */
+  hasRole(roleOrRoles: UserRole | UserRole[]): Observable<boolean> {
     return this.currentUser$.pipe(
       map(user => {
         if (!user) return false;
         
-        if (Array.isArray(role)) {
-          return role.includes(user.role);
+        if (Array.isArray(roleOrRoles)) {
+          return roleOrRoles.includes(user.role);
         }
         
-        return user.role === role;
+        return user.role === roleOrRoles;
       })
     );
   }
 
-  private navigateAfterAuth(role: UserRole): void {
+  /**
+   * Navigate to appropriate dashboard based on user role
+   */
+  navigateAfterAuth(role: UserRole): void {
     switch (role) {
       case 'admin':
         this.router.navigateByUrl('/admin/dashboard');
@@ -304,6 +310,9 @@ export class AuthService {
     }
   }
 
+  /**
+   * Update user profile in the profiles table
+   */
   updateUserProfile(userData: Partial<User>): Observable<User | null> {
     const currentUser = this.getCurrentUser();
     if (!currentUser) {
@@ -311,43 +320,66 @@ export class AuthService {
     }
 
     return new Observable<User | null>(observer => {
-      Promise.resolve(
-        this.supabaseService
+      try {
+        // Create the query
+        const query = this.supabaseService
           .getSupabase()
-          .from('users')
-          .update(userData)
+          .from('profiles')
+          .update({
+            full_name: userData.full_name,
+            phone: userData.phone,
+            company_id: userData.company_id,
+            profile_image_url: userData.profile_image_url,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', currentUser.id)
-          .select()
-          .single()
-      )
-        .then(response => {
-          if (response.error) {
-            observer.error(response.error);
-            observer.complete();
-            return;
-          }
+          .select('*')
+          .single();
+        
+        // Use then with success and error handlers instead of catch
+        query.then(
+          // Success handler
+          (response) => {
+            if (response.error) {
+              observer.error(response.error);
+              observer.complete();
+              return;
+            }
 
-          if (response.data) {
-            const updatedUser = {
-              ...currentUser,
-              ...response.data
-            };
+            if (response.data) {
+              const session = this.sessionSubject.value;
+              const authUser = session?.user;
+              
+              if (authUser) {
+                const updatedUser = this.mapToAppUser(response.data, authUser);
+                this.currentUserSubject.next(updatedUser);
+                observer.next(updatedUser);
+              } else {
+                observer.next(null);
+              }
+            } else {
+              observer.next(null);
+            }
             
-            this.currentUserSubject.next(updatedUser);
-            observer.next(updatedUser);
-          } else {
-            observer.next(null);
+            observer.complete();
+          },
+          // Error handler
+          (error: unknown) => {
+            observer.error(error instanceof Error ? error : new Error(String(error)));
+            observer.complete();
           }
-          
-          observer.complete();
-        })
-        .catch((error: unknown) => {
-          observer.error(error instanceof Error ? error : new Error(String(error)));
-          observer.complete();
-        });
+        );
+      } catch (error: unknown) {
+        // Fallback error handler for synchronous errors
+        observer.error(error instanceof Error ? error : new Error(String(error)));
+        observer.complete();
+      }
     });
   }
 
+  /**
+   * Request password reset using Supabase auth
+   */
   requestPasswordReset(email: string): Observable<{ success: boolean; error: Error | null }> {
     return new Observable(observer => {
       this.supabaseService.getSupabase().auth.resetPasswordForEmail(email)
@@ -359,13 +391,17 @@ export class AuthService {
           }
           observer.complete();
         })
-        .catch(error => {
-          observer.next({ success: false, error });
+        .catch((error: unknown) => {
+          const errorObj = error instanceof Error ? error : new Error(String(error));
+          observer.next({ success: false, error: errorObj });
           observer.complete();
         });
     });
   }
 
+  /**
+   * Update password using Supabase auth
+   */
   updatePassword(password: string): Observable<{ success: boolean; error: Error | null }> {
     return new Observable(observer => {
       this.supabaseService.getSupabase().auth.updateUser({ password })
@@ -377,8 +413,9 @@ export class AuthService {
           }
           observer.complete();
         })
-        .catch(error => {
-          observer.next({ success: false, error });
+        .catch((error: unknown) => {
+          const errorObj = error instanceof Error ? error : new Error(String(error));
+          observer.next({ success: false, error: errorObj });
           observer.complete();
         });
     });

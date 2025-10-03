@@ -1,0 +1,168 @@
+// Most styling is handled by Tailwind CSS classes in the HTML template
+// This file contains additional custom styles that can't be easily achieved with Tailwind
+// Payment method selection
+.payment-method {
+    transition: all 0.2s ease-in-out;
+    &.selected {
+        border-color: #eab308;
+        background-color: #fef9c3;
+    }
+    .payment-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #fef9c3;
+        svg {
+            color: #eab308;
+        }
+    }
+}
+
+// Form styles
+.form-control {
+    &.is-invalid {
+        border-color: #ef4444;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23ef4444' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ef4444' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+}
+
+// Card form styling
+.card-form {
+    .card-number-input {
+        font-family: monospace;
+        letter-spacing: 0.1em;
+    }
+    .expiry-date-input,
+    .cvv-input {
+        font-family: monospace;
+    }
+}
+
+// Bank selection
+.bank-selection {
+    .bank-option {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        &.selected {
+            border-color: #eab308;
+            background-color: #fef9c3;
+        }
+    }
+}
+
+// M-Pesa styling
+.mpesa-section {
+    .phone-input {
+        font-family: monospace;
+        letter-spacing: 0.05em;
+    }
+}
+
+// Payment processing overlay
+.payment-processing-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(17, 24, 39, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    .spinner {
+        border-radius: 50%;
+        width: 4rem;
+        height: 4rem;
+        border: 0.25rem solid rgba(234, 179, 8, 0.3);
+        border-top-color: #eab308;
+        animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+}
+
+// Order summary section
+.order-summary {
+    position: sticky;
+    top: 1.5rem;
+    .product-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e5e7eb;
+        &:last-child {
+            border-bottom: none;
+        }
+        .product-image {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            background-color: #f3f4f6;
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+        .product-details {
+            margin-left: 1rem;
+            flex: 1;
+            .product-name {
+                font-weight: 500;
+                color: #1f2937;
+                margin-bottom: 0.25rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .product-meta {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.875rem;
+                color: #6b7280;
+            }
+        }
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        &.total {
+            font-weight: 600;
+            color: #1f2937;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+    }
+}
+
+// Responsive fixes for small screens
+@media (max-width: 640px) {
+    .payment-methods-grid {
+        grid-template-columns: 1fr;
+    }
+    .card-form {
+        .card-row {
+            grid-template-columns: 1fr;
+        }
+    }
+    .order-summary {
+        position: static;
+        margin-top: 2rem;
+    }
+}

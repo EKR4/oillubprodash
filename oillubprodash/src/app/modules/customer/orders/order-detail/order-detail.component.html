@@ -1,0 +1,148 @@
+<div class="min-h-screen bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header with Back Button -->
+        <div class="flex items-center mb-8">
+            <button (click)="backToOrders()" aria-label="Go back to orders list" class="mr-4 text-gray-600 hover:text-yellow-600 transition-colors duration-200">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+      </button>
+            <h1 class="text-3xl font-bold text-gray-900">Order Details</h1>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center items-center py-16">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-500"></div>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg shadow-sm">
+            <div class="flex items-center">
+                <svg class="h-6 w-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+                <p class="text-red-700">{{ error }}</p>
+            </div>
+        </div>
+
+        <!-- Order Content -->
+        <div *ngIf="order && !isLoading" class="space-y-6">
+            <!-- Order Header Card -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-6">
+                    <div class="flex justify-between items-start">
+                        <div class="space-y-1">
+                            <h2 class="text-xl font-bold text-gray-900">Order #{{ order.order_number }}</h2>
+                            <p class="text-sm text-gray-500">Placed on {{ formatDate(order.created_at) }}</p>
+                        </div>
+                        <span [class]="'px-4 py-1.5 rounded-full text-sm font-medium ' + getStatusClass(order.status)">
+              {{ order.status | titlecase }}
+            </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Info Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Shipping Details -->
+                <div class="bg-white rounded-xl shadow-sm p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Shipping Details</h3>
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+                    </div>
+                    <div class="text-gray-600 space-y-2">
+                        <p>{{ order.shipping_details?.shipping_address?.street }}</p>
+                        <p>{{ order.shipping_details?.shipping_address?.city }}, {{ order.shipping_details?.shipping_address?.state }} {{ order.shipping_details?.shipping_address?.postal_code }}</p>
+                        <p>{{ order.shipping_details?.shipping_address?.country }}</p>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="bg-white rounded-xl shadow-sm p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Payment Details</h3>
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+                    </div>
+                    <div class="text-gray-600 space-y-2">
+                        <p class="capitalize">Method: {{ order.payment_details?.payment_method }}</p>
+                        <p>Status: <span class="capitalize">{{ order.payment_status }}</span></p>
+                        <p *ngIf="order.payment_details?.transaction_id">
+                            Transaction ID: {{ order.payment_details.transaction_id }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6">Order Items</h3>
+                    <div class="divide-y divide-gray-100">
+                        <div *ngFor="let item of order.items" class="py-4 flex items-start space-x-4">
+                            <div class="flex-1">
+                                <h4 class="text-base font-medium text-gray-900">{{ item.product_name }}</h4>
+                                <div class="mt-1 flex items-center text-sm text-gray-500">
+                                    <span>SKU: {{ item.product_sku }}</span>
+                                    <span class="mx-2">&bull;</span>
+                                    <span>Size: {{ item.package_size }}</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-600">{{ item.quantity }} × {{ formatCurrency(item.unit_price) }}</p>
+                                <p class="text-base font-semibold text-gray-900 mt-1">
+                                    {{ formatCurrency(calculateItemTotal(item)) }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="bg-gray-50 p-6">
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Subtotal</span>
+                            <span>{{ formatCurrency(order.subtotal) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Shipping</span>
+                            <span>{{ formatCurrency(order.shipping_fee) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Tax</span>
+                            <span>{{ formatCurrency(order.tax_amount) }}</span>
+                        </div>
+                        <div *ngIf="order.discount_amount > 0" class="flex justify-between text-sm text-green-600">
+                            <span>Discount Applied</span>
+                            <span>-{{ formatCurrency(order.discount_amount) }}</span>
+                        </div>
+                        <div class="border-t border-gray-200 pt-3 mt-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-base font-semibold text-gray-900">Total</span>
+                                <span class="text-xl font-bold text-gray-900">
+                  {{ formatCurrency(order.total_amount) }}
+                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-4">
+                <button (click)="trackOrder()" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-black bg-yellow-500 hover:bg-yellow-600 transition duration-300">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          Track Order
+        </button>
+            </div>
+        </div>
+    </div>
+</div>

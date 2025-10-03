@@ -1,0 +1,92 @@
+// Most styling is handled by Tailwind CSS classes in the HTML template
+// This file contains additional custom styles that can't be easily achieved with Tailwind
+.sticky {
+    position: sticky;
+    top: 6rem;
+}
+
+// Checkout steps
+.steps-container {
+    margin-bottom: 2rem;
+}
+
+// Form styles
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+    @apply border-red-300;
+}
+
+input.ng-valid.ng-touched,
+select.ng-valid.ng-touched,
+textarea.ng-valid.ng-touched {
+    @apply border-green-300;
+}
+
+// Radio button styles
+input[type="radio"] {
+    &:checked {
+        @apply bg-yellow-500 border-yellow-500;
+    }
+    &:focus {
+        @apply ring-2 ring-yellow-500 ring-opacity-50;
+    }
+}
+
+// Delivery method card hover effect
+.delivery-option {
+    transition: all 0.2s ease-in-out;
+    &:hover {
+        @apply border-yellow-300 bg-yellow-50;
+        transform: translateY(-2px);
+    }
+    &.selected {
+        @apply border-yellow-500 bg-yellow-50;
+    }
+}
+
+// Summary section
+.order-summary {
+    .summary-item {
+        @apply py-3 flex items-center;
+        .product-image {
+            @apply flex-shrink-0 w-16 h-16 bg-gray-100 rounded-md overflow-hidden;
+            img {
+                @apply w-full h-full object-cover;
+            }
+        }
+        .product-info {
+            @apply ml-4 flex-1;
+            .product-name {
+                @apply text-sm font-medium text-gray-800 truncate;
+            }
+            .product-meta {
+                @apply text-sm text-gray-500;
+            }
+        }
+        .product-price {
+            @apply ml-4 text-sm font-medium text-gray-900;
+        }
+    }
+}
+
+// Payment methods
+.payment-methods {
+    @apply mt-6;
+    .method-badge {
+        @apply bg-gray-100 rounded px-2 py-1;
+        span {
+            @apply text-sm font-medium;
+        }
+        &:hover {
+            @apply bg-gray-200;
+        }
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 1023px) {
+    .order-summary {
+        margin-top: 2rem;
+    }
+}

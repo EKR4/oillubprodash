@@ -1,0 +1,167 @@
+<div class="container mx-auto px-4 py-6">
+    <div class="flex items-center mb-6">
+        <button (click)="goBack()" class="mr-4 text-gray-500 hover:text-gray-700 transition" title="Back to users">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+    </button>
+        <h1 class="text-2xl font-bold text-gray-800">User Details</h1>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        <p>{{ errorMessage }}</p>
+        <div class="mt-2">
+            <button (click)="goBack()" class="text-red-700 underline">Return to user list</button>
+        </div>
+    </div>
+
+    <!-- User Details -->
+    <div *ngIf="user && !isLoading" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <!-- Header with actions -->
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+            <div class="flex items-center">
+                <div class="h-16 w-16 rounded-full bg-yellow-200 flex items-center justify-center text-yellow-600 text-2xl font-bold mr-4">
+                    {{ user.first_name?.charAt(0) }}{{ user.last_name?.charAt(0) }}
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800">{{ user.first_name }} {{ user.last_name }}</h2>
+                    <div class="flex items-center mt-1">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" [ngClass]="getRoleBadgeClass(user.role)">
+              {{ user.role | titlecase }}
+            </span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ml-2" [ngClass]="getStatusBadgeClass(user.is_active)">
+              {{ user.is_active ? 'Active' : 'Inactive' }}
+            </span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex mt-4 sm:mt-0 space-x-2">
+                <button (click)="toggleUserStatus()" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                    [disabled]="isLoading" title="{{ user.is_active ? 'Deactivate user' : 'Activate user' }}">
+          {{ user.is_active ? 'Deactivate' : 'Activate' }}
+        </button>
+                <button (click)="editUser()" class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" title="Edit user">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit User
+        </button>
+            </div>
+        </div>
+
+        <!-- User Information -->
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Contact Information -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Contact Information</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <span class="text-sm font-medium text-gray-500 block">Email</span>
+                            <span class="mt-1 block">{{ user.email }}</span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-500 block">Phone</span>
+                            <span class="mt-1 block">{{ formatPhoneNumber(user.phone_number) }}</span>
+                        </div>
+                        <!-- Company info if applicable -->
+                        <div *ngIf="user.company_name">
+                            <span class="text-sm font-medium text-gray-500 block">Company</span>
+                            <span class="mt-1 block">{{ user.company_name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Information -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Account Information</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <span class="text-sm font-medium text-gray-500 block">User ID</span>
+                            <span class="mt-1 block text-sm font-mono bg-gray-100 p-1 rounded">{{ user.id }}</span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-500 block">Created On</span>
+                            <span class="mt-1 block">{{ formatDate(user.created_at) }}</span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-500 block">Last Updated</span>
+                            <span class="mt-1 block">{{ formatDate(user.updated_at) }}</span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-500 block">Last Login</span>
+                            <span class="mt-1 block">{{ formatDate(user.last_login) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Logs -->
+            <div class="mt-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <div *ngIf="activityLogs.length === 0" class="text-center py-4 text-gray-500">
+                            No recent activity found
+                        </div>
+
+                        <div *ngIf="activityLogs.length > 0" class="flow-root">
+                            <ul class="-mb-8">
+                                <li *ngFor="let log of activityLogs; let last = last">
+                                    <div class="relative pb-8">
+                                        <span *ngIf="!last" class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                        <div class="relative flex space-x-3">
+                                            <div>
+                                                <span class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center ring-8 ring-white">
+                          <svg *ngIf="getActivityIcon(log.action) === 'login'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                          </svg>
+                          <svg *ngIf="getActivityIcon(log.action) === 'logout'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                          </svg>
+                          <svg *ngIf="getActivityIcon(log.action) === 'edit'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          <svg *ngIf="getActivityIcon(log.action) === 'key'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                          </svg>
+                          <svg *ngIf="getActivityIcon(log.action) === 'activity'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </span>
+                                            </div>
+                                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                                <div>
+                                                    <p class="text-sm text-gray-800">
+                                                        {{ log.action === 'login' ? 'Logged in' : log.action === 'logout' ? 'Logged out' : log.action === 'profile_update' ? 'Updated profile' : log.action === 'password_change' ? 'Changed password' : log.action }}
+                                                    </p>
+                                                </div>
+                                                <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                                    <p>{{ formatDate(log.timestamp) }}</p>
+                                                    <p class="text-xs text-gray-400">{{ log.ip_address }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-4 sm:px-6">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">Showing recent {{ activityLogs.length }} activities</span>
+                            <a href="#" class="text-sm font-medium text-yellow-600 hover:text-yellow-500">View all activity →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

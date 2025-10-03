@@ -1,0 +1,80 @@
+@tailwind components;
+
+@layer components {
+    .animate-spin {
+        animation: spin 1s linear infinite;
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    }
+
+    .form-section {
+        @apply bg-white dark:bg-gray-800 transition-all duration-300;
+        &:hover {
+            @apply transform -translate-y-0.5 shadow-md dark:bg-gray-700;
+        }
+    }
+
+    .nav-tab {
+        @apply relative transition-all duration-200 text-gray-700 dark:text-gray-400;
+        &::after {
+            @apply absolute bottom-0 left-0 w-full h-0.5 bg-primary transform scale-x-0 transition-transform duration-200;
+            content: '';
+        }
+        &[aria-current='page'], &:hover {
+            &::after { @apply scale-x-100; }
+        }
+        &[aria-current='page'] { @apply dark:bg-primary dark:text-white; }
+        &:hover:not([aria-current='page']) { @apply dark:bg-gray-700 dark:text-white; }
+    }
+
+    .form-input {
+        @apply transition-all duration-200 
+               hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:outline-none
+               dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    input[type="number"],
+    select,
+    textarea {
+        @apply form-input;
+    }
+
+    input[type="checkbox"] {
+        @apply rounded border-gray-300 text-primary transition-colors duration-200
+               hover:border-primary
+               dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-primary dark:checked:border-transparent;
+    }
+
+    button {
+        @apply transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+        &:not(:disabled):hover { @apply transform -translate-y-0.5; }
+    }
+}
+
+@media print {
+    .form-section {
+        @apply shadow-none border border-gray-200;
+        transform: none !important;
+        break-inside: avoid;
+    }
+    
+    nav, button { display: none !important; }
+    
+    input[type="password"] {
+        -webkit-text-security: disc;
+        text-security: disc;
+    }
+    
+    .space-y-6 > * + * { @apply mt-6; }
+    
+    .grid {
+        display: block !important;
+        > * { @apply mb-4; }
+    }
+}

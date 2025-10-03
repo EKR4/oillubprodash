@@ -4,6 +4,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../enviroments/environment';
 import { SupabaseUser, SupabaseAuthResponse, SupabaseQueryResponse, UserProfile } from '../models/supabase';
+import { UserRole } from '../models/user';
 
 @Injectable({
   providedIn: 'root'
@@ -32,35 +33,37 @@ export class SupabaseService {
     try {
       const { data: { session } } = await this.supabase.auth.getSession();
       if (session) {
-        const { data: user } = await this.supabase.auth.getUser();
-        if (user) {
-          const { data: userData, error: userError } = await this.supabase
-            .from('users')
+        const { data: authUser } = await this.supabase.auth.getUser();
+        if (authUser?.user) {
+          // Get user data from profiles table which is linked to auth.users
+          const { data: profileData, error: profileError } = await this.supabase
+            .from('profiles')
             .select(`
               *,
-              profile:user_profiles(*),
+              user_profiles(*),
               company:companies(*)
             `)
-            .eq('id', user.user?.id)
+            .eq('id', authUser.user.id)
             .single();
 
-          if (userError) {
-            console.error('Error loading user data:', userError);
+          if (profileError) {
+            console.error('Error loading profile data:', profileError);
             return;
           }
 
-          if (userData) {
+          if (profileData) {
+            // Construct appUser with data from both auth.users and profiles
             const appUser: SupabaseUser = {
-              id: userData.id,
-              email: userData.email,
-              full_name: userData.full_name,
-              role: userData.role,
-              created_at: userData.created_at,
-              is_active: userData.is_active,
-              phone: userData.phone,
-              company_id: userData.company_id,
-              profile: userData.profile,
-              company: userData.company
+              id: profileData.id,
+              email: authUser.user.email || '',
+              full_name: profileData.full_name,
+              role: profileData.role as UserRole,
+              created_at: profileData.created_at,
+              is_active: profileData.is_active,
+              phone: profileData.phone,
+              company_id: profileData.company_id,
+              profile: profileData.user_profiles,
+              company: profileData.company
             };
             this.currentUserSubject.next(appUser);
           }
@@ -71,19 +74,24 @@ export class SupabaseService {
     }
   }
 
-  // Check if this is the first user
-  private async isFirstUser(): Promise<boolean> {
+  // Determine user role atomically using server-side function
+  private async determineUserRole(requestedRole?: string): Promise<string> {
     try {
-      const { count, error } = await this.supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true });
-
+      // Call server-side function for atomic role determination
+      const { data, error } = await this.supabase.rpc('get_first_user_status');
       if (error) throw error;
       
-      return count === 0;
+      // If this is the first user, they become admin regardless of requested role
+      if (data.is_first) {
+        return 'admin';
+      }
+      
+      // Otherwise, use requested role or default to customer
+      return requestedRole || 'customer';
     } catch (error) {
-      console.error('Error checking first user:', error);
-      return false;
+      console.error('Error determining user role:', error);
+      // Fail safe - default to customer role if there's an error
+      return 'customer';
     }
   }
 
@@ -93,10 +101,12 @@ export class SupabaseService {
     }
     
     try {
-      // Check if this is the first user
-      const isFirst = await this.isFirstUser();
-      const userRole = isFirst ? 'admin' : (userData.role || 'customer');
+      // Determine user role atomically through server-side function
+      const userRole = await this.determineUserRole(userData.role);
+      const isAdmin = userRole === 'admin';
 
+      // Using Supabase Auth for user creation with metadata
+      // The trigger we created will automatically create a basic profile
       const { data, error } = await this.supabase.auth.signUp({
         email,
         password,
@@ -111,29 +121,23 @@ export class SupabaseService {
       if (error) throw error;
 
       if (data?.user) {
-        // Create user record
-        const userRecord = {
-          id: data.user.id,
-          email: email,
-          full_name: userData.fullName || '',
-          role: userRole,
+        // Update the automatically created profile with additional data
+        const profileUpdate = {
           phone: userData.phone || '',
           company_id: userData.companyId || null,
-          created_at: new Date().toISOString(),
-          is_active: true,
-          loyalty_points: 0
+          updated_at: new Date().toISOString(),
         };
 
-        const { error: userError } = await this.supabase
-          .from('users')
-          .insert([userRecord])
-          .select()
-          .single();
+        const { error: profileError } = await this.supabase
+          .from('profiles')
+          .update(profileUpdate)
+          .eq('id', data.user.id)
+          .select();
 
-        if (userError) throw userError;
+        if (profileError) throw profileError;
 
-        // Create user profile with UUID
-        const profileRecord = {
+        // Create user address record
+        const addressRecord = {
           id: crypto.randomUUID(),
           user_id: data.user.id,
           street: userData.street || '',
@@ -151,16 +155,16 @@ export class SupabaseService {
           updated_at: new Date().toISOString()
         };
 
-        const { error: profileError } = await this.supabase
+        const { error: addressError } = await this.supabase
           .from('user_profiles')
-          .insert([profileRecord])
+          .insert([addressRecord])
           .select()
           .single();
 
-        if (profileError) throw profileError;
+        if (addressError) throw addressError;
 
         // If this is the first user (admin), create admin_users record
-        if (isFirst) {
+        if (isAdmin) {
           const adminRecord = {
             id: data.user.id,
             department: 'Administration',
@@ -177,12 +181,35 @@ export class SupabaseService {
           if (adminError) throw adminError;
         }
         
-        // Update local user state
-        const appUser: SupabaseUser = {
-          ...userRecord,
-          profile: profileRecord
-        };
-        this.currentUserSubject.next(appUser);
+        // Get the complete profile with company data
+        const { data: profileData, error: fetchError } = await this.supabase
+          .from('profiles')
+          .select(`
+            *,
+            user_profiles(*),
+            company:companies(*)
+          `)
+          .eq('id', data.user.id)
+          .single();
+          
+        if (fetchError) throw fetchError;
+        
+        if (profileData) {
+          // Update local user state
+          const appUser: SupabaseUser = {
+            id: profileData.id,
+            email: email,
+            full_name: profileData.full_name,
+            role: profileData.role as UserRole,
+            created_at: profileData.created_at,
+            is_active: profileData.is_active,
+            phone: profileData.phone,
+            company_id: profileData.company_id,
+            profile: profileData.user_profiles,
+            company: profileData.company
+          };
+          this.currentUserSubject.next(appUser);
+        }
       }
 
       return { data, error: null };
@@ -206,32 +233,38 @@ export class SupabaseService {
       if (error) throw error;
 
       if (data?.user) {
-        // Get user data with profile and company info
-        const { data: userData, error: userError } = await this.supabase
-          .from('users')
+        // Get profile data linked to auth.users
+        const { data: profileData, error: profileError } = await this.supabase
+          .from('profiles')
           .select(`
             *,
-            profile:user_profiles(*),
+            user_profiles(*),
             company:companies(*)
           `)
           .eq('id', data.user.id)
           .single();
 
-        if (userError) throw userError;
+        if (profileError) throw profileError;
 
-        if (userData) {
+        if (profileData) {
+          // Update profile's last_login timestamp
+          await this.supabase
+            .from('profiles')
+            .update({ last_login: new Date().toISOString() })
+            .eq('id', data.user.id);
+          
           // Update local user state
           const appUser: SupabaseUser = {
-            id: userData.id,
-            email: userData.email,
-            full_name: userData.full_name,
-            role: userData.role,
-            created_at: userData.created_at,
-            is_active: userData.is_active,
-            phone: userData.phone,
-            company_id: userData.company_id,
-            profile: userData.profile,
-            company: userData.company
+            id: profileData.id,
+            email: data.user.email || '',
+            full_name: profileData.full_name,
+            role: profileData.role as UserRole,
+            created_at: profileData.created_at,
+            is_active: profileData.is_active,
+            phone: profileData.phone,
+            company_id: profileData.company_id,
+            profile: profileData.user_profiles,
+            company: profileData.company
           };
           this.currentUserSubject.next(appUser);
         }

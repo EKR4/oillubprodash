@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { Router, type CanActivateFn } from '@angular/router';
+import { Router, type CanActivateFn, UrlTree } from '@angular/router';
 import { map, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { UserRole } from '../models/user';
@@ -14,8 +14,8 @@ export const authGuard: CanActivateFn = (route) => {
     map(user => {
       // Check if user is authenticated
       if (!user) {
-        router.navigateByUrl('/auth/login');
-        return false;
+        // Return UrlTree instead of imperative navigation
+        return router.createUrlTree(['/auth/login']);
       }
 
       // If no specific role is required, allow access
@@ -29,22 +29,25 @@ export const authGuard: CanActivateFn = (route) => {
         : user.role === requiredRole;
 
       if (!hasRole) {
-        // Redirect to appropriate dashboard based on user's role
+        // Return appropriate UrlTree based on user's role
+        let redirectUrl: string;
+        
         switch (user.role) {
           case 'admin':
-            router.navigateByUrl('/admin/dashboard');
+            redirectUrl = '/admin/dashboard';
             break;
           case 'company':
-            router.navigateByUrl('/company/dashboard');
+            redirectUrl = '/company/dashboard';
             break;
           case 'customer':
-            router.navigateByUrl('/customer/dashboard');
+            redirectUrl = '/customer/dashboard';
             break;
           default:
-            router.navigateByUrl('/');
+            redirectUrl = '/';
             break;
         }
-        return false;
+        
+        return router.createUrlTree([redirectUrl]);
       }
 
       return true;

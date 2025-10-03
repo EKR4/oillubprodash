@@ -5,7 +5,8 @@ export const routes: Routes = [
   // Public routes
   {
     path: '',
-    loadChildren: () => import('./pages/routes').then(m => m.PUBLIC_ROUTES)
+    loadChildren: () => import('./pages/routes').then(m => m.PUBLIC_ROUTES),
+    pathMatch: 'prefix'
   },
   
   // Auth routes
@@ -22,16 +23,47 @@ export const routes: Routes = [
     data: { role: 'admin' }
   },
 
-  // Redirect empty path to home
+  // Profile route
+  {
+    path: 'profile',
+    loadChildren: () => import('./modules/customer/account/profile/profile.component').then(m => m.ProfileComponent),
+    canActivate: [authGuard]
+  },
+
+  // Product routes
+  {
+    path: 'product-catalog',
+    loadChildren: () => import('./pages/product-catalog/product-catalog.component').then(m => m.ProductCatalogComponent)
+  },
+  {
+    path: 'product-detail/:id',
+    loadChildren: () => import('./pages/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+  },
+
+  // Static pages
+  {
+    path: 'about',
+    loadChildren: () => import('./pages/about/about.component').then(m => m.AboutComponent)
+  },
+  {
+    path: 'contact',
+    loadChildren: () => import('./pages/contact/contact.component').then(m => m.ContactComponent)
+  },
+  {
+    path: 'faq',
+    loadChildren: () => import('./pages/faq/faq.component').then(m => m.FaqComponent)
+  },
+
+  // Home redirect
   {
     path: '',
     redirectTo: '/home',
     pathMatch: 'full'
   },
 
-  // Wildcard route for 404
+  // Not found - with proper status code handling
   {
     path: '**',
-    redirectTo: '/home'
+    loadChildren: () => import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent)
   }
 ];

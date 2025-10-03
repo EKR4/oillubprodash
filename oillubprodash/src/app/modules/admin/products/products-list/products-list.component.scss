@@ -1,0 +1,200 @@
+// Loading spinner animation
+.animate-spin {
+  animation: spin 1s linear infinite;
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+// Table styles
+.table-container {
+  @media (max-width: 768px) {
+    .table-header-group {
+      display: none;
+    }
+
+    tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem;
+      
+      &:hover {
+        background-color: var(--color-hover);
+      }
+    }
+
+    td {
+      display: block;
+      text-align: right;
+      padding: 0.75rem 1rem;
+      
+      &::before {
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: var(--color-label);
+      }
+    }
+  }
+}
+
+// Status badge transitions
+.status-badge {
+  transition: all 0.2s ease-in-out;
+  
+  &.active {
+    background-color: var(--color-success-bg);
+    color: var(--color-success-text);
+    
+    &:hover {
+      background-color: var(--color-success-bg-hover);
+    }
+  }
+  
+  &.inactive {
+    background-color: var(--color-error-bg);
+    color: var(--color-error-text);
+    
+    &:hover {
+      background-color: var(--color-error-bg-hover);
+    }
+  }
+}
+
+// Hover effects
+.hover-shadow {
+  transition: box-shadow 0.2s ease-in-out;
+  
+  &:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+// Sort indicators
+.sort-indicator {
+  display: inline-block;
+  transition: transform 0.2s ease-in-out;
+  
+  &.asc {
+    transform: rotate(180deg);
+  }
+}
+
+// Pagination button transitions
+.pagination-button {
+  transition: all 0.2s ease-in-out;
+  
+  &:not(:disabled):hover {
+    background-color: var(--color-hover);
+    border-color: var(--color-border-hover);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Filter controls
+.filter-control {
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-light);
+  }
+}
+
+// Dark mode styles
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1a1a1a;
+    --color-text: #ffffff;
+    --color-border: #333333;
+    --color-hover: #2a2a2a;
+    --color-primary: #3b82f6;
+    --color-primary-light: #60a5fa;
+    --color-success-bg: #065f46;
+    --color-success-text: #ffffff;
+    --color-success-bg-hover: #047857;
+    --color-error-bg: #991b1b;
+    --color-error-text: #ffffff;
+    --color-error-bg-hover: #b91c1c;
+    --color-label: #9ca3af;
+  }
+
+  .table-container {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    
+    th {
+      background-color: var(--color-bg);
+      color: var(--color-label);
+    }
+    
+    tr:hover {
+      background-color: var(--color-hover);
+    }
+    
+    td {
+      border-color: var(--color-border);
+    }
+  }
+
+  .filter-control {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    border-color: var(--color-border);
+    
+    &::placeholder {
+      color: var(--color-label);
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .table-container {
+    box-shadow: none !important;
+    
+    th, td {
+      border: 1px solid #ddd;
+    }
+  }
+  
+  .status-badge {
+    border: 1px solid #ddd;
+    background: none !important;
+    color: #000 !important;
+  }
+}
+
+// CSS Variables
+:root {
+  --color-bg: #ffffff;
+  --color-text: #000000;
+  --color-border: #e5e7eb;
+  --color-hover: #f3f4f6;
+  --color-primary: #3b82f6;
+  --color-primary-light: #60a5fa;
+  --color-success-bg: #dcfce7;
+  --color-success-text: #166534;
+  --color-success-bg-hover: #bbf7d0;
+  --color-error-bg: #fee2e2;
+  --color-error-text: #991b1b;
+  --color-error-bg-hover: #fecaca;
+  --color-label: #6b7280;
+  --color-border-hover: #9ca3af;
+}

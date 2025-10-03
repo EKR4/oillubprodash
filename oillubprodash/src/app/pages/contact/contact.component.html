@@ -1,13 +1,13 @@
 <div class="bg-gray-50">
     <!-- Header -->
-    <div class="relative bg-indigo-800">
+    <div class="relative bg-secondary">
         <div class="absolute inset-0">
             <img class="w-full h-full object-cover" src="assets/images/contact-hero.jpg" alt="Contact Us">
-            <div class="absolute inset-0 bg-indigo-800 mix-blend-multiply"></div>
+            <div class="absolute inset-0 bg-secondary mix-blend-multiply"></div>
         </div>
         <div class="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
             <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">Contact Us</h1>
-            <p class="mt-6 text-xl text-indigo-100 max-w-3xl">
+            <p class="mt-6 text-xl text-primary max-w-3xl">
                 Get in touch with our team. We're here to help and answer any questions you might have.
             </p>
         </div>
@@ -158,7 +158,7 @@
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
                             <div class="mt-1">
-                                <input type="text" id="name" formControlName="name" class="block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md" [class.border-red-500]="submitted && f['name'].errors">
+                                <input type="text" id="name" formControlName="name" class="block w-full shadow-sm sm:text-sm focus:ring-primary focus:border-primary border-gray-300 rounded-md" [class.border-red-500]="submitted && f['name'].errors">
                             </div>
                             <div *ngIf="submitted && f['name'].errors" class="mt-1 text-sm text-red-600">
                                 <span *ngIf="f['name'].errors?.['required']">Name is required</span>
@@ -170,7 +170,7 @@
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                             <div class="mt-1">
-                                <input type="email" id="email" formControlName="email" class="block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md" [class.border-red-500]="submitted && f['email'].errors">
+                                <input type="email" id="email" formControlName="email" class="block w-full shadow-sm sm:text-sm focus:ring-primary focus:border-primary border-gray-300 rounded-md" [class.border-red-500]="submitted && f['email'].errors">
                             </div>
                             <div *ngIf="submitted && f['email'].errors" class="mt-1 text-sm text-red-600">
                                 <span *ngIf="f['email'].errors?.['required']">Email is required</span>
@@ -182,7 +182,7 @@
                         <div>
                             <label for="phone" class="block text-sm font-medium text-gray-700">Phone (Optional)</label>
                             <div class="mt-1">
-                                <input type="tel" id="phone" formControlName="phone" class="block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md" [class.border-red-500]="submitted && f['phone'].errors">
+                                <input type="tel" id="phone" formControlName="phone" class="block w-full shadow-sm sm:text-sm focus:ring-primary focus:border-primary border-gray-300 rounded-md" [class.border-red-500]="submitted && f['phone'].errors">
                             </div>
                             <div *ngIf="submitted && f['phone'].errors" class="mt-1 text-sm text-red-600">
                                 <span *ngIf="f['phone'].errors?.['pattern']">Please enter a valid phone number</span>
@@ -193,7 +193,7 @@
                         <div>
                             <label for="company" class="block text-sm font-medium text-gray-700">Company (Optional)</label>
                             <div class="mt-1">
-                                <input type="text" id="company" formControlName="company" class="block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md">
+                                <input type="text" id="company" formControlName="company" class="block w-full shadow-sm sm:text-sm focus:ring-primary focus:border-primary border-gray-300 rounded-md">
                             </div>
                         </div>
 
@@ -201,7 +201,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Account Type</label>
                             <div class="mt-1">
-                                <select aria-label="account" formControlName="accountType" class=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md ">
+                                <select aria-label="account" formControlName="accountType" class=" block w-full shadow-sm sm:text-sm focus:ring-primary focus:border-primary border-gray-300 rounded-md ">
                   <option value="customer ">Customer</option>
                   <option value="company ">Company</option>
                   <option value="other ">Other</option>
@@ -213,7 +213,7 @@
                         <div>
                             <label for="subject " class="block text-sm font-medium text-gray-700 ">Subject</label>
                             <div class="mt-1 ">
-                                <select id="subject " formControlName="subject " class="block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md " [class.border-red-500]="submitted && f[ 'subject'].errors ">
+                                <select id="subject " formControlName="subject " class="block w-full shadow-sm sm:text-sm focus:ring-primary focus:border-primary border-gray-300 rounded-md " [class.border-red-500]="submitted && f[ 'subject'].errors ">
                   <option value=" ">Select a subject</option>
                   <option *ngFor="let type of inquiryTypes " [value]="type.value ">
                     {{ type.label }}
@@ -229,7 +229,7 @@
                         <div>
                             <label for="message " class="block text-sm font-medium text-gray-700 ">Message</label>
                             <div class="mt-1 ">
-                                <textarea id="message " formControlName="message " rows="4 " class="block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md " [class.border-red-500]="submitted && f[
+                                <textarea id="message " formControlName="message " rows="4 " class="block w-full shadow-sm sm:text-sm focus:ring-primary focus:border-primary border-gray-300 rounded-md " [class.border-red-500]="submitted && f[
                                     'message'].errors "></textarea>
                             </div>
                             <div *ngIf="submitted && f[ 'message'].errors " class="mt-1 text-sm text-red-600 ">
@@ -240,8 +240,8 @@
 
                         <!-- Submit Button -->
                         <div>
-                            <button type="submit " [disabled]="loading " class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none
-                                    focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ">
+                            <button type="submit " [disabled]="loading " class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-secondary bg-primary hover:bg-primary-dark focus:outline-none
+                                    focus:ring-2 focus:ring-offset-2 focus:ring-primary ">
                 <span *ngIf="!loading ">Send Message</span>
                 <span *ngIf="loading " class="flex items-center ">
                   <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white " xmlns="http://www.w3.org/2000/svg " fill="none " viewBox="0 0 24 24 ">

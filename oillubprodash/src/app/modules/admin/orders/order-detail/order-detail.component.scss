@@ -1,0 +1,203 @@
+// Status badge transitions
+.status-badge {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+// Loading spinner animation
+.spinner {
+  border-top-color: #3b82f6;
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Table responsiveness
+.table-container {
+  @media (max-width: 768px) {
+    .table-responsive {
+      display: block;
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}
+
+// Status timeline
+.status-timeline {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e5e7eb;
+  }
+  
+  .timeline-item {
+    position: relative;
+    padding-left: 2rem;
+    padding-bottom: 1.5rem;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: -0.25rem;
+      top: 0.25rem;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      background-color: #3b82f6;
+    }
+    
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+}
+
+// Card transitions
+.detail-card {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+// Form control states
+.form-control {
+  transition: all 0.2s ease;
+  
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+// Status dot indicators
+.status-dot {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  
+  &.pending { background-color: #fbbf24; }
+  &.processing { background-color: #60a5fa; }
+  &.confirmed { background-color: #818cf8; }
+  &.shipped { background-color: #8b5cf6; }
+  &.delivered { background-color: #34d399; }
+  &.cancelled { background-color: #ef4444; }
+  &.returned { background-color: #f97316; }
+}
+
+// Error message animation
+.error-message {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Price animations
+.price-change {
+  animation: highlight 1s ease-out;
+}
+
+@keyframes highlight {
+  0% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+// Table hover effects
+tr {
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(243, 244, 246, 0.5);
+  }
+}
+
+// Button states
+.btn {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .detail-card {
+    background-color: #1f2937;
+    
+    &:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  .status-timeline::before {
+    background-color: #374151;
+  }
+  
+  tr:hover {
+    background-color: rgba(55, 65, 81, 0.5);
+  }
+  
+  .form-control {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f3f4f6;
+    
+    &:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.1);
+    }
+  }
+}

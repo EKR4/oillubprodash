@@ -3,8 +3,8 @@ export interface Environment {
   supabase: {
     url: string;
     key: string;
-    database: {
-      url: string;
+    database?: {
+      url?: string; // Optional for client-side code
     };
   };
   schema: {

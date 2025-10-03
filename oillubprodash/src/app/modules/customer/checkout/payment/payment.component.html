@@ -1,0 +1,362 @@
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumb Navigation -->
+    <nav class="mb-4 text-sm" aria-label="Breadcrumb">
+        <ol class="flex">
+            <li>
+                <a routerLink="/customer" class="text-gray-500 hover:text-yellow-600 transition">Dashboard</a>
+                <span class="mx-2 text-gray-400">/</span>
+            </li>
+            <li>
+                <a routerLink="/customer/cart" class="text-gray-500 hover:text-yellow-600 transition">Shopping Cart</a>
+                <span class="mx-2 text-gray-400">/</span>
+            </li>
+            <li>
+                <a routerLink="/customer/checkout" class="text-gray-500 hover:text-yellow-600 transition">Shipping</a>
+                <span class="mx-2 text-gray-400">/</span>
+            </li>
+            <li class="text-gray-900 font-medium">Payment</li>
+        </ol>
+    </nav>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !isLoading" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        <p>{{ error }}</p>
+    </div>
+
+    <!-- Payment Content -->
+    <div *ngIf="!isLoading && !error && cart && cart.items && cart.items.length > 0">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Checkout - Payment</h1>
+
+        <!-- Checkout Steps -->
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div *ngFor="let step of steps; let i = index" class="flex items-center mb-4 md:mb-0">
+                    <div [ngClass]="{
+            'bg-yellow-500 text-white': step.active || step.completed,
+            'bg-gray-200 text-gray-600': !step.active && !step.completed
+          }" class="flex items-center justify-center w-8 h-8 rounded-full font-bold">
+                        <span *ngIf="!step.completed">{{ i + 1 }}</span>
+                        <svg *ngIf="step.completed" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+                    </div>
+                    <span class="ml-2 font-medium" [ngClass]="{
+            'text-yellow-600': step.active,
+            'text-gray-900': step.completed && !step.active,
+            'text-gray-500': !step.active && !step.completed
+          }">{{ step.title }}</span>
+
+                    <!-- Divider Line (not shown for last step) -->
+                    <div *ngIf="i < steps.length - 1" class="hidden md:block w-12 h-px mx-4 bg-gray-300"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Payment Form -->
+            <div class="lg:w-2/3">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-xl font-bold text-gray-800">Payment Method</h2>
+                        <p class="text-gray-600 mt-1">Select your preferred payment method</p>
+                    </div>
+
+                    <div class="p-6">
+                        <form [formGroup]="paymentForm" (ngSubmit)="onSubmitPayment()">
+                            <!-- Payment Method Selection -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-medium text-gray-800 mb-4">Select Payment Method</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div *ngFor="let method of paymentMethods" class="border rounded-lg p-4 cursor-pointer transition hover:shadow-md" [ngClass]="{'border-yellow-500 bg-yellow-50': paymentForm.get('paymentMethod')?.value === method.id}" (click)="paymentForm.get('paymentMethod')?.setValue(method.id)">
+                                        <div class="flex flex-col items-center">
+                                            <!-- Method Icon -->
+                                            <div class="bg-gray-100 p-3 rounded-full mb-3">
+                                                <svg *ngIf="method.icon === 'mobile'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                                                <svg *ngIf="method.icon === 'credit-card'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                                                <svg *ngIf="method.icon === 'bank'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 6l9-4 9 4v2H3V6zm18 5H3v9a2 2 0 002 2h14a2 2 0 002-2v-9zM8 15h8" />
+                        </svg>
+                                            </div>
+
+                                            <!-- Method Name and Description -->
+                                            <h4 class="text-center font-medium">{{ method.name }}</h4>
+                                            <p class="text-sm text-gray-600 text-center mt-1">{{ method.description }}</p>
+
+                                            <!-- Hidden Radio Button for Accessibility -->
+                                            <input type="radio" [id]="'payment-' + method.id" [value]="method.id" formControlName="paymentMethod" aria-label="methods" class="sr-only" [title]="'Select ' + method.name + ' as payment method'">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- M-Pesa Payment Fields -->
+                            <div *ngIf="paymentForm.get('paymentMethod')?.value === 'mpesa'" class="mb-8">
+                                <h3 class="text-lg font-medium text-gray-800 mb-4">M-Pesa Details</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                        <div class="relative">
+                                            <input type="tel" id="phoneNumber" formControlName="phoneNumber" placeholder="e.g. +254712345678 or 0712345678" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 pl-10" [ngClass]="{'border-red-300': paymentForm.get('phoneNumber')?.invalid && paymentForm.get('phoneNumber')?.touched}">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="paymentForm.get('phoneNumber')?.invalid && paymentForm.get('phoneNumber')?.touched" class="text-red-600 text-sm mt-1">
+                                            <span *ngIf="paymentForm.get('phoneNumber')?.errors?.['required']">Phone number is required</span>
+                                            <span *ngIf="paymentForm.get('phoneNumber')?.errors?.['pattern']">Please enter a valid Kenyan phone number</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-2">
+                                            You will receive an STK push to this number to complete the payment.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Payment Fields -->
+                            <div *ngIf="paymentForm.get('paymentMethod')?.value === 'card'" class="mb-8">
+                                <h3 class="text-lg font-medium text-gray-800 mb-4">Card Details</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="cardNumber" class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+                                        <div class="relative">
+                                            <input type="text" id="cardNumber" formControlName="cardNumber" placeholder="1234 5678 9012 3456" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 pl-10" [ngClass]="{'border-red-300': paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched}">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched" class="text-red-600 text-sm mt-1">
+                                            <span *ngIf="paymentForm.get('cardNumber')?.errors?.['required']">Card number is required</span>
+                                            <span *ngIf="paymentForm.get('cardNumber')?.errors?.['pattern']">Please enter a valid 16-digit card number</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="cardholderName" class="block text-sm font-medium text-gray-700 mb-1">Cardholder Name</label>
+                                        <input type="text" id="cardholderName" formControlName="cardholderName" placeholder="Name as it appears on card" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" [ngClass]="{'border-red-300': paymentForm.get('cardholderName')?.invalid && paymentForm.get('cardholderName')?.touched}">
+                                        <div *ngIf="paymentForm.get('cardholderName')?.invalid && paymentForm.get('cardholderName')?.touched" class="text-red-600 text-sm mt-1">
+                                            Cardholder name is required
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="expiryDate" class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                                            <input type="text" id="expiryDate" formControlName="expiryDate" placeholder="MM/YY" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" [ngClass]="{'border-red-300': paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched}">
+                                            <div *ngIf="paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched" class="text-red-600 text-sm mt-1">
+                                                <span *ngIf="paymentForm.get('expiryDate')?.errors?.['required']">Expiry date is required</span>
+                                                <span *ngIf="paymentForm.get('expiryDate')?.errors?.['pattern']">Format: MM/YY</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label for="cvv" class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                                            <input type="password" id="cvv" formControlName="cvv" placeholder="123" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" [ngClass]="{'border-red-300': paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched}">
+                                            <div *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched" class="text-red-600 text-sm mt-1">
+                                                <span *ngIf="paymentForm.get('cvv')?.errors?.['required']">CVV is required</span>
+                                                <span *ngIf="paymentForm.get('cvv')?.errors?.['pattern']">Please enter a valid CVV</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bank Transfer Fields -->
+                            <div *ngIf="paymentForm.get('paymentMethod')?.value === 'bank'" class="mb-8">
+                                <h3 class="text-lg font-medium text-gray-800 mb-4">Bank Transfer Details</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="bankName" class="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+                                        <select id="bankName" formControlName="bankName" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" [ngClass]="{'border-red-300': paymentForm.get('bankName')?.invalid && paymentForm.get('bankName')?.touched}"
+                                            title="Select your bank">
+                      <option value="">Select your bank</option>
+                      <option value="equity">Equity Bank</option>
+                      <option value="cooperative">Co-operative Bank</option>
+                      <option value="kcb">KCB Bank</option>
+                      <option value="stanbic">Stanbic Bank</option>
+                      <option value="ncba">NCBA Bank</option>
+                    </select>
+                                        <div *ngIf="paymentForm.get('bankName')?.invalid && paymentForm.get('bankName')?.touched" class="text-red-600 text-sm mt-1">
+                                            Please select your bank
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="accountNumber" class="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+                                        <input type="text" id="accountNumber" formControlName="accountNumber" placeholder="Enter your account number" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" [ngClass]="{'border-red-300': paymentForm.get('accountNumber')?.invalid && paymentForm.get('accountNumber')?.touched}">
+                                        <div *ngIf="paymentForm.get('accountNumber')?.invalid && paymentForm.get('accountNumber')?.touched" class="text-red-600 text-sm mt-1">
+                                            <span *ngIf="paymentForm.get('accountNumber')?.errors?.['required']">Account number is required</span>
+                                            <span *ngIf="paymentForm.get('accountNumber')?.errors?.['pattern']">Please enter a valid account number</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Save Payment Method -->
+                            <div class="mb-8">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="savePaymentMethod" formControlName="savePaymentMethod" class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded" title="Save payment method for future purchases">
+                                    <label for="savePaymentMethod" class="ml-2 block text-sm text-gray-700">
+                    Save this payment method for future purchases
+                  </label>
+                                </div>
+                            </div>
+
+                            <!-- Billing Address (Same as Shipping) -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-medium text-gray-800 mb-4">Billing Address</h3>
+                                <div class="flex items-center mb-4">
+                                    <input type="checkbox" id="billingAddressSameAsShipping" formControlName="billingAddressSameAsShipping" class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded" title="Use same address as shipping">
+                                    <label for="billingAddressSameAsShipping" class="ml-2 block text-sm text-gray-700">
+                    Same as shipping address
+                  </label>
+                                </div>
+
+                                <!-- Billing Address Form (only shown if different from shipping) -->
+                                <div *ngIf="!paymentForm.get('billingAddressSameAsShipping')?.value" formGroupName="billingAddress" class="space-y-4 mt-4">
+                                    <div>
+                                        <label for="billingFullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                        <input type="text" id="billingFullName" formControlName="fullName" placeholder="Enter your full name" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500">
+                                    </div>
+
+                                    <div>
+                                        <label for="billingAddress" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                        <input type="text" id="billingAddress" formControlName="address" placeholder="Enter your address" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500">
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="billingCity" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                            <input type="text" id="billingCity" formControlName="city" placeholder="Enter your city" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500">
+                                        </div>
+
+                                        <div>
+                                            <label for="billingPostalCode" class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                                            <input type="text" id="billingPostalCode" formControlName="postalCode" placeholder="Enter postal code" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Processing Payment Overlay -->
+                            <div *ngIf="processingPayment" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+                                <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                                    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-500 mx-auto mb-4"></div>
+                                    <h3 class="text-xl font-bold mb-2">Processing Payment</h3>
+                                    <p class="text-gray-600">Please wait while we process your payment...</p>
+                                </div>
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <div class="mt-8 flex justify-between">
+                                <button type="button" (click)="returnToShipping()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-md transition flex items-center" [disabled]="processingPayment">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Return to Shipping
+                </button>
+
+                                <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-md transition flex items-center" [disabled]="processingPayment">
+                  Complete Payment
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="lg:w-1/3">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
+
+                    <!-- Cart Items Summary -->
+                    <div class="divide-y divide-gray-200 mb-4">
+                        <div *ngFor="let item of cart.items" class="py-3 flex items-center">
+                            <div class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
+                                <img alt="" [src]="item.product.image_url || 'assets/images/product-placeholder.jpg'" [alt]="item.product.name" [title]="item.product.name" class="w-full h-full object-cover">
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <h3 class="text-sm font-medium text-gray-800 truncate">{{ item.product.name }}</h3>
+                                <p class="text-sm text-gray-500">{{ item.package.size }} x {{ item.quantity }}</p>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ formatPrice(item.package.unit_price * item.quantity, item.package.currency) }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cost Breakdown -->
+                    <div class="space-y-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="font-medium">{{ formatPrice(getSubtotal()) }}</span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Shipping</span>
+                            <span class="font-medium">{{ formatPrice(getShippingCost()) }}</span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Tax (16% VAT)</span>
+                            <span class="font-medium">{{ formatPrice(getTaxAmount()) }}</span>
+                        </div>
+
+                        <div class="border-t border-gray-200 pt-4 mt-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-bold text-gray-800">Total</span>
+                                <span class="text-xl font-bold text-gray-900">{{ formatPrice(getTotal()) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Secure Payment Note -->
+                    <div class="mt-6 bg-gray-50 p-4 rounded-md border border-gray-200">
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+                            <p class="text-sm text-gray-600">
+                                All transactions are secure and encrypted. Your personal information is protected according to our <a href="#" class="text-yellow-600 hover:underline">Privacy Policy</a>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Payment Methods Icons -->
+                    <div class="mt-6">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">We Accept</h3>
+                        <div class="flex space-x-2">
+                            <div class="bg-gray-100 rounded px-2 py-1">
+                                <span class="text-sm font-medium">M-Pesa</span>
+                            </div>
+                            <div class="bg-gray-100 rounded px-2 py-1">
+                                <span class="text-sm font-medium">Visa/MC</span>
+                            </div>
+                            <div class="bg-gray-100 rounded px-2 py-1">
+                                <span class="text-sm font-medium">Bank Transfer</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

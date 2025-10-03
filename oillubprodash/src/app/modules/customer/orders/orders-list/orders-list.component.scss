@@ -1,0 +1,54 @@
+@tailwind components;
+@tailwind utilities;
+:host {
+    display: block;
+    min-height: 100%;
+    background-color: #f9fafb;
+}
+
+.orders-list {
+    &__order {
+        @apply transition-all duration-200 ease-in-out;
+        &:hover {
+            @apply transform scale-[1.02];
+        }
+    }
+}
+
+// Status badge animations
+.status-badge {
+    @apply transition-colors duration-200;
+    &--processing {
+        animation: pulse 2s infinite;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+// Loading animation
+.loading-spinner {
+    @apply animate-spin;
+    animation-duration: 1.5s;
+}
+
+// Hover effects
+.action-button {
+    @apply transition-colors duration-200 ease-in-out;
+    &:hover {
+        @apply text-yellow-700;
+        transform: translateY(-1px);
+    }
+    &:active {
+        transform: translateY(0);
+    }
+}

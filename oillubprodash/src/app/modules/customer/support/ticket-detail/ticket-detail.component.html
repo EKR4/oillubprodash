@@ -1,0 +1,96 @@
+<div class="min-h-screen bg-gray-100 p-6">
+    <div *ngIf="ticket$ | async as ticket; else loading" class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <!-- Ticket Header -->
+        <div class="p-6 bg-yellow-50 border-b border-yellow-200">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900">#{{ticket.id}} - {{ticket.title}}</h1>
+                <span [class]="getStatusClass(ticket.status)" class="px-3 py-1 rounded-full text-sm font-medium">
+          {{ticket.status}}
+        </span>
+            </div>
+            <p class="mt-2 text-gray-600">Created on {{ticket.created_at | date:'medium'}}</p>
+        </div>
+
+        <!-- Ticket Messages -->
+        <div class="p-6">
+            <div class="space-y-6">
+                <div *ngFor="let message of ticket.messages" [class.bg-yellow-50]="message.is_internal" class="p-4 rounded-lg border border-gray-200">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 rounded-full bg-yellow-200 flex items-center justify-center">
+                                    <span class="text-yellow-700 font-medium">{{message.user_id.charAt(0).toUpperCase()}}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">{{message.user_id}}</p>
+                                <p class="mt-1 text-gray-600">{{message.message}}</p>
+                                <!-- Attachments -->
+                                <div *ngIf="message.attachments?.length" class="mt-2 space-y-2">
+                                    <div *ngFor="let attachment of message.attachments" class="flex items-center space-x-2 text-sm text-yellow-600 hover:text-yellow-800">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                    </svg>
+                                        <a [href]="attachment.file_url" target="_blank" class="hover:underline">
+                      {{attachment.file_name}}
+                    </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-sm text-gray-500">{{message.created_at | date:'short'}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reply Form -->
+            <form (ngSubmit)="addReply()" [formGroup]="replyForm" class="mt-6 space-y-4">
+                <div>
+                    <label for="message" class="block text-sm font-medium text-gray-700">Reply</label>
+                    <textarea id="message" formControlName="message" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500" placeholder="Type your reply here..."></textarea>
+                </div>
+
+                <!-- File Upload -->
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+            </svg>
+            <span>Attach Files</span>
+            <input type="file" class="hidden" multiple (change)="onFileSelected($event)">
+          </label>
+                    <div *ngIf="selectedFiles.length" class="text-sm text-gray-600">
+                        {{selectedFiles.length}} file(s) selected
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-between items-center">
+                    <div class="space-x-4">
+                        <button *ngIf="ticket.status === 'OPEN'" type="button" (click)="closeTicket()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+              Close Ticket
+            </button>
+                        <button *ngIf="ticket.status === 'CLOSED'" type="button" (click)="reopenTicket()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+              Reopen Ticket
+            </button>
+                    </div>
+                    <button type="submit" [disabled]="!replyForm.valid || isSubmitting" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50">
+            <svg *ngIf="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Send Reply
+          </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <ng-template #loading>
+        <div class="flex justify-center items-center min-h-[400px]">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+        </div>
+    </ng-template>
+</div>

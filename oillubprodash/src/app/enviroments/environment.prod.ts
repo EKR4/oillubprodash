@@ -3,11 +3,9 @@ import { Environment } from './environment.interface';
 export const environment: Environment = {
   production: true,
   supabase: {
-    url: 'https://cgwxhmotkujqhwkkfrjf.supabase.co',
-    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnd3hobW90a3VqcWh3a2tmcmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1ODczOTAsImV4cCI6MjA3MzE2MzM5MH0.plBumFO0w5bMHDvtOC3-OyLgadYG9a6s184No9EKRo0',
-    database: {
-      url: 'postgresql://postgres:KIPNGETIcH58@@db.cgwxhmotkujqhwkkfrjf.supabase.co:5432/postgres'
-    }
+    url: 'https://hzbocsermrjuhwomgxwl.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Ym9jc2VybXJqdWh3b21neHdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzAwNzAsImV4cCI6MjA3NDg0NjA3MH0.1gWvr1yxZgm7sXHBJRM6bjYrYPLN7rVgkXJnsKwzGEE',
+    // Database connection is only included in server-side code
   },
   schema: {
     auth: {

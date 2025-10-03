@@ -1,0 +1,174 @@
+// Most styling is handled by Tailwind CSS classes in the HTML template
+// This file contains additional custom styles that can't be easily achieved with Tailwind
+// User avatar styles
+.user-avatar {
+    background-color: #fef3c7;
+    color: #d97706;
+    font-weight: 600;
+    overflow: hidden;
+    &.with-image {
+        background-color: transparent;
+    }
+    img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+// Status badge styling
+.status-badge {
+    &.active {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: rgb(16, 185, 129);
+    }
+    &.inactive {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: rgb(239, 68, 68);
+    }
+    &.pending {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: rgb(245, 158, 11);
+    }
+}
+
+// Role badge styling
+.role-badge {
+    &.admin {
+        background-color: rgba(124, 58, 237, 0.1);
+        color: rgb(124, 58, 237);
+    }
+    &.company {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: rgb(59, 130, 246);
+    }
+    &.customer {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: rgb(16, 185, 129);
+    }
+}
+
+// Activity timeline animations
+.activity-timeline {
+    .timeline-item {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        &:hover {
+            background-color: #f9fafb;
+        }
+        &.new-entry {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Info card hover effects
+.info-card {
+    transition: all 0.2s ease;
+    &:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transform: translateY(-2px);
+    }
+}
+
+// Action button styles
+.action-button {
+    transition: all 0.2s ease;
+    &.primary {
+        background-color: #f59e0b;
+        color: white;
+        &:hover {
+            background-color: #d97706;
+        }
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
+        }
+    }
+    &.secondary {
+        background-color: white;
+        color: #374151;
+        border: 1px solid #d1d5db;
+        &:hover {
+            background-color: #f9fafb;
+        }
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(209, 213, 219, 0.3);
+        }
+    }
+    &.danger {
+        background-color: white;
+        color: #ef4444;
+        border: 1px solid #ef4444;
+        &:hover {
+            background-color: #fef2f2;
+        }
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+        }
+    }
+}
+
+// ID display styling
+.id-display {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    background-color: #f3f4f6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+// Print styles
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .page-break {
+        page-break-before: always;
+    }
+    .user-container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        background-color: white !important;
+    }
+    .print-section {
+        break-inside: avoid;
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+    .user-header {
+        flex-direction: column;
+        align-items: flex-start;
+        .user-info {
+            margin-top: 1rem;
+        }
+        .user-actions {
+            margin-top: 1rem;
+            width: 100%;
+            .action-button {
+                width: 100%;
+            }
+        }
+    }
+}

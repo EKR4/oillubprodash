@@ -1,0 +1,209 @@
+<div class="container mx-auto px-4 py-6">
+    <div class="flex items-center mb-6">
+        <button routerLink="/admin/users" class="mr-4 text-gray-500 hover:text-gray-700 transition" title="Back to users">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+    </button>
+        <h1 class="text-2xl font-bold text-gray-800">{{ isEditMode ? 'Edit User' : 'Create New User' }}</h1>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-6">
+            <!-- Alert Messages -->
+            <div *ngIf="formError" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">{{ formError }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="formSuccess" class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-700">{{ formSuccess }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Personal Information Section -->
+                <div class="col-span-1 md:col-span-2">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-4">Personal Information</h2>
+                </div>
+
+                <!-- First Name -->
+                <div>
+                    <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input type="text" id="firstName" formControlName="firstName" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" placeholder="Enter first name" title="First Name">
+                    <div *ngIf="userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched" class="mt-1 text-sm text-red-600">
+                        <span *ngIf="userForm.get('firstName')?.errors?.['required']">First name is required</span>
+                        <span *ngIf="userForm.get('firstName')?.errors?.['minlength']">First name must be at least 2 characters</span>
+                    </div>
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input type="text" id="lastName" formControlName="lastName" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" placeholder="Enter last name" title="Last Name">
+                    <div *ngIf="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched" class="mt-1 text-sm text-red-600">
+                        <span *ngIf="userForm.get('lastName')?.errors?.['required']">Last name is required</span>
+                        <span *ngIf="userForm.get('lastName')?.errors?.['minlength']">Last name must be at least 2 characters</span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="email" id="email" formControlName="email" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" placeholder="Enter email address" title="Email Address">
+                    <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="mt-1 text-sm text-red-600">
+                        <span *ngIf="userForm.get('email')?.errors?.['required']">Email is required</span>
+                        <span *ngIf="userForm.get('email')?.errors?.['email']">Please enter a valid email address</span>
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <input type="tel" id="phone" formControlName="phone" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" placeholder="Enter phone number" title="Phone Number">
+                    <div *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched" class="mt-1 text-sm text-red-600">
+                        <span *ngIf="userForm.get('phone')?.errors?.['pattern']">Please enter a valid phone number</span>
+                    </div>
+                </div>
+
+                <!-- Account Information Section -->
+                <div class="col-span-1 md:col-span-2 mt-4">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-4">Account Information</h2>
+                </div>
+
+                <!-- Username -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" id="username" formControlName="username" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" placeholder="Enter username" title="Username">
+                    <div *ngIf="userForm.get('username')?.invalid && userForm.get('username')?.touched" class="mt-1 text-sm text-red-600">
+                        <span *ngIf="userForm.get('username')?.errors?.['required']">Username is required</span>
+                        <span *ngIf="userForm.get('username')?.errors?.['pattern']">Username may only contain letters, numbers, and underscores</span>
+                        <span *ngIf="userForm.get('username')?.errors?.['minlength']">Username must be at least 4 characters</span>
+                    </div>
+                </div>
+
+                <!-- Password (only for new users) -->
+                <div *ngIf="!isEditMode">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <div class="relative">
+                        <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 pr-10" placeholder="Enter password" title="Password">
+                        <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600" (click)="togglePasswordVisibility()" title="Toggle password visibility">
+              <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            </button>
+                    </div>
+                    <div *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" class="mt-1 text-sm text-red-600">
+                        <span *ngIf="userForm.get('password')?.errors?.['required']">Password is required</span>
+                        <span *ngIf="userForm.get('password')?.errors?.['minlength']">Password must be at least 8 characters</span>
+                        <span *ngIf="userForm.get('password')?.errors?.['pattern']">Password must include at least one uppercase letter, one lowercase letter, one number, and one special character</span>
+                    </div>
+                </div>
+
+                <!-- Role -->
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">User Role</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                        <div *ngFor="let role of userRoles" (click)="selectRole(role.value)" class="border rounded-lg p-4 cursor-pointer transition-all" [ngClass]="{'border-yellow-500 bg-yellow-50': userForm.get('role')?.value === role.value, 'border-gray-200 hover:border-yellow-300': userForm.get('role')?.value !== role.value}">
+                            <div class="flex items-center">
+                                <input type="radio" [id]="'role-' + role.value" [value]="role.value" formControlName="role" class="h-4 w-4 text-yellow-500 focus:ring-yellow-400 border-gray-300" [title]="role.label + ' role'">
+                                <label [for]="'role-' + role.value" class="ml-3 block text-sm font-medium text-gray-700 cursor-pointer">
+                  <span class="font-semibold">{{ role.label }}</span>
+                </label>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500 ml-7">{{ role.description }}</p>
+                        </div>
+                    </div>
+                    <div *ngIf="userForm.get('role')?.invalid && userForm.get('role')?.touched" class="mt-1 text-sm text-red-600">
+                        <span *ngIf="userForm.get('role')?.errors?.['required']">Role selection is required</span>
+                    </div>
+                </div>
+
+                <!-- Status (for edit mode) -->
+                <div *ngIf="isEditMode" class="col-span-1 md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
+                    <div class="flex items-center space-x-4 mt-2">
+                        <div *ngFor="let status of accountStatuses" (click)="selectStatus(status.value)" class="inline-flex items-center px-3 py-2 border rounded-md cursor-pointer transition-all" [ngClass]="{'border-yellow-500 bg-yellow-50 text-yellow-700': userForm.get('status')?.value === status.value, 'border-gray-200 text-gray-700 hover:border-yellow-300': userForm.get('status')?.value !== status.value}">
+                            <input type="radio" [id]="'status-' + status.value" [value]="status.value" formControlName="status" class="h-4 w-4 text-yellow-500 focus:ring-yellow-400 border-gray-300" [title]="status.label + ' status'">
+                            <label [for]="'status-' + status.value" class="ml-2 block text-sm font-medium cursor-pointer">
+                {{ status.label }}
+              </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company section (only if role is company) -->
+            <div *ngIf="userForm.get('role')?.value === 'company'" class="pt-4 border-t border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Company Information</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Company Name -->
+                    <div>
+                        <label for="companyName" class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                        <input type="text" id="companyName" formControlName="companyName" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" placeholder="Enter company name" title="Company Name">
+                        <div *ngIf="userForm.get('companyName')?.invalid && userForm.get('companyName')?.touched" class="mt-1 text-sm text-red-600">
+                            <span *ngIf="userForm.get('companyName')?.errors?.['required']">Company name is required</span>
+                        </div>
+                    </div>
+
+                    <!-- Company Registration Number -->
+                    <div>
+                        <label for="companyRegNumber" class="block text-sm font-medium text-gray-700 mb-1">Registration Number</label>
+                        <input type="text" id="companyRegNumber" formControlName="companyRegNumber" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" placeholder="Enter registration number" title="Registration Number">
+                        <div *ngIf="userForm.get('companyRegNumber')?.invalid && userForm.get('companyRegNumber')?.touched" class="mt-1 text-sm text-red-600">
+                            <span *ngIf="userForm.get('companyRegNumber')?.errors?.['required']">Registration number is required</span>
+                        </div>
+                    </div>
+
+                    <!-- Company Address -->
+                    <div class="col-span-1 md:col-span-2">
+                        <label for="companyAddress" class="block text-sm font-medium text-gray-700 mb-1">Company Address</label>
+                        <textarea id="companyAddress" formControlName="companyAddress" rows="3" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" placeholder="Enter company address" title="Company Address"></textarea>
+                        <div *ngIf="userForm.get('companyAddress')?.invalid && userForm.get('companyAddress')?.touched" class="mt-1 text-sm text-red-600">
+                            <span *ngIf="userForm.get('companyAddress')?.errors?.['required']">Company address is required</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                <button type="button" routerLink="/admin/users" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" title="Cancel">
+          Cancel
+        </button>
+                <button type="submit" [disabled]="userForm.invalid || isLoading" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Save User">
+          <span *ngIf="isLoading" class="inline-flex items-center">
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+          </span>
+          <span *ngIf="!isLoading">{{ isEditMode ? 'Update User' : 'Create User' }}</span>
+        </button>
+            </div>
+        </form>
+    </div>
+</div>

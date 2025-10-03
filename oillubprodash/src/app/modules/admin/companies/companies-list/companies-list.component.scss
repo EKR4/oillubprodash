@@ -1,0 +1,112 @@
+// Most styling is handled by Tailwind CSS classes in the HTML template
+// This file contains additional custom styles that can't be easily achieved with Tailwind
+// Status badge styling
+.status-badge {
+    &.active {
+        @apply bg-green-100 text-green-800;
+    }
+    &.inactive {
+        @apply bg-red-100 text-red-800;
+    }
+    &.pending {
+        @apply bg-yellow-100 text-yellow-800;
+    }
+    &.suspended {
+        @apply bg-gray-100 text-gray-800;
+    }
+}
+
+// Table row hover effect
+.company-row {
+    @apply transition-all duration-150;
+    &:hover {
+        @apply bg-yellow-50;
+    }
+}
+
+// Company logo placeholder styling
+.company-logo-placeholder {
+    @apply bg-gray-200 rounded-full flex items-center justify-center text-gray-500;
+    .initials {
+        @apply font-bold text-sm;
+    }
+}
+
+// Sort indicators styling
+.sort-icon {
+    @apply transition-transform duration-150;
+    &.active {
+        @apply text-yellow-500;
+    }
+}
+
+// Table responsive fixes for smaller screens
+@media (max-width: 768px) {
+    .responsive-table {
+        @apply block overflow-x-auto;
+        th,
+        td {
+            @apply whitespace-nowrap;
+        }
+    }
+}
+
+// Smooth transitions for filter changes
+.filter-transition {
+    @apply transition-opacity duration-200;
+}
+
+// Empty state styling
+.empty-state {
+    @apply text-center py-12;
+    .empty-icon {
+        @apply mx-auto h-16 w-16 text-gray-400 mb-4;
+    }
+    .empty-title {
+        @apply text-lg font-medium text-gray-900 mb-2;
+    }
+    .empty-description {
+        @apply text-sm text-gray-500 max-w-md mx-auto;
+    }
+}
+
+// Pagination button styling
+.pagination-button {
+    @apply relative inline-flex items-center px-4 py-2 border text-sm font-medium;
+    &.active {
+        @apply bg-yellow-50 border-yellow-500 text-yellow-600 z-10;
+    }
+    &.inactive {
+        @apply bg-white border-gray-300 text-gray-500;
+    }
+    &.disabled {
+        @apply cursor-not-allowed opacity-50;
+    }
+}
+
+// Print styles for reports
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .print-only {
+        display: block !important;
+    }
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+    table {
+        page-break-inside: auto;
+    }
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    thead {
+        display: table-header-group;
+    }
+    tfoot {
+        display: table-footer-group;
+    }
+}

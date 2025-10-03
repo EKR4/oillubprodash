@@ -1,0 +1,78 @@
+// Custom animations
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// Form focus states
+.form-input {
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+        border-color: #f59e0b;
+    }
+}
+
+// Custom transitions
+.transition-all {
+    transition: all 0.2s ease-in-out;
+}
+
+// Status badge animations
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    &.badge-success {
+        background-color: #d1fae5;
+        color: #065f46;
+        &:hover {
+            background-color: #a7f3d0;
+        }
+    }
+    &.badge-error {
+        background-color: #fee2e2;
+        color: #991b1b;
+        &:hover {
+            background-color: #fecaca;
+        }
+    }
+    &.badge-warning {
+        background-color: #fef3c7;
+        color: #92400e;
+        &:hover {
+            background-color: #fde68a;
+        }
+    }
+}
+
+// Card hover effects
+.hover-card {
+    transition: all 0.2s ease-in-out;
+    &:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transform: translateY(-0.25rem);
+    }
+}
+
+// Documentation link styles
+.doc-link {
+    color: #d97706;
+    transition: color 0.2s ease-in-out;
+    &:hover {
+        color: #b45309;
+        text-decoration: underline;
+    }
+}

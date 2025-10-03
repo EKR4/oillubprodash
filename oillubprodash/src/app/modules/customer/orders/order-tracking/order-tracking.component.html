@@ -1,0 +1,108 @@
+<div class="min-h-screen bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header with Back Button -->
+        <div class="flex items-center mb-8">
+            <button (click)="backToOrder()" aria-label="Go back to order details" class="mr-4 text-gray-600 hover:text-yellow-600 transition-colors duration-200">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+      </button>
+            <h1 class="text-3xl font-bold text-gray-900">Order Tracking</h1>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center items-center py-16">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-500"></div>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg shadow-sm">
+            <div class="flex items-center">
+                <svg class="h-6 w-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+                <p class="text-red-700">{{ error }}</p>
+            </div>
+        </div>
+
+        <!-- Order Info -->
+        <div *ngIf="order && !isLoading" class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+            <div class="p-6">
+                <div class="flex justify-between items-start">
+                    <div class="space-y-1">
+                        <h2 class="text-xl font-bold text-gray-900">Order #{{ order.order_number }}</h2>
+                        <p class="text-sm text-gray-500">Placed on {{ formatDate(order.created_at) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tracking Timeline -->
+        <div *ngIf="order && !isLoading" class="relative pt-8">
+            <!-- Vertical Line -->
+            <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gray-200"></div>
+
+            <!-- Timeline Steps -->
+            <div class="space-y-16">
+                <div *ngFor="let step of trackingSteps" class="relative flex items-center timeline-step" [class.opacity-50]="!step.completed">
+
+                    <!-- Left Content -->
+                    <div class="w-5/12 pr-8 text-right">
+                        <div class="space-y-2">
+                            <h3 class="text-lg font-semibold text-gray-900">{{ step.title }}</h3>
+                            <p class="text-sm text-gray-600">{{ step.description }}</p>
+                            <p *ngIf="step.timestamp" class="text-xs text-gray-500">
+                                {{ formatDate(step.timestamp) }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Marker -->
+                    <div class="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                        <div [class]="'rounded-full h-6 w-6 border-3 timeline-marker ' + 
+                          (step.completed ? 'bg-yellow-500 border-yellow-500' : 'bg-white border-gray-300')">
+                            <svg *ngIf="step.completed" class="h-4 w-4 text-white mx-auto mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+                        </div>
+                    </div>
+
+                    <!-- Right Content -->
+                    <div class="w-5/12 pl-8">
+                        <!-- Estimated Delivery Info -->
+                        <div *ngIf="step.status === 'shipped'" class="bg-yellow-50 rounded-lg p-4 border border-yellow-100">
+                            <div class="flex items-start">
+                                <svg class="h-6 w-6 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                                <div>
+                                    <p class="text-sm font-medium text-yellow-800">Estimated Delivery</p>
+                                    <p class="text-sm text-yellow-700 mt-1">
+                                        Your order is expected to arrive within 2-3 business days
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Step Information -->
+                        <div *ngIf="step.status === 'processing'" class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                            <div class="flex items-start">
+                                <svg class="h-6 w-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                                <div>
+                                    <p class="text-sm font-medium text-blue-800">Processing Details</p>
+                                    <p class="text-sm text-blue-700 mt-1">
+                                        Your order is being prepared in our warehouse
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

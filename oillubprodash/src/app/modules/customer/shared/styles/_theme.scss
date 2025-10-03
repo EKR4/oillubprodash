@@ -1,0 +1,180 @@
+        // Theme Variables
+        $primary-yellow: #FFD700;
+        $secondary-yellow: #FFC107;
+        $dark-black: #1A1A1A;
+        $light-black: #2D2D2D;
+        $text-white: #FFFFFF;
+        $text-gray: #E0E0E0;
+        // Mixins
+        @mixin card {
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: $light-black;
+            border: 1px solid rgba($primary-yellow, 0.1);
+            &:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba($primary-yellow, 0.15);
+            }
+        }
+        
+        @mixin header-section {
+            background: linear-gradient(135deg, $dark-black 0%, $light-black 100%);
+            border-bottom: 3px solid $primary-yellow;
+            padding: 2rem 1rem;
+            @mixin action-button {
+                padding: 0.75rem 1.5rem;
+                border-radius: 9999px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                background-color: $primary-yellow;
+                color: $dark-black;
+                &:hover:not(:disabled) {
+                    background-color: $secondary-yellow;
+                    transform: translateY(-2px);
+                }
+                &:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+            }
+            @mixin input-field {
+                padding: 0.75rem 1rem;
+                border-radius: 0.5rem;
+                width: 100%;
+                background-color: rgba($light-black, 0.6);
+                border: 1px solid rgba($primary-yellow, 0.2);
+                color: $text-white;
+                &:focus {
+                    outline: none;
+                    border-color: $primary-yellow;
+                    box-shadow: 0 0 0 2px rgba($primary-yellow, 0.2);
+                }
+                &::placeholder {
+                    color: rgba($text-gray, 0.5);
+                }
+            }
+            @mixin badge($type: 'default') {
+                padding: 0.25rem 0.75rem;
+                border-radius: 9999px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                @if $type=='success' {
+                    background-color: rgba(#10B981, 0.2);
+                    color: #10B981;
+                }
+                @else if $type=='warning' {
+                    background-color: rgba($primary-yellow, 0.2);
+                    color: $primary-yellow;
+                }
+                @else if $type=='error' {
+                    background-color: rgba(#EF4444, 0.2);
+                    color: #EF4444;
+                }
+                @else {
+                    background-color: rgba($primary-yellow, 0.1);
+                    color: $primary-yellow;
+                }
+            }
+            @mixin table {
+                width: 100%;
+                th {
+                    padding: 0.75rem 1rem;
+                    text-align: left;
+                    background-color: rgba($primary-yellow, 0.1);
+                    color: $primary-yellow;
+                }
+                td {
+                    padding: 0.75rem 1rem;
+                    border-bottom: 1px solid;
+                    border-color: rgba($primary-yellow, 0.1);
+                    color: $text-white;
+                }
+                tr:hover td {
+                    background-color: rgba($primary-yellow, 0.05);
+                }
+            }
+            // Animations
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            // Utility Classes
+            .container-dark {
+                min-height: 100vh;
+                background-color: $dark-black;
+                color: $text-white;
+            }
+            .section-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 1.5rem;
+                color: $primary-yellow;
+            }
+            .card-container {
+                @include card;
+            }
+            .action-btn {
+                @include action-button;
+            }
+            .form-input {
+                @include input-field;
+            }
+            .table-modern {
+                @include table;
+            }
+            .badge {
+                @include badge;
+            }
+            .header {
+                @include header-section;
+            }
+            // Grid utilities
+            .grid {
+                display: grid;
+                gap: 1.5rem;
+            }
+            .grid-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .grid-4 {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            // Responsive
+            @media (max-width: 1024px) {
+                .grid-4 {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            @media (max-width: 768px) {
+                .grid-3 {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            @media (max-width: 640px) {
+                .grid-2,
+                .grid-3,
+                .grid-4 {
+                    grid-template-columns: 1fr;
+                }
+            }
+        }

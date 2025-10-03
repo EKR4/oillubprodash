@@ -7,7 +7,7 @@
         </h2>
         <p class="mt-2 text-center text-sm text-gray-600">
             Or
-            <a routerLink="/auth/login" class="font-medium text-indigo-600 hover:text-indigo-500">
+            <a routerLink="/auth/login" class="font-medium text-primary hover:text-primary-dark">
         sign in to your existing account
       </a>
         </p>
@@ -17,7 +17,7 @@
         <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <!-- Loading Overlay -->
             <div *ngIf="isLoading" class="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
 
             <!-- Error Message -->
@@ -33,7 +33,7 @@
             Full Name
           </label>
                     <div class="mt-1">
-                        <input id="fullName" formControlName="fullName" type="text" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" [class.border-red-500]="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid">
+                        <input id="fullName" formControlName="fullName" type="text" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" [class.border-red-500]="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid">
                     </div>
                     <p *ngIf="getErrorMessage('fullName')" class="mt-2 text-sm text-red-600">
                         {{ getErrorMessage('fullName') }}
@@ -46,7 +46,7 @@
             Email address
           </label>
                     <div class="mt-1">
-                        <input id="email" formControlName="email" type="email" autocomplete="email" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        <input id="email" formControlName="email" type="email" autocomplete="email" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                             [class.border-red-500]="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
                     </div>
                     <p *ngIf="getErrorMessage('email')" class="mt-2 text-sm text-red-600">
@@ -60,8 +60,7 @@
             Password
           </label>
                     <div class="mt-1">
-                        <input id="password" formControlName="password" type="password" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            [class.border-red-500]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+                        <input id="password" formControlName="password" type="password" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" [class.border-red-500]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
                     </div>
                     <p *ngIf="getErrorMessage('password')" class="mt-2 text-sm text-red-600">
                         {{ getErrorMessage('password') }}
@@ -74,7 +73,7 @@
             Confirm Password
           </label>
                     <div class="mt-1">
-                        <input id="confirmPassword" formControlName="confirmPassword" type="password" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        <input id="confirmPassword" formControlName="confirmPassword" type="password" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                             [class.border-red-500]="registerForm.get('confirmPassword')?.touched && (registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch'])">
                     </div>
                     <p *ngIf="getErrorMessage('confirmPassword')" class="mt-2 text-sm text-red-600">
@@ -89,7 +88,7 @@
           </label>
                     <div class="space-y-2">
                         <div *ngFor="let role of roles" class="flex items-center">
-                            <input aria-label="input" type="radio" [id]="role.value" [value]="role.value" formControlName="role" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                            <input aria-label="input" type="radio" [id]="role.value" [value]="role.value" formControlName="role" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
                             <label [for]="role.value" class="ml-3 block text-sm font-medium text-gray-700">
                 {{ role.label }}
               </label>
@@ -102,10 +101,10 @@
 
                 <!-- Terms and Conditions -->
                 <div class="flex items-center">
-                    <input id="terms" formControlName="terms" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <input id="terms" formControlName="terms" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
                     <label for="terms" class="ml-2 block text-sm text-gray-900">
             I agree to the
-            <a href="#" class="text-indigo-600 hover:text-indigo-500">Terms and Conditions</a>
+            <a href="#" class="text-primary hover:text-primary-dark">Terms and Conditions</a>
           </label>
                 </div>
                 <p *ngIf="getErrorMessage('terms')" class="mt-2 text-sm text-red-600">
@@ -114,10 +113,10 @@
 
                 <!-- Submit Button -->
                 <div>
-                    <button type="submit" [disabled]="isLoading" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="submit" [disabled]="isLoading" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-secondary bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed">
             <span *ngIf="!isLoading">Create Account</span>
             <span *ngIf="isLoading" class="flex items-center">
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>

@@ -1,0 +1,97 @@
+<div class="min-h-screen bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
+            <a routerLink="/customer/products" class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-lg shadow-md transition duration-300 flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+                <span>Continue Shopping</span>
+            </a>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center items-center py-16">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-500"></div>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg shadow-sm">
+            <div class="flex items-center">
+                <svg class="h-6 w-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+                <p class="text-red-700">{{ error }}</p>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && !error && orders.length === 0" class="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100">
+            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+      </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900">No Orders Yet</h3>
+            <p class="mt-2 text-gray-500 max-w-sm mx-auto">Start exploring our products and place your first order today!</p>
+            <div class="mt-6">
+                <a routerLink="/customer/products" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-black bg-yellow-500 hover:bg-yellow-600 transition duration-300">
+          Browse Products
+        </a>
+            </div>
+        </div>
+
+        <!-- Orders List -->
+        <div *ngIf="!isLoading && !error && orders.length > 0" class="space-y-4">
+            <div *ngFor="let order of orders" class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden cursor-pointer" (click)="viewOrder(order.id)">
+                <div class="p-6">
+                    <!-- Order Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="space-y-1">
+                            <h3 class="text-lg font-semibold text-gray-900">
+                                Order #{{ order.order_number }}
+                            </h3>
+                            <p class="text-sm text-gray-500 flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg> {{ formatDate(order.created_at) }}
+                            </p>
+                        </div>
+                        <span [class]="'px-4 py-1.5 rounded-full text-sm font-medium ' + getStatusClass(order.status)">
+              {{ order.status | titlecase }}
+            </span>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="border-t border-gray-100 pt-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center text-gray-500">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg> {{ order.items.length }} items
+                            </div>
+                            <span class="text-lg font-bold text-gray-900">
+                {{ formatCurrency(order.total_amount) }}
+              </span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+                            <button (click)="trackOrder(order.id); $event.stopPropagation()" class="flex items-center text-yellow-600 hover:text-yellow-700 transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                Track Order
+              </button>
+                            <button (click)="viewOrder(order.id); $event.stopPropagation()" class="flex items-center text-yellow-600 hover:text-yellow-700 transition-colors duration-200">
+                View Details
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

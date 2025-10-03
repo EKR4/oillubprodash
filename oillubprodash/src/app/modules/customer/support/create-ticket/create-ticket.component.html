@@ -1,0 +1,83 @@
+<div class="min-h-screen bg-gray-100 p-6">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6 bg-yellow-50 border-b border-yellow-200">
+            <h1 class="text-2xl font-bold text-gray-900">Create New Support Ticket</h1>
+            <p class="mt-2 text-gray-600">Please provide details about your issue</p>
+        </div>
+
+        <div class="p-6">
+            <form [formGroup]="ticketForm" (ngSubmit)="onSubmit()" class="space-y-6">
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                    <input type="text" id="title" formControlName="title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500" placeholder="Brief description of the issue">
+                    <div *ngIf="ticketForm.get('title')?.touched && ticketForm.get('title')?.invalid" class="mt-1 text-sm text-red-600">
+                        Title is required
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                    <select id="category" formControlName="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500">
+            <option value="">Select a category</option>
+            <option value="technical">Technical Issue</option>
+            <option value="billing">Billing</option>
+            <option value="product">Product Query</option>
+            <option value="other">Other</option>
+          </select>
+                    <div *ngIf="ticketForm.get('category')?.touched && ticketForm.get('category')?.invalid" class="mt-1 text-sm text-red-600">
+                        Please select a category
+                    </div>
+                </div>
+
+                <!-- Priority -->
+                <div>
+                    <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
+                    <select id="priority" formControlName="priority" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="description" formControlName="description" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500" placeholder="Detailed description of your issue..."></textarea>
+                    <div *ngIf="ticketForm.get('description')?.touched && ticketForm.get('description')?.invalid" class="mt-1 text-sm text-red-600">
+                        Description must be at least 20 characters
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+              <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+              </svg>
+              <span>Attach Files</span>
+              <input type="file" class="hidden" multiple (change)="onFileSelected($event)">
+            </label>
+                        <div *ngIf="selectedFiles.length" class="text-sm text-gray-600">
+                            {{selectedFiles.length}} file(s) selected
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="submit" [disabled]="!ticketForm.valid || isSubmitting" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50">
+            <svg *ngIf="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Create Ticket
+          </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

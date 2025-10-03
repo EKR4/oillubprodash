@@ -1,0 +1,81 @@
+// Most styling is handled by Tailwind CSS classes in the HTML template
+// This file contains additional custom styles that can't be easily achieved with Tailwind
+// Category selection animation
+.bg-white.rounded-lg.shadow-md.p-4 {
+    transition: all 0.3s ease;
+    &:hover {
+        transform: translateY(-5px);
+    }
+    &.border-2.border-yellow-500 {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+}
+
+// Product card hover effects
+.transition.duration-300 {
+    will-change: transform, box-shadow;
+    &:hover {
+        .text-lg.font-semibold {
+            color: #d97706; // yellow-600
+        }
+    }
+}
+
+// Category badge position fix
+.absolute.top-3.right-3 {
+    z-index: 10;
+}
+
+// Enhanced product image hover
+img.w-full.h-52 {
+    transition: transform 0.5s ease;
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+// Sort and filter controls
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+// Improve responsiveness
+@media (max-width: 768px) {
+    .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.xl\:grid-cols-4 {
+        gap: 1rem;
+    }
+    .mb-8 {
+        margin-bottom: 1.5rem;
+    }
+}
+
+// Add smooth transitions for filter changes
+.grid {
+    transition: opacity 0.3s ease;
+    &.animate-fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Truncate text with ellipsis
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

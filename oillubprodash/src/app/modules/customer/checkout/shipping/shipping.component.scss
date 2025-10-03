@@ -1,0 +1,138 @@
+@tailwind components;
+
+@layer components {
+    .checkout-steps {
+        @apply flex items-center justify-between mb-8;
+        
+        .step {
+            @apply flex flex-col items-center relative flex-1;
+            
+            &:not(:last-child)::after {
+                @apply content-[''] absolute top-4 left-1/2 w-full h-0.5 bg-gray-200 z-0;
+            }
+            
+            .step-number {
+                @apply w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-medium relative z-10;
+                
+                &.active { @apply bg-yellow-500 text-white; }
+                &.completed { @apply bg-green-500 text-white; }
+            }
+            
+            .step-title {
+                @apply mt-2 text-sm;
+                &.active { @apply text-gray-900 font-medium; }
+                &:not(.active) { @apply text-gray-500; }
+            }
+        }
+    }
+
+    .form-group {
+        @apply mb-6;
+        
+        label {
+            @apply block text-sm font-medium text-gray-700 mb-2;
+        }
+        
+        input, select, textarea {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20;
+            
+            &.is-invalid {
+                @apply border-red-500;
+            }
+        }
+        
+        .error-message {
+            @apply text-sm text-red-500 mt-1;
+        }
+    }
+
+    .delivery-options {
+        .option {
+            @apply border border-gray-200 rounded-md p-4 mb-2 cursor-pointer transition-all duration-200
+                   hover:border-gray-300 hover:bg-gray-50;
+            
+            &.selected {
+                @apply border-yellow-500 bg-yellow-50;
+            }
+            
+            .option-radio {
+                @apply w-4 h-4 mr-3;
+            }
+            
+            .option-details {
+                @apply flex flex-col md:flex-row;
+                
+                .option-name {
+                    @apply font-medium text-gray-900;
+                }
+                
+                .option-description {
+                    @apply text-sm text-gray-500;
+                }
+                
+                .option-meta {
+                    @apply flex justify-between mt-1 text-sm;
+                    
+                    .eta { @apply text-gray-500; }
+                    .price { @apply font-medium text-gray-900; }
+                }
+            }
+        }
+    }
+
+    .order-summary {
+        @apply sticky top-6;
+        
+        .product-item {
+            @apply flex items-center py-3 border-b border-gray-200 last:border-0;
+            
+            .product-image {
+                @apply w-16 h-16 rounded-md overflow-hidden bg-gray-100;
+                
+                img {
+                    @apply w-full h-full object-cover;
+                }
+            }
+            
+            .product-details {
+                @apply ml-4 flex-1;
+                
+                .product-name {
+                    @apply font-medium text-gray-800 mb-1 truncate;
+                }
+                
+                .product-meta {
+                    @apply flex justify-between text-sm text-gray-500;
+                }
+            }
+        }
+        
+        .summary-row {
+            @apply flex justify-between mb-2;
+            
+            &.total {
+                @apply font-semibold text-gray-800 pt-2 mt-2 border-t border-gray-200;
+            }
+        }
+    }
+
+    .navigation-buttons {
+        @apply flex justify-between mt-8;
+        
+        .back-button {
+            @apply flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-medium transition-all duration-200 hover:bg-gray-300;
+            
+            svg {
+                @apply mr-2;
+            }
+        }
+        
+        .next-button {
+            @apply flex items-center px-4 py-2 bg-yellow-500 text-white rounded-md font-semibold transition-all duration-200 hover:bg-yellow-600;
+            
+            svg {
+                @apply ml-2;
+            }
+        }
+    }
+}

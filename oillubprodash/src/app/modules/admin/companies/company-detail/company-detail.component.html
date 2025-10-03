@@ -1,0 +1,308 @@
+<div class="container mx-auto p-4">
+    <!-- Loading and Error States -->
+    <div *ngIf="loading" class="flex justify-center items-center h-64">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+
+    <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+        {{ error }}
+    </div>
+
+    <!-- Company Details -->
+    <div *ngIf="company && !loading" class="space-y-6">
+        <!-- Header -->
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">{{ company.name }}</h1>
+                <p class="text-gray-600">{{ company.business_registration_number }}</p>
+            </div>
+            <div class="space-x-2">
+                <button (click)="editCompany()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Edit
+        </button>
+                <button (click)="goBack()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          Back
+        </button>
+            </div>
+        </div>
+
+        <!-- Status Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+            <!-- Company Status -->
+            <div class="p-4 bg-white rounded shadow">
+                <h3 class="font-semibold mb-2">Company Status</h3>
+                <div class="flex items-center space-x-2">
+                    <select [ngModel]="company.status" (ngModelChange)="updateCompanyStatus($event)" class="border rounded px-3 py-2">
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="suspended">Suspended</option>
+            <option value="inactive">Inactive</option>
+          </select>
+                    <span [class]="'px-2 py-1 rounded text-sm ' + 
+            (company.status === 'active' ? 'bg-green-100 text-green-800' :
+             company.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+             company.status === 'suspended' ? 'bg-red-100 text-red-800' :
+             'bg-gray-100 text-gray-800')">
+            {{ company.status }}
+          </span>
+                </div>
+            </div>
+
+            <!-- Verification Status -->
+            <div class="p-4 bg-white rounded shadow">
+                <h3 class="font-semibold mb-2">Verification Status</h3>
+                <div class="flex items-center space-x-2">
+                    <button (click)="verifyCompany(true)" [class]="'px-4 py-2 rounded ' +
+                  (company.verified ? 'bg-green-500 text-white' : 'bg-gray-200')">
+            Verify
+          </button>
+                    <button (click)="verifyCompany(false)" [class]="'px-4 py-2 rounded ' +
+                  (!company.verified ? 'bg-red-500 text-white' : 'bg-gray-200')">
+            Reject
+          </button>
+                    <span class="text-sm">
+            {{ company.verification_status }}
+            <span *ngIf="company.verification_date" class="block text-xs text-gray-500">
+              {{ company.verification_date | date }}
+            </span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Credit Status -->
+            <div class="p-4 bg-white rounded shadow">
+                <h3 class="font-semibold mb-2">Credit Status</h3>
+                <div class="flex items-center space-x-2">
+                    <select [ngModel]="company.credit_status" (ngModelChange)="updateCreditStatus($event)" class="border rounded px-3 py-2">
+            <option value="good">Good</option>
+            <option value="warning">Warning</option>
+            <option value="hold">Hold</option>
+          </select>
+                    <span [class]="'px-2 py-1 rounded text-sm ' +
+            (company.credit_status === 'good' ? 'bg-green-100 text-green-800' :
+             company.credit_status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+             'bg-red-100 text-red-800')">
+            {{ company.credit_status }}
+          </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Information -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Basic Information -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Basic Information</h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Email</label>
+                        <p>{{ company.email }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Phone</label>
+                        <p>{{ company.phone }}</p>
+                        <p *ngIf="company.alternative_phone" class="text-sm text-gray-500">
+                            Alt: {{ company.alternative_phone }}
+                        </p>
+                    </div>
+                    <div *ngIf="company.website">
+                        <label class="block text-sm font-medium text-gray-600">Website</label>
+                        <a [href]="company.website" target="_blank" class="text-blue-500 hover:underline">
+              {{ company.website }}
+            </a>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Company Type</label>
+                        <p class="capitalize">{{ company.company_type.replace('_', ' ') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Details -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Business Details</h2>
+                <div class="space-y-3">
+                    <div *ngIf="company.year_established">
+                        <label class="block text-sm font-medium text-gray-600">Year Established</label>
+                        <p>{{ company.year_established }}</p>
+                    </div>
+                    <div *ngIf="company.employee_count">
+                        <label class="block text-sm font-medium text-gray-600">Employee Count</label>
+                        <p>{{ company.employee_count }}</p>
+                    </div>
+                    <div *ngIf="company.annual_revenue_range">
+                        <label class="block text-sm font-medium text-gray-600">Annual Revenue Range</label>
+                        <p>{{ company.annual_revenue_range }}</p>
+                    </div>
+                    <div *ngIf="company.industry">
+                        <label class="block text-sm font-medium text-gray-600">Industry</label>
+                        <p>{{ company.industry }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contacts -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Contacts</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Name
+                            </th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Position
+                            </th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Contact
+                            </th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Role
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr *ngFor="let contact of contacts">
+                            <td class="px-6 py-4 whitespace-nowrap">{{ contact.full_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ contact.position }}
+                                <span *ngIf="contact.department" class="text-sm text-gray-500">
+                  ({{ contact.department }})
+                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div>{{ contact.email }}</div>
+                                <div class="text-sm text-gray-500">{{ contact.phone }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span *ngIf="contact.is_primary_contact" class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                  Primary
+                </span>
+                                <span *ngIf="contact.is_billing_contact" class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                  Billing
+                </span>
+                                <span *ngIf="contact.is_technical_contact" class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
+                  Technical
+                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Documents</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div *ngFor="let doc of documents" class="border rounded p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-medium">{{ doc.name }}</h4>
+                            <p class="text-sm text-gray-500">{{ doc.document_type }}</p>
+                        </div>
+                        <a [href]="doc.file_url" target="_blank" class="text-blue-500 hover:text-blue-600">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                    <p *ngIf="doc.description" class="text-sm text-gray-600 mt-2">
+                        {{ doc.description }}
+                    </p>
+                    <div class="mt-2 flex justify-between text-sm">
+                        <span class="text-gray-500">
+              {{ doc.upload_date | date }}
+            </span>
+                        <span [class]="'px-2 py-1 rounded-full text-xs ' +
+              (doc.is_verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800')">
+              {{ doc.is_verified ? 'Verified' : 'Unverified' }}
+            </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Recent Transactions</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Type
+                            </th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Amount
+                            </th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr *ngFor="let transaction of transactions">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ transaction.transaction_date | date }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap capitalize">
+                                {{ transaction.transaction_type.replace('_', ' ') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ transaction.amount | currency:transaction.currency }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span [class]="'px-2 py-1 rounded-full text-xs ' +
+                  (transaction.status === 'completed' ? 'bg-green-100 text-green-800' :
+                   transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                   transaction.status === 'overdue' ? 'bg-red-100 text-red-800' :
+                   'bg-gray-100 text-gray-800')">
+                  {{ transaction.status }}
+                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Price Tiers -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Price Tiers</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Effective From
+                            </th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Discount
+                            </th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Notes
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr *ngFor="let tier of priceTiers">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ tier.effective_from | date }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ (tier.override_discount_percentage || tier.baseTier?.discount_percentage || 0) }}%
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ tier.notes }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map, of, switchMap, take, tap, filter, from } from 'rxjs';
+import { BehaviorSubject, Observable, map, of, switchMap, take, tap, filter, from, catchError } from 'rxjs';
 import { AuthService } from '../../cores/services/auth.service';
 import { SupabaseService } from '../../cores/services/supabase.service';
 import { 
@@ -10,20 +10,36 @@ import {
   SavedCart 
 } from '../../cores/models/cart';
 import { Product, ProductPackage } from '../../cores/models/product';
-import { User } from '../../cores/models/user';
-// Add type declaration for uuid
+// Define a minimal User type to avoid TSX import errors
+type UserRole = 'admin' | 'company' | 'customer';
+interface User {
+  id: string;
+  email: string;
+  role: UserRole;
+  company_id?: string;
+}
+
 import { v4 as uuidv4 } from 'uuid';
-// Declare uuid module to fix TypeScript error
 declare module 'uuid';
+
+// Interface for cart token response
+interface CartTokenResponse {
+  token: string;
+  expires_at?: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
+  // Storage keys and constants
   private readonly CART_STORAGE_KEY = 'lubrimax_cart';
+  private readonly CART_TOKEN_KEY = 'lubrimax_cart_token';
   private readonly TAX_RATE = 0.16; // 16% VAT
   private readonly DEFAULT_CURRENCY = 'KES';
+  private readonly TOKEN_EXPIRY_BUFFER_DAYS = 3; // Refresh token if it's within 3 days of expiry
   
+  // BehaviorSubjects for observables
   private cartSubject = new BehaviorSubject<Cart | null>(null);
   cart$ = this.cartSubject.asObservable();
   
@@ -37,23 +53,147 @@ export class CartService {
   });
   cartSummary$ = this.cartSummarySubject.asObservable();
   
+  // Internal state
   private currentUser: User | null = null;
+  private cartToken: string | null = null;
+  private tokenExpiry: Date | null = null;
 
   constructor(
     private authService: AuthService,
     private supabaseService: SupabaseService
   ) {
-    // Initialize cart
+    // Initialize token and cart
+    this.loadCartToken();
     this.initializeCart();
     
     // Listen for auth changes
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       if (user) {
-        // If user logs in, merge local cart with server cart
-        this.syncCartWithServer();
+        // If user logs in, refresh token and merge local cart with server cart
+        this.refreshCartToken().subscribe(() => {
+          this.syncCartWithServer();
+        });
       }
     });
+  }
+
+  /**
+   * Load cart token from localStorage
+   */
+  private loadCartToken(): void {
+    const tokenData = localStorage.getItem(this.CART_TOKEN_KEY);
+    if (tokenData) {
+      try {
+        const { token, expires_at } = JSON.parse(tokenData);
+        this.cartToken = token;
+        this.tokenExpiry = expires_at ? new Date(expires_at) : null;
+        
+        // Check if token is expired or about to expire
+        if (this.isTokenExpired()) {
+          this.refreshCartToken().subscribe();
+        }
+      } catch (error) {
+        console.error('Error parsing cart token:', error);
+        this.cartToken = null;
+        this.tokenExpiry = null;
+        localStorage.removeItem(this.CART_TOKEN_KEY);
+      }
+    }
+  }
+
+  /**
+   * Check if cart token is expired or about to expire
+   */
+  private isTokenExpired(): boolean {
+    if (!this.tokenExpiry) return true;
+    
+    const now = new Date();
+    const bufferTime = this.TOKEN_EXPIRY_BUFFER_DAYS * 24 * 60 * 60 * 1000;
+    
+    // Consider token expired if it's within buffer days of expiration
+    return this.tokenExpiry.getTime() - now.getTime() < bufferTime;
+  }
+
+  /**
+   * Create or refresh cart token
+   */
+  private refreshCartToken(): Observable<string> {
+    // Prepare request options 
+    const options: any = {};
+    
+    // If user is logged in, add auth token
+    if (this.currentUser) {
+      const authToken = this.authService.getAccessToken();
+      // Only set token if it's non-null
+      if (authToken) {
+        // We can't directly set headers, instead set auth token in localStorage
+        // Supabase will automatically use it
+        localStorage.setItem('supabase.auth.token', authToken);
+      }
+    }
+    
+    return from(
+      this.supabaseService.getSupabase()
+        .rpc('create_cart_token', {})
+        .single()
+    ).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        
+        const response = data as CartTokenResponse;
+        this.cartToken = response.token;
+        this.tokenExpiry = response.expires_at ? new Date(response.expires_at) : null;
+        
+        // Store token in localStorage
+        localStorage.setItem(this.CART_TOKEN_KEY, JSON.stringify({
+          token: this.cartToken,
+          expires_at: this.tokenExpiry?.toISOString()
+        }));
+        
+        return this.cartToken;
+      }),
+      catchError(error => {
+        console.error('Error refreshing cart token:', error);
+        return of(''); // Return empty string on error
+      })
+    );
+  }
+
+  /**
+   * Get cart token, creating or refreshing if needed
+   */
+  private getCartToken(): Observable<string> {
+    // If we already have a valid token, return it
+    if (this.cartToken && !this.isTokenExpired()) {
+      return of(this.cartToken);
+    }
+    
+    // Otherwise, refresh the token
+    return this.refreshCartToken();
+  }
+
+  /**
+   * Add cart token to request headers
+   */
+  private getTokenHeaders(): Observable<Record<string, string>> {
+    return this.getCartToken().pipe(
+      map(token => {
+        const headers: Record<string, string> = {};
+        
+        // Set app.cart_token in request headers for RLS policies
+        if (token) {
+          headers['x-app-cart-token'] = token;
+        }
+        
+        // Add auth token if user is logged in
+        if (this.currentUser && this.authService.getAccessToken()) {
+          headers['Authorization'] = `Bearer ${this.authService.getAccessToken()}`;
+        }
+        
+        return headers;
+      })
+    );
   }
 
   /**

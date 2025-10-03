@@ -1,0 +1,145 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    background-color: #f9fafb;
+}
+
+// Image gallery
+.product-image {
+    &-main {
+        transition: transform 0.3s ease;
+        &:hover {
+            transform: scale(1.02);
+        }
+    }
+}
+
+// Package selection
+.package-option {
+    transition: all 0.2s ease;
+    &:hover {
+        border-color: #fbbf24;
+    }
+    &.selected {
+        border-color: #f59e0b;
+        background-color: rgba(245, 158, 11, 0.05);
+    }
+}
+
+// Quantity controls
+.quantity-control {
+    button {
+        transition: all 0.2s ease;
+        &:hover:not(:disabled) {
+            background-color: #f3f4f6;
+        }
+        &:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
+
+// Tab animations
+.tab-button {
+    position: relative;
+    transition: all 0.2s ease;
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background-color: #f59e0b;
+        transition: all 0.2s ease;
+    }
+    &:hover::after {
+        width: 100%;
+        left: 0;
+    }
+    &.active::after {
+        width: 100%;
+        left: 0;
+    }
+}
+
+// Document links
+.document-link {
+    transition: all 0.2s ease;
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+}
+
+// Add to cart button animation
+.add-to-cart-btn {
+    transition: all 0.2s ease;
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+    }
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+}
+
+// Loading animation
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+// Certifications badges
+.certification-badge {
+    transition: all 0.2s ease;
+    &:hover {
+        transform: translateY(-1px);
+    }
+}
+
+// Related products
+.related-product {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    img {
+        transition: transform 0.3s ease;
+        &:hover {
+            transform: scale(1.05);
+        }
+    }
+}
+
+// Custom styling for product description content
+.prose {
+    h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    ul {
+        margin-bottom: 1.5rem;
+    }
+    p {
+        line-height: 1.6;
+    }
+}
+
+// Product card hover effect
+.hover\:translate-y-\[-5px\]:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}

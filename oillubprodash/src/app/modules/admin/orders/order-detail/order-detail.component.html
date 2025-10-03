@@ -1,0 +1,297 @@
+<div class="container mx-auto p-4">
+  <!-- Loading and Error States -->
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+    {{ error }}
+  </div>
+
+  <!-- Order Details -->
+  <div *ngIf="order && !loading" class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold">Order #{{ order.order_number }}</h1>
+        <p class="text-gray-600">{{ order.created_at | date:'medium' }}</p>
+      </div>
+      <button (click)="goBack()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+        Back to Orders
+      </button>
+    </div>
+
+    <!-- Status Controls -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Order Status -->
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="font-semibold mb-2">Order Status</h3>
+        <div class="flex items-center space-x-2">
+          <select [ngModel]="order.status"
+                  (ngModelChange)="updateOrderStatus($event)"
+                  [disabled]="statusUpdateLoading"
+                  class="border rounded px-3 py-2 w-full">
+            <option *ngFor="let status of orderStatuses" [value]="status">
+              {{ getStatusLabel(status) }}
+            </option>
+          </select>
+          <span [class]="'px-2 py-1 rounded text-sm ' + getStatusColor(order.status)">
+            {{ getStatusLabel(order.status) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Payment Status -->
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="font-semibold mb-2">Payment Status</h3>
+        <div class="flex items-center space-x-2">
+          <select [ngModel]="order.payment_status"
+                  (ngModelChange)="updatePaymentStatus($event)"
+                  [disabled]="statusUpdateLoading"
+                  class="border rounded px-3 py-2 w-full">
+            <option *ngFor="let status of paymentStatuses" [value]="status">
+              {{ getStatusLabel(status) }}
+            </option>
+          </select>
+          <span [class]="'px-2 py-1 rounded text-sm ' + getStatusColor(order.payment_status)">
+            {{ getStatusLabel(order.payment_status) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Shipping Status -->
+      <div *ngIf="order.shipping_details" class="bg-white p-4 rounded-lg shadow">
+        <h3 class="font-semibold mb-2">Shipping Status</h3>
+        <div class="flex items-center space-x-2">
+          <select [ngModel]="order.shipping_details.status"
+                  (ngModelChange)="updateShippingStatus($event)"
+                  [disabled]="statusUpdateLoading"
+                  class="border rounded px-3 py-2 w-full">
+            <option value="pending">Pending</option>
+            <option value="preparing">Preparing</option>
+            <option value="ready_for_pickup">Ready for Pickup</option>
+            <option value="in_transit">In Transit</option>
+            <option value="delivered">Delivered</option>
+            <option value="failed">Failed</option>
+          </select>
+          <span [class]="'px-2 py-1 rounded text-sm ' + getStatusColor(order.shipping_details.status)">
+            {{ getStatusLabel(order.shipping_details.status) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Information -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Customer Information -->
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Customer Information</h2>
+        <div class="space-y-3">
+          <div *ngIf="order.user">
+            <p class="font-medium">{{ order.user.full_name }}</p>
+            <p class="text-gray-600">{{ order.user.email }}</p>
+            <p *ngIf="order.user.phone" class="text-gray-600">{{ order.user.phone }}</p>
+          </div>
+          <div *ngIf="order.company">
+            <p class="font-medium mt-4">Company</p>
+            <p class="text-gray-600">{{ order.company.name }}</p>
+            <p class="text-gray-600">{{ order.company.business_registration_number }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Information -->
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Payment Information</h2>
+        <div class="space-y-3" *ngIf="order.payment_details">
+          <div>
+            <p class="font-medium">Payment Method</p>
+            <p class="text-gray-600">{{ getStatusLabel(order.payment_details.payment_method) }}</p>
+          </div>
+          <div *ngIf="order.payment_details.transaction_id">
+            <p class="font-medium">Transaction ID</p>
+            <p class="text-gray-600">{{ order.payment_details.transaction_id }}</p>
+          </div>
+          <div *ngIf="order.payment_details.mpesa_receipt_number">
+            <p class="font-medium">MPesa Receipt</p>
+            <p class="text-gray-600">{{ order.payment_details.mpesa_receipt_number }}</p>
+          </div>
+          <div *ngIf="order.payment_details.card_last_four">
+            <p class="font-medium">Card</p>
+            <p class="text-gray-600">
+              {{ order.payment_details.card_brand }} **** {{ order.payment_details.card_last_four }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shipping Details -->
+    <div class="bg-white p-6 rounded-lg shadow" *ngIf="order.shipping_details">
+      <h2 class="text-xl font-semibold mb-4">Shipping Details</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Delivery Method -->
+        <div>
+          <p class="font-medium">Delivery Method</p>
+          <p class="text-gray-600">{{ getStatusLabel(order.shipping_details.delivery_method) }}</p>
+          
+          <!-- Shipping Address -->
+          <div *ngIf="order.shipping_details.shipping_address" class="mt-4">
+            <p class="font-medium">Shipping Address</p>
+            <div class="text-gray-600">
+              <p>{{ order.shipping_details.shipping_address.street }}</p>
+              <p>{{ order.shipping_details.shipping_address.city }}, {{ order.shipping_details.shipping_address.state }}</p>
+              <p>{{ order.shipping_details.shipping_address.postal_code }}</p>
+              <p>{{ order.shipping_details.shipping_address.country }}</p>
+            </div>
+          </div>
+
+          <!-- Pickup Location -->
+          <div *ngIf="order.shipping_details.pickup_location_name" class="mt-4">
+            <p class="font-medium">Pickup Location</p>
+            <p class="text-gray-600">{{ order.shipping_details.pickup_location_name }}</p>
+            <p *ngIf="order.shipping_details.pickup_date" class="text-gray-600">
+              Pickup Date: {{ order.shipping_details.pickup_date | date }}
+            </p>
+            <p *ngIf="order.shipping_details.pickup_time_slot" class="text-gray-600">
+              Time Slot: {{ order.shipping_details.pickup_time_slot }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Tracking Information -->
+        <div>
+          <div *ngIf="order.shipping_details.tracking_number">
+            <p class="font-medium">Tracking Information</p>
+            <p class="text-gray-600">
+              Tracking #: {{ order.shipping_details.tracking_number }}
+            </p>
+            <p class="text-gray-600">
+              Carrier: {{ order.shipping_details.shipping_carrier }}
+            </p>
+            <a *ngIf="order.shipping_details.tracking_url"
+               [href]="order.shipping_details.tracking_url"
+               target="_blank"
+               class="text-blue-500 hover:underline">
+              Track Shipment
+            </a>
+          </div>
+
+          <!-- Delivery Dates -->
+          <div class="mt-4">
+            <p *ngIf="order.shipping_details.estimated_delivery_date" class="text-gray-600">
+              Estimated Delivery: {{ order.shipping_details.estimated_delivery_date | date }}
+            </p>
+            <p *ngIf="order.shipping_details.actual_delivery_date" class="text-gray-600">
+              Delivered On: {{ order.shipping_details.actual_delivery_date | date }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Product
+              </th>
+              <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Package
+              </th>
+              <th class="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Quantity
+              </th>
+              <th class="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Unit Price
+              </th>
+              <th class="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Total
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let item of order.items">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div>{{ item.product_name }}</div>
+                <div class="text-sm text-gray-500">SKU: {{ item.product_sku }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                {{ item.package_size }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                {{ item.quantity }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                {{ formatCurrency(item.unit_price, item.currency) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right font-medium">
+                {{ formatCurrency(item.total_amount, item.currency) }}
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="border-t-2 border-gray-200">
+              <td colspan="4" class="px-6 py-4 text-right font-medium">Subtotal</td>
+              <td class="px-6 py-4 text-right font-medium">
+                {{ formatCurrency(order.subtotal, order.currency) }}
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4" class="px-6 py-4 text-right">Tax</td>
+              <td class="px-6 py-4 text-right">
+                {{ formatCurrency(order.tax_amount, order.currency) }}
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4" class="px-6 py-4 text-right">Shipping</td>
+              <td class="px-6 py-4 text-right">
+                {{ formatCurrency(order.shipping_fee, order.currency) }}
+              </td>
+            </tr>
+            <tr *ngIf="order.discount_amount > 0">
+              <td colspan="4" class="px-6 py-4 text-right text-green-600">Discount</td>
+              <td class="px-6 py-4 text-right text-green-600">
+                -{{ formatCurrency(order.discount_amount, order.currency) }}
+              </td>
+            </tr>
+            <tr class="border-t-2 border-gray-200">
+              <td colspan="4" class="px-6 py-4 text-right font-bold">Total</td>
+              <td class="px-6 py-4 text-right font-bold">
+                {{ formatCurrency(order.total_amount, order.currency) }}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Status History -->
+    <div class="bg-white p-6 rounded-lg shadow" *ngIf="order.shipping_details?.status_updates?.length">
+      <h2 class="text-xl font-semibold mb-4">Status History</h2>
+      <div class="space-y-4">
+        <div *ngFor="let update of order.shipping_details.status_updates" class="flex items-start">
+          <div class="flex-shrink-0">
+            <div [class]="'w-4 h-4 rounded-full mt-1 ' + getStatusColor(update.status)"></div>
+          </div>
+          <div class="ml-4">
+            <p class="font-medium">{{ getStatusLabel(update.status) }}</p>
+            <p class="text-sm text-gray-500">{{ update.timestamp | date:'medium' }}</p>
+            <p *ngIf="update.location" class="text-sm text-gray-600">{{ update.location }}</p>
+            <p *ngIf="update.notes" class="text-sm text-gray-600">{{ update.notes }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div *ngIf="order.notes" class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mb-4">Notes</h2>
+      <p class="text-gray-600">{{ order.notes }}</p>
+    </div>
+  </div>
+</div>

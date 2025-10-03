@@ -1,0 +1,74 @@
+@tailwind components;
+
+@layer components {
+    .animate-spin {
+        animation: spin 1s linear infinite;
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    }
+
+    .status {
+        @apply transition-colors duration-200;
+        &-completed {
+            @apply bg-green-100 text-green-800 hover:bg-green-200 
+                   dark:bg-green-900/20 dark:text-green-300 dark:hover:bg-opacity-30;
+        }
+        &-failed {
+            @apply bg-red-100 text-red-800 hover:bg-red-200 
+                   dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-opacity-30;
+        }
+        &-in-progress {
+            @apply bg-blue-100 text-blue-800 hover:bg-blue-200 
+                   dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-opacity-30;
+        }
+        &-pending {
+            @apply bg-yellow-100 text-yellow-800 hover:bg-yellow-200 
+                   dark:bg-yellow-900/20 dark:text-yellow-300 dark:hover:bg-opacity-30;
+        }
+    }
+
+    .form-section {
+        @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md;
+    }
+
+    .form-input {
+        @apply transition-all duration-200
+               hover:border-primary-300 focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:outline-none
+               dark:bg-gray-800 dark:border-gray-700 dark:text-white;
+    }
+
+    input[type="time"],
+    input[type="number"],
+    select {
+        @apply form-input;
+    }
+
+    input[type="checkbox"] {
+        @apply rounded border-gray-300 text-primary transition-colors duration-200
+               hover:border-primary-300
+               dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-primary dark:checked:border-transparent;
+    }
+
+    button {
+        @apply transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+        &:not(:disabled):hover {
+            @apply -translate-y-0.5;
+        }
+    }
+}
+
+@media print {
+    .form-section {
+        @apply shadow-none transform-none;
+    }
+    
+    button { @apply hidden; }
+    
+    input[type="time"],
+    input[type="number"],
+    select {
+        @apply border border-gray-200 bg-transparent;
+    }
+}

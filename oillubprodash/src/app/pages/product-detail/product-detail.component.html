@@ -1,7 +1,7 @@
 <div class="bg-white">
     <!-- Loading State -->
     <div *ngIf="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-indigo-500"></div>
+        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
     </div>
 
     <!-- Error State -->
@@ -27,7 +27,7 @@
             <!-- Image Gallery -->
             <div class="lg:max-w-lg lg:self-end">
                 <div class="aspect-w-1 aspect-h-1 rounded-lg overflow-hidden">
-                    <img alt="" [src]="getProductImage(product)" [alt]="product.name" [title]="product.name + ' - ' + product.category + ' - ' + (product.packages[0].size || '')" class="w-full h-full object-center object-cover">
+                    <img alt [src]="getProductImage(product)" [alt]="product.name" [title]="product.name + ' - ' + product.category + ' - ' + (product.packages[0].size || '')" class="w-full h-full object-center object-cover">
                 </div>
             </div>
 
@@ -49,8 +49,8 @@
                 <div class="mt-8">
                     <h2 class="text-sm font-medium text-gray-900">Package Options</h2>
                     <div class="mt-3 grid grid-cols-3 gap-3">
-                        <button *ngFor="let pkg of product.packages" (click)="selectPackage(pkg)" [class.ring-2]="isPackageSelected(pkg)" [class.ring-indigo-500]="isPackageSelected(pkg)" [class.border-transparent]="isPackageSelected(pkg)" [class.opacity-50]="!isPackageInStock(pkg)"
-                            [disabled]="!isPackageInStock(pkg)" class="relative block border rounded-lg p-4 focus:outline-none">
+                        <button *ngFor="let pkg of product.packages; let i = index" [id]="'package-' + i" (click)="selectPackage(pkg)" [class.ring-2]="isPackageSelected(pkg)" [class.ring-primary]="isPackageSelected(pkg)" [class.border-transparent]="isPackageSelected(pkg)" [class.opacity-50]="!isPackageInStock(pkg)"
+                            [disabled]="!isPackageInStock(pkg)" class="relative block border rounded-lg p-4 focus:outline-none" [attr.aria-label]="'Select ' + pkg.size + ' package'" [attr.aria-pressed]="isPackageSelected(pkg)" [title]="pkg.size + ' - ' + getFormattedPrice(pkg)">
               <span class="absolute inset-0 rounded-lg border-2" aria-hidden="true"></span>
               <div class="flex flex-col h-full">
                 <span class="block text-sm font-medium text-gray-900">{{ pkg.size }}</span>
@@ -65,14 +65,14 @@
                 <div class="mt-8">
                     <h2 class="text-sm font-medium text-gray-900">Quantity</h2>
                     <div class="mt-2 flex items-center space-x-3">
-                        <button (click)="decrementQuantity()" [disabled]="quantity <= 1" class="rounded-md p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button (click)="decrementQuantity()" [disabled]="quantity <= 1" class="rounded-md p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary" aria-label="Decrease quantity" title="Decrease quantity">
               <span class="sr-only">Decrease quantity</span>
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
               </svg>
             </button>
                         <span class="text-gray-900">{{ quantity }}</span>
-                        <button (click)="incrementQuantity()" [disabled]="!selectedPackage || quantity >= selectedPackage.stock_level" class="rounded-md p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button (click)="incrementQuantity()" [disabled]="!selectedPackage || quantity >= selectedPackage.stock_level" class="rounded-md p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary" aria-label="Increase quantity" title="Increase quantity">
               <span class="sr-only">Increase quantity</span>
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -83,7 +83,8 @@
 
                 <!-- Add to Cart -->
                 <div class="mt-8">
-                    <button (click)="addToCart()" [disabled]="!selectedPackage || !isPackageInStock(selectedPackage)" class="w-full bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button (click)="addToCart()" [disabled]="!selectedPackage || !isPackageInStock(selectedPackage)" class="w-full bg-primary border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-secondary hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label="Add selected package to cart" title="Add to cart">
             Add to Cart
           </button>
                 </div>
@@ -93,14 +94,17 @@
         <!-- Product Details Tabs -->
         <div class="mt-16">
             <div class="border-b border-gray-200">
-                <nav class="-mb-px flex space-x-8">
-                    <button (click)="setActiveTab('description')" [class.border-indigo-500]="activeTab === 'description'" [class.text-indigo-600]="activeTab === 'description'" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <nav class="-mb-px flex space-x-8" role="tablist" aria-label="Product information">
+                    <button (click)="setActiveTab('description')" id="tab-description" role="tab" [attr.aria-selected]="activeTab === 'description'" aria-controls="tabpanel-description" [class.border-primary]="activeTab === 'description'" [class.text-primary]="activeTab === 'description'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
             Description
           </button>
-                    <button (click)="setActiveTab('specifications')" [class.border-indigo-500]="activeTab === 'specifications'" [class.text-indigo-600]="activeTab === 'specifications'" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <button (click)="setActiveTab('specifications')" id="tab-specifications" role="tab" [attr.aria-selected]="activeTab === 'specifications'" aria-controls="tabpanel-specifications" [class.border-primary]="activeTab === 'specifications'" [class.text-primary]="activeTab === 'specifications'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
             Specifications
           </button>
-                    <button (click)="setActiveTab('reviews')" [class.border-indigo-500]="activeTab === 'reviews'" [class.text-indigo-600]="activeTab === 'reviews'" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <button title="review" (click)="setActiveTab('reviews')" id="tab-reviews" role="tab" [attr.aria-selected]="activeTab === 'reviews'" aria-controls="tabpanel-reviews" [class.border-primary]="activeTab === 'reviews'" [class.text-primary]="activeTab === 'reviews'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
             Reviews
           </button>
                 </nav>
@@ -109,12 +113,12 @@
             <!-- Tab Content -->
             <div class="py-6">
                 <!-- Description Tab -->
-                <div *ngIf="activeTab === 'description'" class="prose prose-sm max-w-none">
+                <div *ngIf="activeTab === 'description'" id="tabpanel-description" role="tabpanel" aria-labelledby="tab-description" class="prose prose-sm max-w-none">
                     <div [innerHTML]="product.description"></div>
                 </div>
 
                 <!-- Specifications Tab -->
-                <div *ngIf="activeTab === 'specifications'" class="prose prose-sm max-w-none">
+                <div *ngIf="activeTab === 'specifications'" id="tabpanel-specifications" role="tabpanel" aria-labelledby="tab-specifications" class="prose prose-sm max-w-none">
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <h3 class="text-lg font-medium text-gray-900">Technical Specifications</h3>
@@ -157,7 +161,7 @@
                 </div>
 
                 <!-- Reviews Tab -->
-                <div *ngIf="activeTab === 'reviews'" class="prose prose-sm max-w-none">
+                <div *ngIf="activeTab === 'reviews'" id="tabpanel-reviews" role="tabpanel" aria-labelledby="tab-reviews" class="prose prose-sm max-w-none">
                     <!-- Reviews implementation to be added -->
                     <p class="text-gray-500">Reviews coming soon...</p>
                 </div>

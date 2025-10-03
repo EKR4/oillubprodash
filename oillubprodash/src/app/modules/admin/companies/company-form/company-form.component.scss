@@ -1,0 +1,186 @@
+// Form section transitions
+.form-section {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    &:hover {
+        transform: translateY(-2px);
+    }
+    &.loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+}
+
+// Form control states
+:host ::ng-deep {
+    // Input and select focus states
+    .form-control {
+        transition: all 0.2s ease-in-out;
+        &:focus {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        &.ng-invalid.ng-touched {
+            border-color: #EF4444;
+            &:focus {
+                box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+            }
+        }
+    }
+    // Checkbox styles
+    input[type="checkbox"] {
+        &:checked {
+            background-color: #3B82F6;
+            border-color: #3B82F6;
+        }
+        &:focus {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+    }
+    // Select dropdown
+    select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+}
+
+// Loading overlay animation
+.loading-overlay {
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    .spinner {
+        animation: spin 1s linear infinite;
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    }
+}
+
+// Error and success messages
+.message {
+    animation: slideIn 0.3s ease-out;
+    @keyframes slideIn {
+        from {
+            transform: translateY(-10px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+}
+
+// Form groups
+.form-group {
+    margin-bottom: 1.5rem;
+    label {
+        margin-bottom: 0.5rem;
+        display: block;
+        font-weight: 500;
+    }
+    .help-text {
+        font-size: 0.875rem;
+        color: #6B7280;
+        margin-top: 0.25rem;
+    }
+    .error-message {
+        color: #EF4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        min-height: 1.25rem;
+    }
+}
+
+// Required field indicator
+.required-field {
+    &::after {
+        content: '*';
+        color: #EF4444;
+        margin-left: 0.25rem;
+    }
+}
+
+// Button states
+.btn {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    &:hover {
+        transform: translateY(-1px);
+    }
+    &:active {
+        transform: translateY(0);
+    }
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    // Ripple effect
+    &::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+        background-repeat: no-repeat;
+        background-position: 50%;
+        transform: scale(10, 10);
+        opacity: 0;
+        transition: transform .5s, opacity 1s;
+    }
+    &:active::after {
+        transform: scale(0, 0);
+        opacity: .3;
+        transition: 0s;
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .form-section {
+        padding: 1rem;
+    }
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+     :host ::ng-deep {
+        input,
+        select,
+        textarea {
+            background-color: #1F2937;
+            border-color: #374151;
+            color: #F3F4F6;
+            &::placeholder {
+                color: #6B7280;
+            }
+            &:focus {
+                border-color: #60A5FA;
+            }
+        }
+        label {
+            color: #F3F4F6;
+        }
+        .help-text {
+            color: #9CA3AF;
+        }
+    }
+}

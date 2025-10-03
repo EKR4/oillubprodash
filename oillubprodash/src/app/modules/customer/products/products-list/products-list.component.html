@@ -1,0 +1,144 @@
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumb Navigation -->
+    <nav class="mb-4 text-sm" aria-label="Breadcrumb">
+        <ol class="flex">
+            <li>
+                <a routerLink="/customer" class="text-gray-500 hover:text-yellow-600 transition">Dashboard</a>
+                <span class="mx-2 text-gray-400">/</span>
+            </li>
+            <li class="text-gray-900 font-medium">Products</li>
+        </ol>
+    </nav>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !isLoading" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        <p>{{ error }}</p>
+    </div>
+
+    <!-- Product Listing -->
+    <div *ngIf="!isLoading && !error">
+        <!-- Product Categories Showcase -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">Product Categories</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div *ngFor="let category of categories" (click)="selectCategory(category.id)" class="bg-white rounded-lg shadow-md p-4 cursor-pointer transition hover:shadow-lg" [ngClass]="{'border-2 border-yellow-500': selectedCategory === category.id}">
+                    <div class="flex items-center">
+                        <div class="bg-yellow-100 p-3 rounded-lg mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg">{{ category.name }}</h3>
+                            <p class="text-sm text-gray-600">{{ category.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button (click)="selectCategory(null)" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded transition" [ngClass]="{'bg-yellow-500 hover:bg-yellow-600 text-white': selectedCategory === null}">
+          View All Products
+        </button>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:space-x-4">
+                <div class="mb-4 md:mb-0 flex-grow">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search Products</label>
+                    <div class="relative">
+                        <input type="text" id="search" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" placeholder="Search by name, brand, or description..." class="w-full border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 pl-10">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-auto mb-4 md:mb-0">
+                    <label for="category-filter" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="category-filter" (change)="onCategoryChange($event)" class="border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 block w-full">
+            <option value="">All Categories</option>
+            <option *ngFor="let category of categories" [value]="category.id" [selected]="selectedCategory === category.id">
+              {{ category.name }}
+            </option>
+          </select>
+                </div>
+
+                <div class="w-full md:w-auto">
+                    <label for="sort-options" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                    <select id="sort-options" [(ngModel)]="sortOption" (change)="onSortChange($event)" class="border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 block w-full">
+            <option value="name">Name (A-Z)</option>
+            <option value="price_low">Price (Low to High)</option>
+            <option value="price_high">Price (High to Low)</option>
+            <option value="newest">Newest First</option>
+          </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold mb-2">
+                {{ selectedCategory ? getCategoryName(selectedCategory) : 'All Products' }}
+            </h2>
+            <p class="text-gray-600">
+                Showing {{ filteredProducts.length }} product{{ filteredProducts.length !== 1 ? 's' : '' }} {{ searchQuery ? ' for "' + searchQuery + '"' : '' }}
+            </p>
+        </div>
+
+        <!-- No Results Message -->
+        <div *ngIf="filteredProducts.length === 0 && !isLoading" class="bg-gray-50 p-8 rounded-lg text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No Products Found</h3>
+            <p class="text-gray-600 mb-4">
+                We couldn't find any products matching your search criteria. Try adjusting your filters or search query.
+            </p>
+            <button (click)="loadAllProducts()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-md transition">
+        View All Products
+      </button>
+        </div>
+
+        <!-- Product Grid -->
+        <div *ngIf="filteredProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div *ngFor="let product of filteredProducts" class="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-xl hover:translate-y-[-5px]">
+                <a [routerLink]="['/customer/products', product.id]" class="block">
+                    <img [src]="getProductImage(product)" [alt]="product.name" alt="Product image" [title]="product.name" class="w-full h-52 object-cover">
+                    <div class="absolute top-3 right-3 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
+                        {{ product.category | titlecase }}
+                    </div>
+                </a>
+                <div class="p-4">
+                    <a [routerLink]="['/customer/products', product.id]" class="block">
+                        <h3 class="text-lg font-semibold text-gray-900 hover:text-yellow-600 truncate">{{ product.name }}</h3>
+                        <p class="text-sm text-gray-600 mt-1 truncate">{{ product.brand }}</p>
+                        <p *ngIf="product.packages && product.packages.length > 0" class="text-yellow-600 font-bold mt-2">
+                            {{ product.packages[0].currency }} {{ product.packages[0].unit_price.toFixed(2) }}
+                        </p>
+                    </a>
+                    <div class="mt-4 flex justify-between">
+                        <button (click)="addToCart(product)" [disabled]="!product.packages || product.packages.length === 0 || product.packages[0].stock_level === 0" [ngClass]="{
+                'opacity-50 cursor-not-allowed': !product.packages || product.packages.length === 0 || product.packages[0].stock_level === 0
+              }" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm transition" title="Add to cart" aria-label="Add to cart">
+              Add to Cart
+            </button>
+                        <button (click)="addToFavorites(product)" class="border border-gray-300 hover:border-gray-400 text-gray-700 px-4 py-2 rounded-md text-sm transition" title="Add to favorites" aria-label="Add to favorites">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

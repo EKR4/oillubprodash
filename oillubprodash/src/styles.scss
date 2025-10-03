@@ -1,8 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 
-@use '@angular/material' as mat;
 
-/* You can add global styles to this file, and also import other style files */
+/* Import Angular Material prebuilt theme */
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+/* Tailwind directives */
 
 @tailwind base;
 @tailwind components;
@@ -12,12 +15,18 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Angular Material Theming */
+/* Using prebuilt theme - custom theming code removed */
 
-@include mat.core();
+
+/* CSS Custom Properties for use throughout the app */
+
 :root {
     --primary-color: #FEBD17;
+    --primary-color-light: #FED833;
+    --primary-color-dark: #E0A100;
     --secondary-color: #1F2937;
+    --secondary-color-light: #374151;
+    --secondary-color-dark: #111827;
     --accent-color: #FF4081;
     --warning-color: #F44336;
     --success-color: #4CAF50;
@@ -45,7 +54,7 @@
 }
 
 
-/* Responsive fixes */
+/* Base styles */
 
 html,
 body {
@@ -55,7 +64,7 @@ body {
 }
 
 
-/* Material theme overrides */
+/* Material theme overrides using our custom properties */
 
 .mat-mdc-card {
     @apply rounded-lg;
@@ -67,15 +76,28 @@ body {
 
 .mat-mdc-raised-button.mat-primary {
     background-color: var(--primary-color);
-    color: #1F2937;
+    color: var(--secondary-color);
 }
 
 .mat-mdc-progress-bar.mat-primary .mat-mdc-progress-bar-fill::after {
     background-color: var(--primary-color);
 }
 
+.mat-mdc-button.mat-accent,
+.mat-mdc-icon-button.mat-accent,
+.mat-mdc-stroked-button.mat-accent {
+    color: var(--secondary-color);
+}
 
-/* Custom button styles inspired by the reference design */
+.mat-mdc-raised-button.mat-accent,
+.mat-mdc-fab.mat-accent,
+.mat-mdc-mini-fab.mat-accent {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+
+/* Custom button styles - consolidated (no duplicates) */
 
 .btn-primary {
     @apply bg-primary text-secondary-800 font-medium py-2 px-4 rounded-md transition-colors;
@@ -90,16 +112,48 @@ body {
 }
 
 
-/* Custom button styles inspired by the reference design */
+/* Form input styles */
 
-.btn-primary {
-    @apply bg-primary text-secondary-800 font-medium py-2 px-4 rounded-md transition-colors;
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    @apply ring-primary border-primary;
 }
 
-.btn-secondary {
-    @apply bg-secondary-800 text-white font-medium py-2 px-4 rounded-md transition-colors;
+
+/* Checkbox and radio styling */
+
+.form-checkbox,
+.form-radio {
+    @apply text-primary;
 }
 
-.btn-outline {
-    @apply bg-transparent border border-gray-300 text-secondary-800 font-medium py-2 px-4 rounded-md transition-colors;
+
+/* Status indicators */
+
+.status-success {
+    @apply bg-green-100 text-green-800 border border-green-200 px-2 py-1 rounded;
+}
+
+.status-warning {
+    @apply bg-primary-100 text-secondary-800 border border-primary-300 px-2 py-1 rounded;
+}
+
+.status-error {
+    @apply bg-red-100 text-red-800 border border-red-200 px-2 py-1 rounded;
+}
+
+
+/* Input validation states */
+
+.input-valid {
+    @apply border-green-500;
+}
+
+.input-invalid {
+    @apply border-red-500;
+}
+
+.error-message {
+    @apply text-sm text-red-600 mt-1;
 }

@@ -1,0 +1,165 @@
+<div class="min-h-screen bg-gray-100">
+    <!-- Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center space-x-2 text-sm">
+                <a routerLink="/customer/dashboard" class="text-gray-600 hover:text-yellow-600">Dashboard</a>
+                <span class="text-gray-400">/</span>
+                <span class="text-gray-900 font-medium">Shopping Cart</span>
+            </div>
+            <h1 class="mt-2 text-2xl font-bold text-gray-900">Shopping Cart</h1>
+            <p class="mt-1 text-sm text-gray-600">{{ getTotalItems() }} item{{ getTotalItems() !== 1 ? 's' : '' }} in your cart</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+            <span class="ml-3 text-gray-600">Loading your cart...</span>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error && !isLoading" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700">{{ error }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty Cart -->
+        <div *ngIf="!isLoading && !cart?.items?.length" class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900">Your cart is empty</h3>
+            <p class="mt-1 text-sm text-gray-500">Start adding items to your cart to see them here.</p>
+            <div class="mt-6">
+                <button (click)="continueShopping()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                    Browse Products
+                </button>
+            </div>
+        </div>
+
+        <div *ngIf="!isLoading && cart?.items?.length" class="lg:grid lg:grid-cols-12 lg:gap-8">
+            <!-- Cart Items -->
+            <div class="lg:col-span-8">
+                <div class="bg-white shadow-sm rounded-lg">
+                    <ul class="divide-y divide-gray-200">
+                        <li *ngFor="let item of cart.items" class="p-6">
+                            <div class="flex items-center">
+                                <!-- Product Image -->
+                                <div class="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32">
+                                    <img alt [src]="getProductImageUrl(item)" [alt]="item.product.name" class="w-full h-full object-cover rounded-md">
+                                </div>
+
+                                <!-- Product Details -->
+                                <div class="ml-6 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-lg font-medium text-gray-900">
+                                                {{ item.product.name }}
+                                            </h3>
+                                            <p class="mt-1 text-sm text-gray-500">{{ item.product.description }}</p>
+                                        </div>
+                                        <p class="text-lg font-medium text-gray-900">
+                                            {{ formatCurrency(item.price * item.quantity) }}
+                                        </p>
+                                    </div>
+
+                                    <div class="mt-4 flex items-center justify-between">
+                                        <!-- Quantity Controls -->
+                                        <div class="flex items-center border rounded-md">
+                                            <button aria-label="button" (click)="updateQuantity(item.id, item.quantity - 1)" [disabled]="item.quantity <= 1" class="p-2 text-gray-600 hover:text-yellow-600 disabled:opacity-50">
+                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <span class="px-4 py-2 text-gray-900">{{ item.quantity }}</span>
+                                            <button aria-label="button" (click)="updateQuantity(item.id, item.quantity + 1)" class="p-2 text-gray-600 hover:text-yellow-600">
+                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <!-- Remove Button -->
+                                        <button (click)="removeItem(item.id)" class="text-sm font-medium text-red-600 hover:text-red-500">
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- Cart Actions -->
+                    <div class="p-6 bg-gray-50 border-t border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <button (click)="clearCart()" class="text-sm font-medium text-red-600 hover:text-red-500">
+                                Clear Cart
+                            </button>
+                            <button (click)="continueShopping()" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                Continue Shopping
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="mt-8 lg:mt-0 lg:col-span-4">
+                <div class="bg-white shadow-sm rounded-lg sticky top-4">
+                    <div class="p-6">
+                        <h2 class="text-lg font-medium text-gray-900">Order Summary</h2>
+
+                        <dl class="mt-6 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <dt class="text-sm text-gray-600">Subtotal</dt>
+                                <dd class="text-sm font-medium text-gray-900">{{ formatCurrency(getSubtotal()) }}</dd>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <dt class="text-sm text-gray-600">Shipping</dt>
+                                <dd class="text-sm font-medium text-gray-900">{{ formatCurrency(getShippingCost()) }}</dd>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <dt class="text-sm text-gray-600">Tax (16% VAT)</dt>
+                                <dd class="text-sm font-medium text-gray-900">{{ formatCurrency(getTax()) }}</dd>
+                            </div>
+
+                            <div class="border-t border-gray-200 pt-4 flex items-center justify-between">
+                                <dt class="text-base font-medium text-gray-900">Total</dt>
+                                <dd class="text-base font-medium text-yellow-600">{{ formatCurrency(getTotal()) }}</dd>
+                            </div>
+                        </dl>
+
+                        <div class="mt-6">
+                            <button (click)="proceedToCheckout()" class="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                Proceed to Checkout
+                            </button>
+                        </div>
+
+                        <div class="mt-6">
+                            <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                                <span>We Accept:</span>
+                                <span class="font-medium">M-Pesa</span>
+                                <span>•</span>
+                                <span class="font-medium">Card</span>
+                                <span>•</span>
+                                <span class="font-medium">Bank Transfer</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

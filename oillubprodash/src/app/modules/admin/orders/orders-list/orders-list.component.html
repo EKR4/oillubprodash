@@ -1,0 +1,229 @@
+<div class="container mx-auto p-4">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+    {{ error }}
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading" class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Orders</h1>
+      <div class="flex space-x-2">
+        <button (click)="clearFilters()" 
+                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white p-4 rounded-lg shadow">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Status Filter -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select [(ngModel)]="filters.status"
+                  (change)="applyFilters()"
+                  class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option [ngValue]="undefined">All Statuses</option>
+            <option *ngFor="let status of statusOptions" [value]="status">
+              {{ getStatusLabel(status) }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Date From -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+          <input type="date"
+                 [(ngModel)]="filters.dateFrom"
+                 (change)="applyFilters()"
+                 class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <!-- Date To -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+          <input type="date"
+                 [(ngModel)]="filters.dateTo"
+                 (change)="applyFilters()"
+                 class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <!-- Search -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Search Order #</label>
+          <input type="text"
+                 [(ngModel)]="filters.search"
+                 (keyup.enter)="applyFilters()"
+                 placeholder="Enter order number"
+                 class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" 
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  (click)="updateSort('order_number')">
+                Order #
+                <span *ngIf="sortField === 'order_number'" class="ml-1">
+                  {{ sortAscending ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th scope="col" 
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  (click)="updateSort('created_at')">
+                Date
+                <span *ngIf="sortField === 'created_at'" class="ml-1">
+                  {{ sortAscending ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Customer
+              </th>
+              <th scope="col" 
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  (click)="updateSort('total_amount')">
+                Amount
+                <span *ngIf="sortField === 'total_amount'" class="ml-1">
+                  {{ sortAscending ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let order of orders" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 cursor-pointer"
+                  (click)="viewOrderDetails(order.id)">
+                {{ order.order_number }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ order.created_at | date:'medium' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <div *ngIf="order.user">{{ order.user.full_name }}</div>
+                <div *ngIf="order.company" class="text-xs text-gray-400">{{ order.company.name }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ formatCurrency(order.total_amount, order.currency) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <select [ngModel]="order.status"
+                        (ngModelChange)="updateOrderStatus(order.id, $event)"
+                        [class]="'text-sm rounded-full px-3 py-1 ' + getStatusColor(order.status)">
+                  <option *ngFor="let status of statusOptions" [value]="status">
+                    {{ getStatusLabel(status) }}
+                  </option>
+                </select>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button (click)="viewOrderDetails(order.id)"
+                        class="text-blue-600 hover:text-blue-900">
+                  View Details
+                </button>
+              </td>
+            </tr>
+            <!-- Empty State -->
+            <tr *ngIf="orders.length === 0">
+              <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                No orders found
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button (click)="goToPage(currentPage - 1)"
+                    [disabled]="currentPage === 1"
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+              Previous
+            </button>
+            <button (click)="goToPage(currentPage + 1)"
+                    [disabled]="currentPage === totalPages"
+                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+              Next
+            </button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
+                to
+                <span class="font-medium">
+                  {{ Math.min(currentPage * pageSize, totalOrders) }}
+                </span>
+                of
+                <span class="font-medium">{{ totalOrders }}</span>
+                results
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <!-- First Page -->
+                <button (click)="goToPage(1)"
+                        [disabled]="currentPage === 1"
+                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
+                  <span class="sr-only">First</span>
+                  ⟪
+                </button>
+                <!-- Previous Page -->
+                <button (click)="goToPage(currentPage - 1)"
+                        [disabled]="currentPage === 1"
+                        class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
+                  <span class="sr-only">Previous</span>
+                  ⟨
+                </button>
+                <!-- Page Numbers -->
+                <button *ngFor="let page of [].constructor(totalPages); let i = index"
+                        (click)="goToPage(i + 1)"
+                        [class]="'relative inline-flex items-center px-4 py-2 border text-sm font-medium ' +
+                                (currentPage === i + 1 
+                                  ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50')">
+                  {{ i + 1 }}
+                </button>
+                <!-- Next Page -->
+                <button (click)="goToPage(currentPage + 1)"
+                        [disabled]="currentPage === totalPages"
+                        class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
+                  <span class="sr-only">Next</span>
+                  ⟩
+                </button>
+                <!-- Last Page -->
+                <button (click)="goToPage(totalPages)"
+                        [disabled]="currentPage === totalPages"
+                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
+                  <span class="sr-only">Last</span>
+                  ⟫
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

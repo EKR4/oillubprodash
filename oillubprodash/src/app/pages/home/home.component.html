@@ -1,22 +1,22 @@
 <div class="bg-white">
     <!-- Hero Section -->
-    <div class="relative bg-indigo-800">
+    <div class="relative bg-secondary">
         <div class="absolute inset-0">
             <img class="w-full h-full object-cover" src="assets/images/hero-bg.jpg" alt="Hero Background">
-            <div class="absolute inset-0 bg-indigo-800 mix-blend-multiply"></div>
+            <div class="absolute inset-0 bg-secondary mix-blend-multiply"></div>
         </div>
         <div class="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
             <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
                 Premium Lubricants for Peak Performance
             </h1>
-            <p class="mt-6 text-xl text-indigo-100 max-w-3xl">
+            <p class="mt-6 text-xl text-primary-100 max-w-3xl">
                 Delivering high-quality lubricants and expert technical support to keep your machinery running at its best.
             </p>
             <div class="mt-10 flex space-x-4">
-                <a routerLink="/products" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400">
+                <a routerLink="/products" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-secondary bg-primary hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
           View Products
         </a>
-                <a routerLink="/contact" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <a routerLink="/contact" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-white hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
           Contact Us
         </a>
             </div>
@@ -66,7 +66,7 @@
                         </div>
                         <div class="mt-6 flex items-center justify-between">
                             <span class="text-xl font-bold text-gray-900">{{ formatPrice(product.price) }}</span>
-                            <a [routerLink]="['/products', product.id]" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                            <a [routerLink]="['/products', product.id]" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-secondary bg-primary hover:bg-primary-600">
                 Learn More
               </a>
                         </div>
@@ -88,7 +88,7 @@
 
             <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
                 <div *ngFor="let feature of features" class="relative">
-                    <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                    <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-primary text-secondary">
                         <img alt="" [src]="getFeatureIcon(feature.icon)" [alt]="feature.title" [title]="feature.description" class="h-6 w-6">
                     </div>
                     <div class="ml-16">
@@ -113,7 +113,7 @@
             <div class="mt-12 grid gap-8 md:grid-cols-3">
                 <div *ngFor="let testimonial of testimonials" class="bg-white rounded-lg shadow-lg overflow-hidden">
                     <div class="p-6">
-                        <div class="text-indigo-600">
+                        <div class="text-primary">
                             <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
               </svg>
@@ -156,16 +156,16 @@
     </div>
 
     <!-- CTA Section -->
-    <div class="bg-indigo-700">
+    <div class="bg-secondary-700">
         <div class="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
             <h2 class="text-3xl font-extrabold text-white sm:text-4xl">
                 <span class="block">Ready to optimize your operations?</span>
                 <span class="block">Start with LubriMax today.</span>
             </h2>
-            <p class="mt-4 text-lg leading-6 text-indigo-200">
+            <p class="mt-4 text-lg leading-6 text-primary-100">
                 Join the growing number of businesses trusting LubriMax for their lubrication needs.
             </p>
-            <a routerLink="/contact" class="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto">
+            <a routerLink="/contact" class="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-secondary bg-primary hover:bg-primary-600 sm:w-auto">
         Get Started
       </a>
         </div>

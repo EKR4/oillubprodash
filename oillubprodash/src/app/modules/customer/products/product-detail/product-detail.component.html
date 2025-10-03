@@ -1,0 +1,522 @@
+<div class="min-h-screen bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Back Button -->
+        <button (click)="backToProducts()" class="flex items-center text-gray-600 hover:text-yellow-600 mb-6 transition-colors duration-200" aria-label="Back to products">
+      <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back to Products
+    </button>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center items-center py-16">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-500"></div>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-6">
+            <div class="flex items-center">
+                <svg class="h-6 w-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+                <p class="text-red-700">{{ error }}</p>
+            </div>
+        </div>
+
+        <!-- Product Content -->
+        <div *ngIf="product && !isLoading" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Product Images -->
+            <div class="space-y-4">
+                <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                    <img alt [src]="getProductImage(product)" [alt]="product.name" class="w-full h-96 object-cover">
+                </div>
+
+                <!-- Technical Documents -->
+                <div class="flex space-x-4">
+                    <a *ngIf="product.technical_data_url" [href]="product.technical_data_url" target="_blank" class="flex-1 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg transition duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg> Technical Data Sheet
+                    </a>
+                    <a *ngIf="product.safety_data_url" [href]="product.safety_data_url" target="_blank" class="flex-1 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg transition duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg> Safety Data Sheet
+                    </a>
+                </div>
+
+                <!-- Certifications -->
+                <div *ngIf="hasKebsCertification() || hasIsoCertification()" class="flex space-x-4">
+                    <div *ngIf="hasKebsCertification()" class="flex items-center bg-yellow-50 text-yellow-800 px-4 py-2 rounded-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg> KEBS Certified
+                    </div>
+                    <div *ngIf="hasIsoCertification()" class="flex items-center bg-green-50 text-green-800 px-4 py-2 rounded-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg> ISO Certified
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="space-y-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ product.name }}</h1>
+                    <p class="text-lg text-gray-600 mt-2">{{ product.brand }}</p>
+                </div>
+
+                <!-- Package Selection -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Select Package Size</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button *ngFor="let pkg of product.packages" (click)="selectPackage(pkg)" [class.border-yellow-500]="isPackageSelected(pkg)" class="border-2 rounded-lg p-4 text-left hover:border-yellow-400 transition-colors duration-200">
+              <div class="font-medium text-gray-900">{{ pkg.size }}</div>
+              <div class="text-sm text-gray-500">{{ formatCurrency(pkg.unit_price) }}</div>
+            </button>
+                    </div>
+
+                    <!-- Quantity Selection -->
+                    <div class="mt-6 flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-700">Quantity:</label>
+                        <div class="flex items-center space-x-4">
+                            <button (click)="decrementQuantity()" [disabled]="quantity <= 1" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50" aria-label="Decrease quantity" title="Decrease quantity">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                </svg>
+              </button>
+                            <span class="text-lg font-medium text-gray-900">{{ quantity }}</span>
+                            <button (click)="incrementQuantity()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200" aria-label="Increase quantity" title="Increase quantity">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+              </button>
+                        </div>
+                    </div>
+
+                    <!-- Add to Cart Button -->
+                    <button (click)="addToCart()" [disabled]="!selectedPackage" class="w-full mt-6 bg-yellow-500 text-black py-3 px-6 rounded-lg font-semibold hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            Add to Cart
+          </button>
+                </div>
+
+                <!-- Product Details Tabs -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <!-- Tab Headers -->
+                    <div class="flex border-b border-gray-200">
+                        <button *ngFor="let tab of ['description', 'specifications', 'reviews']" (click)="setActiveTab(tab)" [class.border-yellow-500]="activeTab === tab" [class.text-yellow-600]="activeTab === tab" class="flex-1 py-4 px-6 text-sm font-medium text-gray-700 hover:text-yellow-600 border-b-2 border-transparent transition-colors duration-200">
+              {{ tab | titlecase }}
+            </button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="p-6">
+                        <!-- Description Tab -->
+                        <div *ngIf="activeTab === 'description'" class="prose max-w-none">
+                            <p class="text-gray-600">{{ product.description }}</p>
+
+                            <div *ngIf="product.benefits?.length" class="mt-6">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Key Benefits</h4>
+                                <ul class="list-disc pl-5 space-y-2">
+                                    <li *ngFor="let benefit of product.benefits" class="text-gray-600">{{ benefit }}</li>
+                                </ul>
+                            </div>
+
+                            <div *ngIf="product.recommended_for?.length" class="mt-6">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Recommended For</h4>
+                                <ul class="list-disc pl-5 space-y-2">
+                                    <li *ngFor="let recommendation of product.recommended_for" class="text-gray-600">{{ recommendation }}</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Specifications Tab -->
+                        <div *ngIf="activeTab === 'specifications'" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Base Properties -->
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-3">Base Properties</h4>
+                                    <dl class="space-y-2">
+                                        <div class="flex justify-between">
+                                            <dt class="text-gray-600">Base Oil Type</dt>
+                                            <dd class="font-medium text-gray-900">{{ product.specifications.base_oil_type | titlecase }}</dd>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <dt class="text-gray-600">Viscosity Grade</dt>
+                                            <dd class="font-medium text-gray-900">{{ product.viscosity_grade }}</dd>
+                                        </div>
+                                        <div *ngIf="product.specifications.viscosity_index" class="flex justify-between">
+                                            <dt class="text-gray-600">Viscosity Index</dt>
+                                            <dd class="font-medium text-gray-900">{{ product.specifications.viscosity_index }}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+
+                                <!-- Performance Specifications -->
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-3">Performance</h4>
+                                    <dl class="space-y-2">
+                                        <div *ngIf="product.specifications.api_classification" class="flex justify-between">
+                                            <dt class="text-gray-600">API Classification</dt>
+                                            <dd class="font-medium text-gray-900">{{ product.specifications.api_classification }}</dd>
+                                        </div>
+                                        <div *ngIf="product.specifications.acea_classification" class="flex justify-between">
+                                            <dt class="text-gray-600">ACEA Classification</dt>
+                                            <dd class="font-medium text-gray-900">{{ product.specifications.acea_classification }}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            </div>
+
+                            <!-- Certifications -->
+                            <div *ngIf="product.certifications?.length" class="mt-6">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">Certifications</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div *ngFor="let cert of product.certifications" class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="font-medium text-gray-900">{{ cert.certification_type }}</div>
+                                        <div class="text-sm text-gray-600">{{ cert.issuing_body }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reviews Tab -->
+                        <div *ngIf="activeTab === 'reviews'" class="text-center py-8">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No reviews yet</h3>
+                            <p class="mt-1 text-sm text-gray-500">Be the first to review this product</p>
+                            <div class="mt-6">
+                                <button class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                  Write a review
+                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <div *ngIf="relatedProducts.length > 0" class="mt-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div *ngFor="let product of relatedProducts" class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100" (click)="viewProduct(product.id)">
+                    <img alt [src]="getProductImage(product)" [alt]="product.name" [title]="product.name" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ product.name }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">{{ product.brand }}</p>
+                        <div class="mt-4 flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-900">{{ getMinPrice(product) | currency:'KES':'symbol-narrow':'1.0-0' }}</span>
+                            <span class="text-sm text-gray-500">{{ product.viscosity_grade }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</svg>
+</div>
+<span class="text-gray-600 ml-2">(25 reviews)</span>
+</div>
+</div>
+
+<!-- Package Selection -->
+<div class="mb-6">
+    <h2 class="text-lg font-semibold mb-3">Available Package Sizes</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <button *ngFor="let pkg of product.packages" (click)="selectPackage(pkg)" [ngClass]="{
+                'bg-yellow-100 border-yellow-500': isPackageSelected(pkg),
+                'opacity-50 cursor-not-allowed': !isPackageInStock(pkg)
+              }" [disabled]="!isPackageInStock(pkg)" class="border rounded-md p-3 text-center transition hover:border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500" [title]="isPackageInStock(pkg) ? pkg.size + ' - ' + getFormattedPrice(pkg) : 'Out of stock'">
+              <p class="font-medium">{{ pkg.size }}</p>
+              <p class="text-yellow-600 font-bold mt-1">{{ getFormattedPrice(pkg) }}</p>
+              <p class="text-xs mt-1">
+                <span *ngIf="isPackageInStock(pkg)" class="text-green-600">In Stock ({{ pkg.stock_level }})</span>
+                <span *ngIf="!isPackageInStock(pkg)" class="text-red-600">Out of Stock</span>
+              </p>
+            </button>
+    </div>
+</div>
+
+<!-- Quantity Selector -->
+<div class="mb-6" *ngIf="selectedPackage">
+    <h2 class="text-lg font-semibold mb-3">Quantity</h2>
+    <div class="flex items-center">
+        <button (click)="decrementQuantity()" [disabled]="quantity <= 1" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-l focus:outline-none focus:ring-2 focus:ring-yellow-500" [ngClass]="{'opacity-50 cursor-not-allowed': quantity <= 1}"
+            title="Decrease quantity" aria-label="Decrease quantity">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+              </svg>
+            </button>
+
+        <span class="bg-gray-100 text-gray-800 font-medium py-2 px-4 border-t border-b border-gray-200">
+              {{ quantity }}
+            </span>
+
+        <button (click)="incrementQuantity()" [disabled]="selectedPackage && quantity >= selectedPackage.stock_level" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-r focus:outline-none focus:ring-2 focus:ring-yellow-500" [ngClass]="{'opacity-50 cursor-not-allowed': selectedPackage && quantity >= selectedPackage.stock_level}"
+            title="Increase quantity" aria-label="Increase quantity">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+
+        <div class="ml-4 text-gray-600">
+            <span *ngIf="selectedPackage && selectedPackage.stock_level > 10">
+                {{ selectedPackage.stock_level }}+ available
+              </span>
+            <span *ngIf="selectedPackage && selectedPackage.stock_level <= 10 && selectedPackage.stock_level > 0" class="text-orange-600">
+                Only {{ selectedPackage.stock_level }} left in stock!
+              </span>
+        </div>
+    </div>
+</div>
+
+<!-- Add to Cart Button -->
+<div class="mb-6" *ngIf="selectedPackage">
+    <div class="flex flex-col sm:flex-row gap-3">
+        <button (click)="addToCart()" [disabled]="!isPackageInStock(selectedPackage)" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-md transition flex-1 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            [ngClass]="{'opacity-50 cursor-not-allowed': !isPackageInStock(selectedPackage)}" title="Add to cart" aria-label="Add to cart">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Add to Cart
+            </button>
+
+        <button (click)="addToFavorites()" class="border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-bold py-3 px-6 rounded-md transition focus:outline-none focus:ring-2 focus:ring-gray-500" title="Add to favorites" aria-label="Add to favorites">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+    </div>
+</div>
+
+<!-- Quick Specs -->
+<div class="bg-gray-50 p-4 rounded-md mb-6">
+    <h2 class="text-lg font-semibold mb-3">Quick Specifications</h2>
+    <div class="grid grid-cols-2 gap-3">
+        <div *ngIf="product.specifications?.viscosity_grade">
+            <p class="text-sm text-gray-500">Viscosity Grade</p>
+            <p class="font-medium">{{ product.specifications.viscosity_grade }}</p>
+        </div>
+        <div *ngIf="product.specifications?.base_type">
+            <p class="text-sm text-gray-500">Base Type</p>
+            <p class="font-medium">{{ product.specifications.base_type }}</p>
+        </div>
+        <div *ngIf="product.specifications?.application">
+            <p class="text-sm text-gray-500">Application</p>
+            <p class="font-medium">{{ product.specifications.application }}</p>
+        </div>
+        <div *ngIf="product.specifications?.performance_level">
+            <p class="text-sm text-gray-500">Performance Level</p>
+            <p class="font-medium">{{ product.specifications.performance_level }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Certifications -->
+<div *ngIf="hasKebsCertification() || hasIsoCertification()">
+    <div class="flex flex-wrap gap-2">
+        <span *ngIf="hasKebsCertification()" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              KEBS Certified
+            </span>
+        <span *ngIf="hasIsoCertification()" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              ISO Certified
+            </span>
+    </div>
+</div>
+</div>
+</div>
+
+<!-- Product Tabs -->
+<div class="border-t border-gray-200 mt-6">
+    <div class="flex border-b">
+        <button (click)="setActiveTab('description')" [ngClass]="{'border-yellow-500 text-yellow-600': activeTab === 'description', 'border-transparent': activeTab !== 'description'}" class="py-4 px-6 border-b-2 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            title="Description" aria-label="View product description">
+          Description
+        </button>
+        <button (click)="setActiveTab('specifications')" [ngClass]="{'border-yellow-500 text-yellow-600': activeTab === 'specifications', 'border-transparent': activeTab !== 'specifications'}" class="py-4 px-6 border-b-2 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            title="Specifications" aria-label="View product specifications">
+          Specifications
+        </button>
+        <button (click)="setActiveTab('reviews')" [ngClass]="{'border-yellow-500 text-yellow-600': activeTab === 'reviews', 'border-transparent': activeTab !== 'reviews'}" class="py-4 px-6 border-b-2 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            title="Reviews" aria-label="View product reviews">
+          Reviews
+        </button>
+    </div>
+
+    <!-- Description Tab Content -->
+    <div *ngIf="activeTab === 'description'" class="p-6">
+        <div class="prose max-w-none">
+            <p>{{ product.description }}</p>
+
+            <h3 class="text-lg font-semibold mt-6 mb-3">Key Benefits</h3>
+            <ul class="list-disc pl-5 space-y-2">
+                <li *ngFor="let benefit of product.benefits">{{ benefit }}</li>
+            </ul>
+
+            <h3 class="text-lg font-semibold mt-6 mb-3">Recommended For</h3>
+            <ul class="list-disc pl-5 space-y-2">
+                <li *ngFor="let recommendation of product.recommended_for">{{ recommendation }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Specifications Tab Content -->
+    <div *ngIf="activeTab === 'specifications'" class="p-6">
+        <div class="prose max-w-none">
+            <h3 class="text-lg font-semibold mb-4">Technical Specifications</h3>
+
+            <div class="bg-gray-50 rounded-lg overflow-hidden mb-6">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-200">
+                        <tr *ngIf="product.specifications?.viscosity_grade">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-100">
+                                Viscosity Grade
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ product.specifications.viscosity_grade }}
+                            </td>
+                        </tr>
+                        <tr *ngIf="product.specifications?.base_type">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-100">
+                                Base Type
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ product.specifications.base_type }}
+                            </td>
+                        </tr>
+                        <tr *ngIf="product.specifications?.density">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-100">
+                                Density
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ product.specifications.density }}
+                            </td>
+                        </tr>
+                        <tr *ngIf="product.specifications?.flash_point">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-100">
+                                Flash Point
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ product.specifications.flash_point }}
+                            </td>
+                        </tr>
+                        <tr *ngIf="product.specifications?.pour_point">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-100">
+                                Pour Point
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ product.specifications.pour_point }}
+                            </td>
+                        </tr>
+                        <tr *ngIf="product.specifications?.viscosity_index">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-100">
+                                Viscosity Index
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ product.specifications.viscosity_index }}
+                            </td>
+                        </tr>
+                        <tr *ngIf="product.specifications?.application">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-100">
+                                Application
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ product.specifications.application }}
+                            </td>
+                        </tr>
+                        <tr *ngIf="product.specifications?.performance_level">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-100">
+                                Performance Level
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ product.specifications.performance_level }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- OEM Approvals -->
+            <div *ngIf="getOEMApprovalsList().length > 0">
+                <h3 class="text-lg font-semibold mb-3">OEM Approvals</h3>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span *ngFor="let approval of getOEMApprovalsList()" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                {{ approval }}
+              </span>
+                </div>
+            </div>
+
+            <!-- Safety Data -->
+            <div *ngIf="product.specifications?.safety_data_url">
+                <h3 class="text-lg font-semibold mb-3">Safety Information</h3>
+                <a [href]="product.specifications.safety_data_url" target="_blank" class="inline-flex items-center text-yellow-600 hover:text-yellow-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg> Download Safety Data Sheet (SDS)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Tab Content -->
+    <div *ngIf="activeTab === 'reviews'" class="p-6">
+        <div class="prose max-w-none">
+            <h3 class="text-lg font-semibold mb-4">Customer Reviews</h3>
+
+            <!-- Review Feature to be implemented -->
+            <div class="bg-gray-50 p-6 rounded-lg text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+                <h4 class="text-lg font-medium text-gray-900 mb-2">Review Feature Coming Soon</h4>
+                <p class="text-gray-600">We're working on adding customer reviews for this product.</p>
+                <button class="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-md transition">
+              Be the first to review
+            </button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Related Products -->
+<div *ngIf="relatedProducts.length > 0 && !isLoading" class="mt-12">
+    <h2 class="text-2xl font-bold mb-6">Related Products</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div *ngFor="let relatedProduct of relatedProducts" class="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-xl hover:translate-y-[-5px]">
+            <a [routerLink]="['/customer/products', relatedProduct.id]" class="block">
+                <img alt="" [src]="getProductImage(relatedProduct)" [alt]="relatedProduct.name" [title]="relatedProduct.name" class="w-full h-48 object-cover">
+            </a>
+            <div class="p-4">
+                <a [routerLink]="['/customer/products', relatedProduct.id]" class="block">
+                    <h3 class="text-lg font-semibold text-gray-900 hover:text-yellow-600">{{ relatedProduct.name }}</h3>
+                </a>
+                <p class="text-yellow-600 font-bold mt-2">{{ getFormattedPrice(relatedProduct.packages[0]) }}</p>
+                <div class="mt-4 flex justify-between">
+                    <button (click)="addToCart()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm transition">Add to Cart</button>
+                    <button (click)="addToFavorites()" title="Add to favorites" aria-label="Add to favorites" class="border border-gray-300 hover:border-gray-400 text-gray-700 px-4 py-2 rounded-md text-sm transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

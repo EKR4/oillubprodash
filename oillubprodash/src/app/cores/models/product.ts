@@ -11,6 +11,7 @@ export interface Product {
   brand: string;
   category: ProductCategory;
   viscosity_grade: ViscosityGrade;
+  company_id?: string; // Reference to company that owns this product
   image_url?: string;
   technical_data_url?: string;
   safety_data_url?: string;

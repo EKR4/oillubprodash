@@ -1,0 +1,82 @@
+<div class="min-h-screen bg-gray-100">
+    <!-- Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center space-x-2 text-sm">
+                <a routerLink="/customer/dashboard" class="text-gray-600 hover:text-yellow-600">Dashboard</a>
+                <span class="text-gray-400">/</span>
+                <span class="text-gray-900 font-medium">Favorites</span>
+            </div>
+            <h1 class="mt-2 text-2xl font-bold text-gray-900">My Favorites</h1>
+            <p class="mt-1 text-sm text-gray-600">{{ favorites.length }} saved item{{ favorites.length !== 1 ? 's' : '' }}</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-spinner">
+            <div class="spinner"></div>
+            <span class="ml-3">Loading your favorites...</span>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error && !isLoading" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-red-700">{{ error }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && favorites.length === 0" class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <h3>No favorites yet</h3>
+            <p>Start adding products to your favorites to see them here.</p>
+            <a routerLink="/customer/products" class="action-button mt-6">
+                Browse Products
+            </a>
+        </div>
+
+        <!-- Favorites Grid -->
+        <div *ngIf="!isLoading && favorites.length > 0" class="favorites-grid">
+            <!-- Product Card -->
+            <div *ngFor="let product of favorites" class="product-card">
+                <!-- Product Image -->
+                <div class="image-container">
+                    <img alt [src]="product.image_url" [alt]="product.name">
+
+                    <!-- Remove from Favorites Button -->
+                    <button (click)="removeFromFavorites(product.id)" class="favorite-button" title="Remove from favorites">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Product Details -->
+                <div class="product-details">
+                    <h3 (click)="viewProduct(product.id)">{{ product.name }}</h3>
+                    <p>{{ product.description }}</p>
+
+                    <div class="actions">
+                        <span class="price">{{ formatCurrency(product.price) }}</span>
+                        <button (click)="addToCart(product)" class="action-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
