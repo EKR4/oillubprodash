@@ -1,1 +1,130 @@
-<p>sales-reports works!</p>
+<div class="sales-reports-container">
+    <header class="reports-header">
+        <h1>Sales Analytics</h1>
+
+        <div class="controls">
+            <div class="time-range">
+                <button *ngFor="let range of ['7', '30', '90', '365']" [class.active]="timeRangeControl.value === range" (click)="updateTimeRange(range)">
+          {{ range === '365' ? 'Year' : range + ' Days' }}
+        </button>
+            </div>
+
+            <div class="category-filter">
+                <button *ngFor="let category of ['all', 'oils', 'lubricants', 'filters']" [class.active]="categoryControl.value === category" (click)="updateCategory(category)">
+          {{ category | titlecase }}
+        </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="metrics-grid">
+        <div class="metric-card revenue">
+            <div class="metric-value">{{ formatCurrency(metrics.totalRevenue) }}</div>
+            <div class="metric-label">Total Revenue</div>
+            <div class="metric-detail">{{ metrics.totalOrders }} orders</div>
+        </div>
+
+        <div class="metric-card profit">
+            <div class="metric-value">{{ formatCurrency(metrics.grossProfit) }}</div>
+            <div class="metric-label">Gross Profit</div>
+            <div class="metric-detail">{{ formatPercent(metrics.profitMargin) }} margin</div>
+        </div>
+
+        <div class="metric-card average">
+            <div class="metric-value">{{ formatCurrency(metrics.averageOrderValue) }}</div>
+            <div class="metric-label">Average Order Value</div>
+            <div class="metric-detail">+5.2% vs last period</div>
+        </div>
+
+        <div class="metric-card returns">
+            <div class="metric-value">{{ metrics.canceledOrders }}</div>
+            <div class="metric-label">Canceled Orders</div>
+            <div class="metric-detail">{{ formatPercent(metrics.returnRate) }} return rate</div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card full-width">
+            <h3>Sales Trend</h3>
+            <div class="chart-container">
+                <!-- Line chart will be rendered here -->
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Sales by Category</h3>
+            <div class="categories-list">
+                <div class="category-item" *ngFor="let category of salesByCategory">
+                    <div class="category-header">
+                        <span class="category-name">{{ category.category }}</span>
+                        <span class="category-growth" [class]="getGrowthClass(category.growth)">
+              {{ category.growth > 0 ? '+' : '' }}{{ formatPercent(category.growth) }}
+            </span>
+                    </div>
+                    <div class="category-metrics">
+                        <div class="metric">
+                            <span class="value">{{ formatCurrency(category.revenue) }}</span>
+                            <span class="label">Revenue</span>
+                        </div>
+                        <div class="metric">
+                            <span class="value">{{ category.orders }}</span>
+                            <span class="label">Orders</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Sales Channels</h3>
+            <div class="channels-list">
+                <div class="channel-item" *ngFor="let channel of salesChannels; let i = index">
+                    <div class="channel-info">
+                        <span class="channel-name">{{ channel.name }}</span>
+                        <span class="channel-value">{{ formatCurrency(channel.revenue) }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" [style.width.%]="channel.percentage" [style.background-color]="getChannelColor(i)">
+                        </div>
+                    </div>
+                    <div class="channel-details">
+                        <span>{{ channel.orders }} orders</span>
+                        <span>{{ formatPercent(channel.percentage) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <h3>Top Performing Products</h3>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Units Sold</th>
+                        <th>Revenue</th>
+                        <th>Profit</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let product of topProducts">
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.sku }}</td>
+                        <td>{{ product.unitsSold | number }}</td>
+                        <td>{{ formatCurrency(product.revenue) }}</td>
+                        <td>{{ formatCurrency(product.profit) }}</td>
+                        <td>
+                            <span [class]="getGrowthClass(product.trend)">
+                {{ product.trend > 0 ? '+' : '' }}{{ formatPercent(product.trend) }}
+              </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

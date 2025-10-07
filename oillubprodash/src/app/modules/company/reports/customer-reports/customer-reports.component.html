@@ -1,1 +1,103 @@
-<p>customer-reports works!</p>
+<div class="reports-container">
+    <header class="reports-header">
+        <h1>Customer Analytics</h1>
+
+        <div class="controls">
+            <div class="time-range">
+                <button *ngFor="let range of ['7', '30', '90', '365']" [class.active]="timeRangeControl.value === range" (click)="updateTimeRange(range)">
+          {{ range === '365' ? 'Year' : range + ' Days' }}
+        </button>
+            </div>
+
+            <div class="segment-filter">
+                <button *ngFor="let segment of ['all', 'wholesale', 'retail']" [class.active]="segmentControl.value === segment" (click)="updateSegment(segment)">
+          {{ segment | titlecase }}
+        </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-value">{{ metrics.totalCustomers | number }}</div>
+            <div class="metric-label">Total Customers</div>
+            <div class="metric-change positive">+{{ metrics.newCustomers }} new</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">{{ metrics.activeCustomers | number }}</div>
+            <div class="metric-label">Active Customers</div>
+            <div class="metric-change">{{ formatPercent(metrics.activeCustomers / metrics.totalCustomers * 100) }} active rate</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">{{ formatCurrency(metrics.averageOrderValue) }}</div>
+            <div class="metric-label">Average Order Value</div>
+            <div class="metric-change positive">+5.2% vs last period</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">{{ formatPercent(metrics.churnRate) }}</div>
+            <div class="metric-label">Churn Rate</div>
+            <div class="metric-change negative">+0.5% vs last period</div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card full-width">
+            <h3>Customer Growth Trend</h3>
+            <div class="chart-container">
+                <!-- Line chart will be rendered here -->
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Customer Segmentation</h3>
+            <div class="chart-container">
+                <!-- Pie chart will be rendered here -->
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Revenue by Segment</h3>
+            <div class="chart-container">
+                <!-- Multi-line chart will be rendered here -->
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Customer Retention</h3>
+            <div class="chart-container">
+                <!-- Bar chart will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <h3>Top Performing Customers</h3>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Orders</th>
+                        <th>Revenue</th>
+                        <th>Growth</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let customer of topCustomers">
+                        <td>{{ customer.name }}</td>
+                        <td>{{ customer.orders }}</td>
+                        <td>{{ formatCurrency(customer.revenue) }}</td>
+                        <td>
+                            <span [class.positive]="customer.growth > 0" [class.negative]="customer.growth < 0">
+                {{ customer.growth > 0 ? '+' : '' }}{{ customer.growth }}%
+              </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,1 +1,132 @@
-<p>reports-dashboard works!</p>
+<div class="reports-dashboard" *ngIf="!isLoading && salesMetrics && inventoryMetrics; else loading">
+    <div class="header">
+        <h1>Reports & Analytics</h1>
+        <div class="date-range">
+            <select [formControl]="dateRange" class="range-select">
+        <option *ngFor="let option of dateRangeOptions" [value]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+        </div>
+    </div>
+
+    <div class="metrics-grid">
+        <div class="metric-card sales">
+            <div class="card-header">
+                <h3>Total Sales</h3>
+                <i class="fas fa-chart-line" aria-hidden="true"></i>
+            </div>
+            <div class="value">{{ formatCurrency(salesMetrics.total) }}</div>
+            <div class="growth positive">
+                <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                <span>12.5% vs last period</span>
+            </div>
+        </div>
+
+        <div class="metric-card orders">
+            <div class="card-header">
+                <h3>Orders</h3>
+                <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+            </div>
+            <div class="value">{{ salesMetrics.orderCount }}</div>
+            <div class="growth positive">
+                <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                <span>8.2% vs last period</span>
+            </div>
+        </div>
+
+        <div class="metric-card avg-order">
+            <div class="card-header">
+                <h3>Average Order Value</h3>
+                <i class="fas fa-dollar-sign" aria-hidden="true"></i>
+            </div>
+            <div class="value">{{ formatCurrency(salesMetrics.averageOrderValue) }}</div>
+            <div class="growth positive">
+                <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                <span>4.1% vs last period</span>
+            </div>
+        </div>
+
+        <div class="metric-card inventory">
+            <div class="card-header">
+                <h3>Inventory Value</h3>
+                <i class="fas fa-warehouse" aria-hidden="true"></i>
+            </div>
+            <div class="value">{{ formatCurrency(inventoryMetrics.value) }}</div>
+            <div class="status-indicators">
+                <span class="status warning">
+          {{ inventoryMetrics.lowStock }} Low Stock
+        </span>
+                <span class="status danger">
+          {{ inventoryMetrics.outOfStock }} Out of Stock
+        </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card revenue-chart">
+            <h3>Monthly Revenue</h3>
+            <div class="chart-container">
+                <!-- TODO: Implement actual chart -->
+                <div class="placeholder-chart">
+                    <div *ngFor="let data of salesMetrics.monthlyRevenue" class="bar" [style.height]="(data.revenue / 25000 * 100) + '%'">
+                        <span class="value">{{ formatCurrency(data.revenue) }}</span>
+                        <span class="label">{{ data.month }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card top-products">
+            <h3>Top Products</h3>
+            <div class="products-list">
+                <div class="product-item" *ngFor="let product of salesMetrics.topProducts">
+                    <div class="product-info">
+                        <span class="name">{{ product.name }}</span>
+                        <span class="sales">{{ product.sales }} sales</span>
+                    </div>
+                    <div class="revenue">
+                        {{ formatCurrency(product.revenue) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card inventory-categories">
+            <h3>Inventory by Category</h3>
+            <div class="categories-list">
+                <div class="category-item" *ngFor="let category of inventoryMetrics.topCategories">
+                    <div class="category-info">
+                        <span class="name">{{ category.name }}</span>
+                        <span class="count">{{ category.count }} items</span>
+                    </div>
+                    <div class="value">
+                        {{ formatCurrency(category.value) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-actions">
+        <button class="btn secondary" title="Download Sales Report">
+      <i class="fas fa-download" aria-hidden="true"></i>
+      <span>Sales Report</span>
+    </button>
+        <button class="btn secondary" title="Download Inventory Report">
+      <i class="fas fa-download" aria-hidden="true"></i>
+      <span>Inventory Report</span>
+    </button>
+        <button class="btn secondary" title="Download Financial Report">
+      <i class="fas fa-download" aria-hidden="true"></i>
+      <span>Financial Report</span>
+    </button>
+    </div>
+</div>
+
+<ng-template #loading>
+    <div class="loading">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading reports data...
+    </div>
+</ng-template>

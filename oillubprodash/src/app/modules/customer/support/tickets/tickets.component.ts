@@ -11,7 +11,7 @@ import { TicketService } from '../../../../shared/services/ticket.service';
 })
 export class TicketsComponent implements OnInit {
   tickets$: Observable<Ticket[]>;
-  filteredTickets$: Observable<Ticket[]>;
+  filteredTickets$!: Observable<Ticket[]>;
   isLoading = true;
 
   // Filters

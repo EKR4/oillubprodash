@@ -1,1 +1,119 @@
-<p>inventory-reports works!</p>
+<div class="inventory-reports-container">
+    <header class="reports-header">
+        <h1>Inventory Analytics</h1>
+
+        <div class="controls">
+            <div class="time-range">
+                <button *ngFor="let range of ['7', '30', '90', '365']" [class.active]="timeRangeControl.value === range" (click)="updateTimeRange(range)">
+          {{ range === '365' ? 'Year' : range + ' Days' }}
+        </button>
+            </div>
+
+            <div class="category-filter">
+                <button *ngFor="let category of ['all', 'oils', 'lubricants', 'filters']" [class.active]="categoryControl.value === category" (click)="updateCategory(category)">
+          {{ category | titlecase }}
+        </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-value">{{ metrics.totalProducts | number }}</div>
+            <div class="metric-label">Total Products</div>
+            <div class="metric-detail">{{ metrics.lowStockItems }} low stock items</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">{{ formatCurrency(metrics.totalValue) }}</div>
+            <div class="metric-label">Inventory Value</div>
+            <div class="metric-detail">{{ metrics.outOfStockItems }} out of stock</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">{{ metrics.avgTurnoverRate.toFixed(1) }}</div>
+            <div class="metric-label">Avg. Turnover Rate</div>
+            <div class="metric-detail">{{ metrics.fastMovingItems }} fast-moving items</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">{{ metrics.deadStock }}</div>
+            <div class="metric-label">Dead Stock Items</div>
+            <div class="metric-detail negative">No movement in 90 days</div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card full-width">
+            <h3>Stock Level Trends</h3>
+            <div class="chart-container">
+                <!-- Line chart will be rendered here -->
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Stock Distribution</h3>
+            <div class="chart-container">
+                <!-- Pie chart will be rendered here -->
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Stock Alerts</h3>
+            <div class="alerts-container">
+                <div class="alert-card" *ngFor="let alert of stockAlerts">
+                    <div class="alert-header">
+                        <span class="status-badge" [class]="getStatusColor(alert.status)">
+              {{ alert.status | titlecase }}
+            </span>
+                        <span class="days-until-stockout" [class]="getDaysUntilStockoutColor(alert.daysUntilStockout)">
+              {{ alert.daysUntilStockout }} days until stockout
+            </span>
+                    </div>
+                    <div class="product-name">{{ alert.productName }}</div>
+                    <div class="stock-info">
+                        <div>Current: {{ alert.currentStock }}</div>
+                        <div>Reorder at: {{ alert.reorderPoint }}</div>
+                    </div>
+                    <button class="reorder-btn" [routerLink]="['/company/inventory/products', alert.productId]">
+            View Product
+          </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <h3>Top Performing Products</h3>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Stock Level</th>
+                        <th>Turnover Rate</th>
+                        <th>Revenue</th>
+                        <th>Profit</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let product of topPerformers">
+                        <td>{{ product.productName }}</td>
+                        <td>{{ product.sku }}</td>
+                        <td>{{ product.stockLevel }}</td>
+                        <td>{{ product.turnoverRate.toFixed(1) }}</td>
+                        <td>{{ formatCurrency(product.revenue) }}</td>
+                        <td>{{ formatCurrency(product.profit) }}</td>
+                        <td>
+                            <span [class.positive]="product.trend > 0" [class.negative]="product.trend < 0">
+                {{ product.trend > 0 ? '+' : '' }}{{ product.trend }}%
+              </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

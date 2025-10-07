@@ -1,0 +1,217 @@
+.reports-dashboard {
+    padding: 2rem;
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        h1 {
+            font-size: 2rem;
+            color: #1a1a1a;
+        }
+        .date-range {
+            .range-select {
+                padding: 0.75rem 1rem;
+                border: 1px solid #e5e5e5;
+                border-radius: 8px;
+                font-size: 1rem;
+                background: white;
+                cursor: pointer;
+                min-width: 200px;
+                &:focus {
+                    outline: none;
+                    border-color: #ffd700;
+                    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+                }
+            }
+        }
+    }
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            .card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+                h3 {
+                    font-size: 1.1rem;
+                    color: #666;
+                }
+                i {
+                    font-size: 1.25rem;
+                    color: #1a1a1a;
+                }
+            }
+            .value {
+                font-size: 1.75rem;
+                font-weight: 600;
+                color: #1a1a1a;
+                margin-bottom: 1rem;
+            }
+            .growth {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.875rem;
+                &.positive {
+                    color: #10b981;
+                }
+                &.negative {
+                    color: #ef4444;
+                }
+            }
+            .status-indicators {
+                display: flex;
+                gap: 1rem;
+                .status {
+                    font-size: 0.875rem;
+                    padding: 0.25rem 0.75rem;
+                    border-radius: 999px;
+                    &.warning {
+                        background: #fef3c7;
+                        color: #92400e;
+                    }
+                    &.danger {
+                        background: #fee2e2;
+                        color: #b91c1c;
+                    }
+                }
+            }
+        }
+    }
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        @media (max-width: 1024px) {
+            grid-template-columns: 1fr;
+        }
+        .chart-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            h3 {
+                color: #1a1a1a;
+                font-size: 1.25rem;
+                margin-bottom: 1.5rem;
+            }
+            &.revenue-chart {
+                grid-row: span 2;
+                .chart-container {
+                    height: 300px;
+                    .placeholder-chart {
+                        height: 100%;
+                        display: flex;
+                        align-items: flex-end;
+                        gap: 1rem;
+                        padding-top: 2rem;
+                        .bar {
+                            flex: 1;
+                            background: #ffd700;
+                            position: relative;
+                            transition: height 0.3s ease;
+                            min-height: 30px;
+                            .value {
+                                position: absolute;
+                                top: -25px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                font-size: 0.875rem;
+                                color: #666;
+                            }
+                            .label {
+                                position: absolute;
+                                bottom: -25px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                font-size: 0.875rem;
+                                color: #666;
+                            }
+                        }
+                    }
+                }
+            }
+            .products-list,
+            .categories-list {
+                .product-item,
+                .category-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1rem;
+                    border-bottom: 1px solid #e5e5e5;
+                    &:last-child {
+                        border-bottom: none;
+                    }
+                    .product-info,
+                    .category-info {
+                        .name {
+                            display: block;
+                            color: #1a1a1a;
+                            font-weight: 500;
+                            margin-bottom: 0.25rem;
+                        }
+                        .sales,
+                        .count {
+                            font-size: 0.875rem;
+                            color: #666;
+                        }
+                    }
+                    .revenue,
+                    .value {
+                        font-weight: 500;
+                        color: #1a1a1a;
+                    }
+                }
+            }
+        }
+    }
+    .report-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            &.secondary {
+                background: white;
+                border: 1px solid #e5e5e5;
+                &:hover {
+                    border-color: #ffd700;
+                    color: #1a1a1a;
+                }
+            }
+            i {
+                font-size: 1rem;
+            }
+        }
+    }
+    .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 3rem;
+        color: #666;
+        i {
+            font-size: 1.5rem;
+            color: #ffd700;
+        }
+    }
+}

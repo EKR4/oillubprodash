@@ -1,1 +1,97 @@
-<p>orders-list works!</p>
+<div class="orders-container">
+    <div class="header">
+        <h1>Orders</h1>
+        <div class="stats">
+            <div class="stat-card">
+                <span class="value">152</span>
+                <span class="label">Total Orders</span>
+            </div>
+            <div class="stat-card">
+                <span class="value">$15,280</span>
+                <span class="label">Revenue</span>
+            </div>
+            <div class="stat-card">
+                <span class="value">24</span>
+                <span class="label">Pending</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" [formControl]="searchControl" placeholder="Search orders...">
+        </div>
+
+        <div class="status-filters">
+            <button *ngFor="let status of statusFilters" [class.active]="selectedStatus === status.id" (click)="filterByStatus(status.id)">
+        {{ status.name }}
+      </button>
+        </div>
+    </div>
+
+    <div class="table-container" *ngIf="!isLoading; else loading">
+        <table>
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th (click)="sortBy('date')">
+                        Date
+                        <i class="fas" [class.fa-sort-up]="sortField === 'date' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'date' && sortDirection === 'desc'"></i>
+                    </th>
+                    <th (click)="sortBy('total')">
+                        Total
+                        <i class="fas" [class.fa-sort-up]="sortField === 'total' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'total' && sortDirection === 'desc'"></i>
+                    </th>
+                    <th>Items</th>
+                    <th (click)="sortBy('status')">
+                        Status
+                        <i class="fas" [class.fa-sort-up]="sortField === 'status' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'status' && sortDirection === 'desc'"></i>
+                    </th>
+                    <th>Payment</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let order of orders">
+                    <td>
+                        <a [routerLink]="['/orders', order.id]" class="order-link">
+              {{ order.orderNumber }}
+            </a>
+                    </td>
+                    <td>{{ order.customerName }}</td>
+                    <td>{{ order.date | date:'medium' }}</td>
+                    <td>${{ order.total.toFixed(2) }}</td>
+                    <td>{{ order.items }} items</td>
+                    <td>
+                        <span class="status-badge" [class]="getStatusColor(order.status)">
+              {{ order.status }}
+            </span>
+                    </td>
+                    <td>
+                        <span class="status-badge" [class]="getPaymentStatusColor(order.paymentStatus)">
+              {{ order.paymentStatus }}
+            </span>
+                    </td>
+                    <td class="actions">
+                        <button class="icon-button" [routerLink]="['/orders', order.id]" title="View Order Details">
+              <i class="fas fa-eye" aria-hidden="true"></i>
+              <span class="sr-only">View Order Details</span>
+            </button>
+                        <button class="icon-button" (click)="printOrder(order.id)" title="Print Order">
+              <i class="fas fa-print" aria-hidden="true"></i>
+              <span class="sr-only">Print Order</span>
+            </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <ng-template #loading>
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading orders...
+        </div>
+    </ng-template>
+</div>

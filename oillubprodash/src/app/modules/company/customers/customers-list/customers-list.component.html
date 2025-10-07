@@ -1,1 +1,129 @@
-<p>customers-list works!</p>
+<div class="customers-container">
+    <div class="header">
+        <h1>Customers</h1>
+        <div class="stats">
+            <div class="stat-card">
+                <span class="value">1,234</span>
+                <span class="label">Total Customers</span>
+            </div>
+            <div class="stat-card">
+                <span class="value">890</span>
+                <span class="label">Active</span>
+            </div>
+            <div class="stat-card">
+                <span class="value">$458K</span>
+                <span class="label">Revenue</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="search-box">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="text" [formControl]="searchControl" placeholder="Search customers..." aria-label="Search customers">
+        </div>
+
+        <div class="filter-group">
+            <div class="status-filters">
+                <button *ngFor="let status of statusFilters" [class.active]="selectedStatus === status.id" (click)="filterByStatus(status.id)">
+          {{ status.name }}
+        </button>
+            </div>
+
+            <div class="type-filters">
+                <button *ngFor="let type of typeFilters" [class.active]="selectedType === type.id" (click)="filterByType(type.id)">
+          {{ type.name }}
+        </button>
+            </div>
+        </div>
+
+        <button class="btn primary" [routerLink]="['./new']">
+      <i class="fas fa-plus" aria-hidden="true"></i>
+      <span>Add Customer</span>
+    </button>
+    </div>
+
+    <div class="table-container" *ngIf="!isLoading; else loading">
+        <table>
+            <thead>
+                <tr>
+                    <th (click)="sortBy('name')" role="button" class="sortable">
+                        Customer
+                        <i class="fas" [class.fa-sort-up]="sortField === 'name' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'name' && sortDirection === 'desc'" aria-hidden="true"></i>
+                    </th>
+                    <th>Contact</th>
+                    <th (click)="sortBy('totalOrders')" role="button" class="sortable">
+                        Orders
+                        <i class="fas" [class.fa-sort-up]="sortField === 'totalOrders' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'totalOrders' && sortDirection === 'desc'" aria-hidden="true"></i>
+                    </th>
+                    <th (click)="sortBy('totalSpent')" role="button" class="sortable">
+                        Total Spent
+                        <i class="fas" [class.fa-sort-up]="sortField === 'totalSpent' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'totalSpent' && sortDirection === 'desc'" aria-hidden="true"></i>
+                    </th>
+                    <th (click)="sortBy('lastOrder')" role="button" class="sortable">
+                        Last Order
+                        <i class="fas" [class.fa-sort-up]="sortField === 'lastOrder' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'lastOrder' && sortDirection === 'desc'" aria-hidden="true"></i>
+                    </th>
+                    <th>Status</th>
+                    <th>Type</th>
+                    <th>Tags</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let customer of customers">
+                    <td>
+                        <div class="customer-info">
+                            <a [routerLink]="['./', customer.id]" class="name">{{ customer.name }}</a>
+                            <span class="company">{{ customer.companyName }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="contact-info">
+                            <span class="email">{{ customer.email }}</span>
+                            <span class="phone">{{ customer.phone }}</span>
+                        </div>
+                    </td>
+                    <td>{{ customer.totalOrders }}</td>
+                    <td>{{ formatCurrency(customer.totalSpent) }}</td>
+                    <td>{{ customer.lastOrder | date:'short' }}</td>
+                    <td>
+                        <span class="status-badge" [class]="getStatusColor(customer.status)">
+              {{ customer.status | titlecase }}
+            </span>
+                    </td>
+                    <td>
+                        <span class="status-badge" [class]="getCustomerTypeColor(customer.type)">
+              {{ customer.type | titlecase }}
+            </span>
+                    </td>
+                    <td>
+                        <div class="tags">
+                            <span class="tag" *ngFor="let tag of customer.tags">{{ tag }}</span>
+                        </div>
+                    </td>
+                    <td class="actions">
+                        <button class="icon-button" [routerLink]="['./', customer.id]" title="View Customer Details">
+              <i class="fas fa-eye" aria-hidden="true"></i>
+              <span class="sr-only">View Customer Details</span>
+            </button>
+                        <button class="icon-button" [routerLink]="['./', customer.id, 'edit']" title="Edit Customer">
+              <i class="fas fa-edit" aria-hidden="true"></i>
+              <span class="sr-only">Edit Customer</span>
+            </button>
+                        <button class="icon-button" title="View Customer Orders" [routerLink]="['./', customer.id, 'orders']">
+              <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+              <span class="sr-only">View Customer Orders</span>
+            </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <ng-template #loading>
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading customers...
+        </div>
+    </ng-template>
+</div>

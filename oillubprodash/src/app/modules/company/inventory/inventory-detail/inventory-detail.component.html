@@ -1,0 +1,139 @@
+<div class="inventory-detail" *ngIf="!isLoading && item; else loading">
+    <div class="header">
+        <div class="title-section">
+            <h1>{{ item.productName }}</h1>
+            <span class="status-badge" [class]="getStockStatusColor(getStockStatus(item))">
+        {{ getStockStatus(item).replace('-', ' ') | titlecase }}
+      </span>
+        </div>
+
+        <div class="actions">
+            <button class="btn secondary" [routerLink]="['/inventory']">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        <span>Back to Inventory</span>
+      </button>
+            <button class="btn primary" [routerLink]="['./edit']">
+        <i class="fas fa-edit" aria-hidden="true"></i>
+        <span>Edit Item</span>
+      </button>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="main-info">
+            <div class="info-card">
+                <h3>Details</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="label">SKU</span>
+                        <span class="value">{{ item.sku }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Category</span>
+                        <span class="value">{{ item.category | titlecase }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Unit Price</span>
+                        <span class="value">${{ item.unitPrice.toFixed(2) }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Supplier</span>
+                        <span class="value">{{ item.supplier }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Location</span>
+                        <span class="value">{{ item.location }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Last Updated</span>
+                        <span class="value">{{ item.lastUpdated | date:'medium' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Stock Management</h3>
+                <div class="stock-grid">
+                    <div class="stock-info">
+                        <span class="label">Current Stock</span>
+                        <span class="value" [class.warning]="item.inStock <= item.lowStockThreshold">
+              {{ item.inStock }}
+            </span>
+                    </div>
+                    <div class="stock-info">
+                        <span class="label">Low Stock Threshold</span>
+                        <span class="value">{{ item.lowStockThreshold }}</span>
+                    </div>
+                    <div class="stock-info">
+                        <span class="label">Reorder Point</span>
+                        <span class="value">{{ item.reorderPoint }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Description</h3>
+                <p class="description">{{ item.description }}</p>
+            </div>
+        </div>
+
+        <div class="side-section">
+            <div class="stock-movement-form">
+                <h3>Record Stock Movement</h3>
+                <form [formGroup]="stockForm" (ngSubmit)="onSubmitStockMovement()">
+                    <div class="form-group">
+                        <label for="type">Movement Type</label>
+                        <select id="type" formControlName="type">
+              <option value="in">Stock In</option>
+              <option value="out">Stock Out</option>
+            </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <input type="number" id="quantity" formControlName="quantity" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">Reason</label>
+                        <input type="text" id="reason" formControlName="reason" placeholder="e.g., Restock, Order fulfillment">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reference">Reference</label>
+                        <input type="text" id="reference" formControlName="reference" placeholder="e.g., PO-2025-001">
+                    </div>
+
+                    <button type="submit" class="btn primary full-width" [disabled]="!stockForm.valid">
+            Record Movement
+          </button>
+                </form>
+            </div>
+
+            <div class="movement-history">
+                <h3>Movement History</h3>
+                <div class="movements-list">
+                    <div class="movement-item" *ngFor="let movement of item.movements">
+                        <div class="movement-header">
+                            <span class="movement-type" [class]="getMovementTypeColor(movement.type)">
+                {{ movement.type === 'in' ? 'Stock In' : 'Stock Out' }}
+              </span>
+                            <span class="movement-date">{{ movement.date | date:'short' }}</span>
+                        </div>
+                        <div class="movement-details">
+                            <span class="quantity">{{ movement.quantity }} units</span>
+                            <span class="reference">Ref: {{ movement.reference }}</span>
+                            <span class="reason">{{ movement.reason }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #loading>
+    <div class="loading">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading item details...
+    </div>
+</ng-template>

@@ -1,1 +1,107 @@
-<p>order-detail works!</p>
+<div class="order-detail" *ngIf="!isLoading && order; else loading">
+    <div class="header">
+        <div class="title-section">
+            <h1>Order #{{ order.orderNumber }}</h1>
+            <div class="status-badges">
+                <span class="status-badge" [class]="getStatusColor(order.status)">
+          {{ order.status }}
+        </span>
+                <span class="status-badge" [class]="getPaymentStatusColor(order.paymentStatus)">
+          {{ order.paymentStatus }}
+        </span>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn secondary" (click)="printOrder()" title="Print Order">
+        <i class="fas fa-print" aria-hidden="true"></i>
+        <span>Print</span>
+      </button>
+            <button class="btn primary" [routerLink]="['/orders']">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        <span>Back to Orders</span>
+      </button>
+        </div>
+    </div>
+
+    <div class="order-content">
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Customer Information</h3>
+                <div class="info-content">
+                    <p class="name">{{ order.customerName }}</p>
+                    <p class="email">{{ order.customerEmail }}</p>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Shipping Address</h3>
+                <div class="info-content">
+                    <p>{{ order.shippingAddress.street }}</p>
+                    <p>{{ order.shippingAddress.city }}, {{ order.shippingAddress.state }} {{ order.shippingAddress.zip }}</p>
+                    <p>{{ order.shippingAddress.country }}</p>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Order Details</h3>
+                <div class="info-content">
+                    <p><strong>Order Date:</strong> {{ order.date | date:'medium' }}</p>
+                    <p><strong>Payment Status:</strong> {{ order.paymentStatus }}</p>
+                    <p><strong>Notes:</strong> {{ order.notes }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="items-section">
+            <h3>Order Items</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of order.items">
+                            <td>{{ item.productName }}</td>
+                            <td>{{ item.sku }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ item.unitPrice.toFixed(2) }}</td>
+                            <td>${{ item.total.toFixed(2) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="order-summary">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>${{ order.subtotal.toFixed(2) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax</span>
+                    <span>${{ order.tax.toFixed(2) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>${{ order.shipping.toFixed(2) }}</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>${{ order.total.toFixed(2) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #loading>
+    <div class="loading">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading order details...
+    </div>
+</ng-template>

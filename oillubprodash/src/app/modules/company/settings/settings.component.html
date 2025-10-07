@@ -1,1 +1,154 @@
-<p>settings works!</p>
+<div class="settings-container" *ngIf="!isLoading; else loading">
+    <div class="header">
+        <h1>Company Settings</h1>
+        <button class="btn primary" (click)="onSubmit()" [disabled]="!settingsForm.valid || isSaving">
+      <i class="fas" [class.fa-spinner]="isSaving" [class.fa-save]="!isSaving" [class.fa-spin]="isSaving" aria-hidden="true"></i>
+      <span>{{ isSaving ? 'Saving...' : 'Save Changes' }}</span>
+    </button>
+    </div>
+
+    <form [formGroup]="settingsForm" class="settings-form">
+        <!-- General Settings -->
+        <div class="settings-section" formGroupName="general">
+            <h2>General Information</h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="companyName">Company Name</label>
+                    <input type="text" id="companyName" formControlName="companyName" placeholder="Enter company name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" formControlName="email" placeholder="company@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" formControlName="phone" placeholder="+1 (555) 123-4567">
+                </div>
+
+                <div class="form-group">
+                    <label for="website">Website</label>
+                    <input type="url" id="website" formControlName="website" placeholder="https://example.com">
+                </div>
+            </div>
+
+            <div class="form-group" formGroupName="address">
+                <h3>Address</h3>
+                <div class="address-grid">
+                    <input type="text" formControlName="street" placeholder="Street Address">
+                    <input type="text" formControlName="city" placeholder="City">
+                    <input type="text" formControlName="state" placeholder="State/Province">
+                    <input type="text" formControlName="zip" placeholder="ZIP/Postal Code">
+                    <input type="text" formControlName="country" placeholder="Country">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <h3>Company Logo</h3>
+                <div class="logo-upload">
+                    <input type="file" id="logo" accept="image/*" (change)="onLogoChange($event)" class="hidden">
+                    <label for="logo" class="upload-label">
+            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+            <span>Click to upload new logo</span>
+          </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Settings -->
+        <div class="settings-section" formGroupName="notifications">
+            <h2>Notifications</h2>
+            <div class="notification-options">
+                <div class="toggle-option">
+                    <label class="toggle">
+            <input type="checkbox" formControlName="lowStockAlerts">
+            <span class="slider"></span>
+          </label>
+                    <div class="toggle-info">
+                        <span class="title">Low Stock Alerts</span>
+                        <span class="description">Get notified when products are running low</span>
+                    </div>
+                </div>
+
+                <div class="toggle-option">
+                    <label class="toggle">
+            <input type="checkbox" formControlName="orderNotifications">
+            <span class="slider"></span>
+          </label>
+                    <div class="toggle-info">
+                        <span class="title">Order Notifications</span>
+                        <span class="description">Receive updates about new orders</span>
+                    </div>
+                </div>
+
+                <div class="toggle-option">
+                    <label class="toggle">
+            <input type="checkbox" formControlName="customerReviews">
+            <span class="slider"></span>
+          </label>
+                    <div class="toggle-info">
+                        <span class="title">Customer Reviews</span>
+                        <span class="description">Get notified about new customer reviews</span>
+                    </div>
+                </div>
+
+                <div class="toggle-option">
+                    <label class="toggle">
+            <input type="checkbox" formControlName="newsletterUpdates">
+            <span class="slider"></span>
+          </label>
+                    <div class="toggle-info">
+                        <span class="title">Newsletter Updates</span>
+                        <span class="description">Receive company newsletter and updates</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preferences Settings -->
+        <div class="settings-section" formGroupName="preferences">
+            <h2>Preferences</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="currency">Currency</label>
+                    <select id="currency" formControlName="currency">
+            <option *ngFor="let currency of currencies" [value]="currency.code">
+              {{ currency.name }} ({{ currency.code }})
+            </option>
+          </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dateFormat">Date Format</label>
+                    <select id="dateFormat" formControlName="dateFormat">
+            <option *ngFor="let format of dateFormats" [value]="format.value">
+              {{ format.label }}
+            </option>
+          </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="timeZone">Time Zone</label>
+                    <input type="text" id="timeZone" formControlName="timeZone" placeholder="America/New_York">
+                </div>
+
+                <div class="form-group">
+                    <label for="language">Language</label>
+                    <select id="language" formControlName="language">
+            <option *ngFor="let lang of languages" [value]="lang.code">
+              {{ lang.name }}
+            </option>
+          </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<ng-template #loading>
+    <div class="loading">
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading settings...
+    </div>
+</ng-template>

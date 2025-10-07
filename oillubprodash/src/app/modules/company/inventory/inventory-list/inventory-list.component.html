@@ -1,1 +1,102 @@
-<p>inventory-list works!</p>
+<div class="inventory-container">
+    <div class="header">
+        <h1>Inventory Management</h1>
+        <div class="stats">
+            <div class="stat-card">
+                <span class="value">1,234</span>
+                <span class="label">Total Items</span>
+            </div>
+            <div class="stat-card">
+                <span class="value">24</span>
+                <span class="label">Low Stock</span>
+            </div>
+            <div class="stat-card">
+                <span class="value">8</span>
+                <span class="label">Out of Stock</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="search-box">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="text" [formControl]="searchControl" placeholder="Search inventory..." aria-label="Search inventory">
+        </div>
+
+        <div class="category-filters">
+            <button *ngFor="let category of categories" [class.active]="selectedCategory === category.id" (click)="filterByCategory(category.id)">
+        {{ category.name }}
+      </button>
+        </div>
+
+        <button class="btn primary" [routerLink]="['./new']">
+      <i class="fas fa-plus" aria-hidden="true"></i>
+      <span>Add New Item</span>
+    </button>
+    </div>
+
+    <div class="table-container" *ngIf="!isLoading; else loading">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th (click)="sortBy('inStock')" role="button" class="sortable">
+                        In Stock
+                        <i class="fas" [class.fa-sort-up]="sortField === 'inStock' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'inStock' && sortDirection === 'desc'" aria-hidden="true"></i>
+                    </th>
+                    <th>Reorder Point</th>
+                    <th (click)="sortBy('unitPrice')" role="button" class="sortable">
+                        Unit Price
+                        <i class="fas" [class.fa-sort-up]="sortField === 'unitPrice' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'unitPrice' && sortDirection === 'desc'" aria-hidden="true"></i>
+                    </th>
+                    <th>Status</th>
+                    <th (click)="sortBy('lastUpdated')" role="button" class="sortable">
+                        Last Updated
+                        <i class="fas" [class.fa-sort-up]="sortField === 'lastUpdated' && sortDirection === 'asc'" [class.fa-sort-down]="sortField === 'lastUpdated' && sortDirection === 'desc'" aria-hidden="true"></i>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of inventory">
+                    <td>
+                        <a [routerLink]="['./', item.id]" class="product-link">{{ item.productName }}</a>
+                    </td>
+                    <td>{{ item.sku }}</td>
+                    <td>{{ item.category | titlecase }}</td>
+                    <td>
+                        <div class="stock-info" [class.warning]="item.inStock <= item.lowStockThreshold">
+                            {{ item.inStock }}
+                        </div>
+                    </td>
+                    <td>{{ item.reorderPoint }}</td>
+                    <td>${{ item.unitPrice.toFixed(2) }}</td>
+                    <td>
+                        <span class="status-badge" [class]="getStockStatusColor(getStockStatus(item))">
+              {{ getStockStatus(item).replace('-', ' ') | titlecase }}
+            </span>
+                    </td>
+                    <td>{{ item.lastUpdated | date:'short' }}</td>
+                    <td class="actions">
+                        <button class="icon-button" [routerLink]="['./', item.id]" title="View Details">
+              <i class="fas fa-eye" aria-hidden="true"></i>
+              <span class="sr-only">View Details</span>
+            </button>
+                        <button class="icon-button" [routerLink]="['./', item.id, 'edit']" title="Edit Item">
+              <i class="fas fa-edit" aria-hidden="true"></i>
+              <span class="sr-only">Edit Item</span>
+            </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <ng-template #loading>
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading inventory...
+        </div>
+    </ng-template>
+</div>
