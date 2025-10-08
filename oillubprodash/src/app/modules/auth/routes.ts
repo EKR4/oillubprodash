@@ -1,34 +1,29 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
-import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './reset-password/reset-password.component';
-import { VerifyEmailComponent } from './verify-email/verify-email.component';
 
 export const AUTH_ROUTES: Routes = [
   {
     path: 'login',
-    component: LoginComponent,
+    loadComponent: () => import('./login/login.component').then(m => m.LoginComponent),
     title: 'Login'
   },
   {
     path: 'register',
-    component: RegisterComponent,
+    loadComponent: () => import('./register/register.component').then(m => m.RegisterComponent),
     title: 'Register'
   },
   {
     path: 'forgot-password',
-    component: ForgotPasswordComponent,
+    loadComponent: () => import('./forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
     title: 'Forgot Password'
   },
   {
     path: 'reset-password',
-    component: ResetPasswordComponent,
+    loadComponent: () => import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
     title: 'Reset Password'
   },
   {
     path: 'verify-email',
-    component: VerifyEmailComponent,
+    loadComponent: () => import('./verify-email/verify-email.component').then(m => m.VerifyEmailComponent),
     title: 'Verify Email'
   },
   {

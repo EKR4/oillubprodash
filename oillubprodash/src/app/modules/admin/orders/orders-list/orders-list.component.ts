@@ -2,10 +2,10 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { SupabaseService } from '../../../cores/services/supabase.service';
-import { Order, OrderStatus, OrderWithRelations } from '../../../cores/models/order';
-import { User } from '../../../cores/models/user';
-import { Company } from '../../../cores/models/company';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
+import { Order, OrderStatus, OrderWithRelations } from '../../../../cores/models/order';
+import { User } from '../../../../cores/models/user';
+import { Company } from '../../../../cores/models/company';
 import { Subject, takeUntil } from 'rxjs';
 
 interface OrderFilters {
@@ -138,7 +138,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       options.filters.push({
         column: 'created_at',
         operator: 'gte',
-        value: this.filters.dateFrom
+        value: this.filters.dateFrom.toISOString()
       });
     }
 
@@ -146,7 +146,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       options.filters.push({
         column: 'created_at',
         operator: 'lte',
-        value: this.filters.dateTo
+        value: this.filters.dateTo.toISOString()
       });
     }
 
@@ -169,9 +169,15 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       const options = this.buildQueryOptions();
 
       // Get orders with relations
-      const { data: ordersData, error: ordersError } = await this.supabase
-        .getItems('orders', options);
+      const supabase = this.supabase.getSupabase();
       
+      // Get orders
+      const { data: ordersData, error: ordersError } = await supabase
+        .from('orders')
+        .select('*')
+        .order(options.order.column, { ascending: options.order.ascending })
+        .range(options.range.from, options.range.to);
+
       if (ordersError) throw ordersError;
       if (!Array.isArray(ordersData)) throw new Error('Invalid orders data');
 
@@ -184,16 +190,33 @@ export class OrdersListComponent implements OnInit, OnDestroy {
           const order = orderData as Order;
           
           const [userResponse, companyResponse] = await Promise.all([
-            this.supabase.getItemById('users', order.user_id),
-            order.company_id ? this.supabase.getItemById('companies', order.company_id) : Promise.resolve({ data: null, error: null })
+            supabase
+              .from('users')
+              .select('*')
+              .eq('id', order.user_id)
+              .single(),
+            order.company_id ? 
+              supabase
+                .from('companies')
+                .select('*')
+                .eq('id', order.company_id)
+                .single() :
+              Promise.resolve({ data: null, error: null })
           ]);
 
           // Type check the related data
           const user = userResponse.data && this.isUser(userResponse.data) ? userResponse.data : undefined;
           const company = companyResponse.data && this.isCompany(companyResponse.data) ? companyResponse.data : undefined;
 
+          // Convert string dates to Date objects
+          const formatDate = (dateStr: string | null) => dateStr ? new Date(dateStr) : undefined;
+
           const orderWithRelations: OrderWithRelations = {
             ...order,
+            created_at: new Date(order.created_at),
+            updated_at: formatDate(order.updated_at as unknown as string),
+            completed_at: formatDate(order.completed_at as unknown as string),
+            cancelled_at: formatDate(order.cancelled_at as unknown as string),
             user,
             company
           };
@@ -206,14 +229,15 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       this.orders = ordersWithRelations.filter((order): order is OrderWithRelations => order !== null);
 
       // Get total count
-      const { data: countData, error: countError } = await this.supabase
-        .getItems('orders', { ...options, count: true });
+      const { count, error: countError } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true });
 
       if (countError) throw countError;
-      if (!countData || !('count' in countData)) {
+      if (!count) {
         throw new Error('Invalid count data');
       }
-      this.totalOrders = countData.count as number;
+      this.totalOrders = count;
       this.totalPages = Math.ceil(this.totalOrders / this.pageSize);
 
     } catch (error: any) {
@@ -225,11 +249,13 @@ export class OrdersListComponent implements OnInit, OnDestroy {
 
   async updateOrderStatus(orderId: string, status: OrderStatus) {
     try {
-      const { error } = await this.supabase
-        .updateItem('orders', orderId, {
+      const { error } = await this.supabase.getSupabase()
+        .from('orders')
+        .update({
           status,
-          updated_at: new Date()
-        });
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId);
 
       if (error) throw error;
 

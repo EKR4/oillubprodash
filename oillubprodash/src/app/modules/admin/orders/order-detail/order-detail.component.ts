@@ -2,14 +2,11 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { SupabaseService } from '../../../cores/services/supabase.service';
-import { Order, OrderStatus, PaymentStatus } from '../../../cores/models/order';
-import { switchMap, catchError, of, Subject, takeUntil, take } from 'rxjs';
-
-interface OrderWithRelations extends Order {
-  company?: any;
-  user?: any;
-}
+import { SupabaseService } from '../../../../cores/services/supabase.service';
+import { Order, OrderStatus, PaymentStatus, OrderWithRelations, DeliveryStatusUpdate, PaymentMethod } from '../../../../cores/models/order';
+import { User } from '../../../../cores/models/user';
+import { Company } from '../../../../cores/models/company';
+import { switchMap, catchError, of, Subject, takeUntil, take, firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-order-detail',
@@ -83,51 +80,80 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   private async loadOrderData(orderId: string): Promise<void> {
     try {
-      const { data: orderData, error: orderError } = await this.supabase
-        .getItemById('orders', orderId);
+      const supabase = this.supabase.getSupabase();
+      const { data: rawOrderData, error: orderError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
 
       if (orderError) throw orderError;
-      if (!orderData) throw new Error('Order not found');
-      if (!this.isOrder(orderData)) throw new Error('Invalid order data');
+      if (!rawOrderData) throw new Error('Order not found');
+      if (!this.isOrder(rawOrderData)) throw new Error('Invalid order data');
 
       // Load related data
       const [companyData, userData] = await Promise.all([
-        orderData.company_id ? this.loadCompanyData(orderData.company_id) : null,
-        this.loadUserData(orderData.user_id)
+        rawOrderData.company_id ? this.loadCompanyData(rawOrderData.company_id) : null,
+        this.loadUserData(rawOrderData.user_id)
       ]);
 
       // Cast to Order first to ensure type safety
-      const baseOrder = orderData as Order;
+      const baseOrder = rawOrderData as Order;
       
-      this.order = {
-        id: baseOrder.id,
-        order_number: baseOrder.order_number,
-        user_id: baseOrder.user_id,
-        company_id: baseOrder.company_id,
-        items: baseOrder.items,
-        subtotal: baseOrder.subtotal,
-        tax_amount: baseOrder.tax_amount,
-        shipping_fee: baseOrder.shipping_fee,
-        discount_amount: baseOrder.discount_amount,
-        total_amount: baseOrder.total_amount,
-        currency: baseOrder.currency,
-        status: baseOrder.status,
-        payment_status: baseOrder.payment_status,
-        payment_details: baseOrder.payment_details,
-        shipping_details: baseOrder.shipping_details,
-        notes: baseOrder.notes,
-        created_at: baseOrder.created_at,
-        updated_at: baseOrder.updated_at,
-        completed_at: baseOrder.completed_at,
-        cancelled_at: baseOrder.cancelled_at,
-        loyalty_points_earned: baseOrder.loyalty_points_earned,
-        loyalty_points_used: baseOrder.loyalty_points_used,
-        is_bulk_order: baseOrder.is_bulk_order,
-        metadata: baseOrder.metadata,
+      // Convert string dates to Date objects
+      const formatDate = (dateStr: string | null) => dateStr ? new Date(dateStr) : undefined;
+      
+      // Start with the base order data
+      const orderData: OrderWithRelations = {
+        ...baseOrder,
+        // Format dates
+        created_at: formatDate(baseOrder.created_at as unknown as string) || new Date(),
+        updated_at: formatDate(baseOrder.updated_at as unknown as string),
+        completed_at: formatDate(baseOrder.completed_at as unknown as string),
+        cancelled_at: formatDate(baseOrder.cancelled_at as unknown as string),
         // Add related data
-        company: companyData,
-        user: userData
+        company: companyData as Company,
+        user: userData as User,
+        // Initialize required fields
+        payment_details: baseOrder.payment_details ? {
+          ...baseOrder.payment_details,
+          created_at: new Date(baseOrder.payment_details.created_at),
+          updated_at: baseOrder.payment_details.updated_at ? new Date(baseOrder.payment_details.updated_at) : undefined,
+          transaction_date: baseOrder.payment_details.transaction_date ? new Date(baseOrder.payment_details.transaction_date) : undefined
+        } : {
+          // Default payment details if none exist
+          id: crypto.randomUUID(),
+          order_id: baseOrder.id,
+          payment_method: 'other',
+          amount: baseOrder.total_amount,
+          currency: baseOrder.currency,
+          payment_provider: 'manual',
+          status: baseOrder.payment_status,
+          created_at: new Date()
+        },
+        shipping_details: baseOrder.shipping_details ? {
+          ...baseOrder.shipping_details,
+          created_at: new Date(baseOrder.shipping_details.created_at),
+          updated_at: baseOrder.shipping_details.updated_at ? new Date(baseOrder.shipping_details.updated_at) : undefined,
+          estimated_delivery_date: baseOrder.shipping_details.estimated_delivery_date ? new Date(baseOrder.shipping_details.estimated_delivery_date) : undefined,
+          status_updates: (baseOrder.shipping_details.status_updates || []).map(update => ({
+            ...update,
+            timestamp: new Date(update.timestamp)
+          }))
+        } : {
+          // Default shipping details if none exist
+          id: crypto.randomUUID(),
+          order_id: baseOrder.id,
+          delivery_method: 'shipping',
+          status: 'pending',
+          tracking_number: undefined,
+          shipping_carrier: undefined,
+          status_updates: [],
+          created_at: new Date()
+        }
       };
+
+      this.order = orderData;
 
     } catch (error: any) {
       this.error = error.message;
@@ -135,16 +161,24 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   }
 
   private async loadCompanyData(companyId: string) {
-    const { data, error } = await this.supabase
-      .getItemById('companies', companyId);
+    const supabase = this.supabase.getSupabase();
+    const { data, error } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('id', companyId)
+      .single();
     
     if (error) throw error;
     return data;
   }
 
   private async loadUserData(userId: string) {
-    const { data, error } = await this.supabase
-      .getItemById('users', userId);
+    const supabase = this.supabase.getSupabase();
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
     
     if (error) throw error;
     return data;
@@ -155,27 +189,34 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     
     this.statusUpdateLoading = true;
     try {
-      const updates: Partial<Order> = {
+      const now = new Date();
+      const updates: Record<string, any> = {
         status,
-        updated_at: new Date()
+        updated_at: now.toISOString()
       };
 
       // Add timestamps based on status
       if (status === 'delivered') {
-        updates.completed_at = new Date();
+        updates['completed_at'] = now.toISOString();
       } else if (status === 'cancelled') {
-        updates.cancelled_at = new Date();
+        updates['cancelled_at'] = now.toISOString();
       }
 
-      const { error } = await this.supabase
-        .updateItem('orders', this.order.id, updates);
+      const supabase = this.supabase.getSupabase();
+      const { error } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', this.order.id);
 
       if (error) throw error;
 
       // Update local state
       this.order = {
         ...this.order,
-        ...updates
+        status,
+        updated_at: new Date(),
+        completed_at: status === 'delivered' ? new Date() : this.order.completed_at,
+        cancelled_at: status === 'cancelled' ? new Date() : this.order.cancelled_at
       };
 
     } catch (error: any) {
@@ -190,15 +231,25 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     
     this.statusUpdateLoading = true;
     try {
-      const updates = {
+      const now = new Date();
+      const updates: Record<string, any> = {
         payment_status: status,
-        'payment_details.status': status,
-        'payment_details.updated_at': new Date(),
-        updated_at: new Date()
+        updated_at: now.toISOString()
       };
 
-      const { error } = await this.supabase
-        .updateItem('orders', this.order.id, updates);
+      if (this.order.payment_details) {
+        updates['payment_details'] = {
+          ...this.order.payment_details,
+          status,
+          updated_at: now.toISOString()
+        };
+      }
+
+      const supabase = this.supabase.getSupabase();
+      const { error } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', this.order.id);
 
       if (error) throw error;
 
@@ -223,40 +274,52 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     this.statusUpdateLoading = true;
     try {
       // Get current user ID
-      const currentUser = await this.supabase.currentUser$.pipe(take(1)).toPromise();
+      const currentUser = await firstValueFrom(this.supabase.currentUser$.pipe(take(1)));
       const userId = currentUser?.id || 'system';
+      const now = new Date();
 
       const statusUpdate = {
         id: crypto.randomUUID(),
         shipping_id: this.order.shipping_details.id,
         status,
-        timestamp: new Date(),
+        timestamp: now.toISOString(),
         updated_by: userId
       };
 
-      const updates = {
-        'shipping_details.status': status,
-        'shipping_details.status_updates': [
-          ...(this.order.shipping_details.status_updates || []),
-          statusUpdate
-        ],
-        'shipping_details.updated_at': new Date(),
-        updated_at: new Date()
+      const updatedStatusUpdates = [
+        ...(this.order.shipping_details.status_updates || []).map(update => ({
+          ...update,
+          timestamp: update.timestamp instanceof Date ? update.timestamp.toISOString() : update.timestamp
+        })),
+        statusUpdate
+      ];
+
+      const updates: Record<string, any> = {
+        updated_at: now.toISOString(),
+        shipping_details: {
+          ...this.order.shipping_details,
+          status,
+          status_updates: updatedStatusUpdates,
+          updated_at: now.toISOString()
+        }
       };
 
-      const { error } = await this.supabase
-        .updateItem('orders', this.order.id, updates);
+      const supabase = this.supabase.getSupabase();
+      const { error } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', this.order.id);
 
       if (error) throw error;
 
-      // Update local state
+      // Update local state with Date objects for the UI
       this.order.shipping_details.status = status;
       this.order.shipping_details.status_updates = [
         ...(this.order.shipping_details.status_updates || []),
-        statusUpdate
+        { ...statusUpdate, timestamp: now }
       ];
-      this.order.shipping_details.updated_at = new Date();
-      this.order.updated_at = new Date();
+      this.order.shipping_details.updated_at = now;
+      this.order.updated_at = now;
 
     } catch (error: any) {
       this.error = error.message;

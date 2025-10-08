@@ -3,9 +3,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { User } from '../../../cores/models/user';
-import { AuthService } from '../../../cores/services/auth.service';
-import { SupabaseService } from '../../../cores/services/supabase.service';
+import { User } from '../../../../cores/models/user';
+import { AuthService } from '../../../../cores/services/auth.service';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
 
 // Define UserRole as an enum since it's being used as a value
 enum UserRole {

@@ -36,10 +36,10 @@ interface CompanySettings {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.scss'
+  styleUrls: ['./settings.component.scss']
 })
 export class CompanySettingsComponent implements OnInit {
-  settingsForm: FormGroup;
+  settingsForm!: FormGroup;
   isLoading = true;
   isSaving = false;
 

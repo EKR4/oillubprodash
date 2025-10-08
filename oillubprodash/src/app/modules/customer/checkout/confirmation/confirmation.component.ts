@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Order, OrderStatus, PaymentStatus, PaymentMethod } from '../../../cores/models/order';
-import { CartService } from '../../../cart.service';
-import { ProductService } from '../../../product.service';
+import { Order, OrderStatus, PaymentStatus, PaymentMethod } from '../../../../cores/models/order';
+import { CartService } from '../../../../shared/services/cart.service';
+import { ProductService } from '../../../../shared/services/product.service';
 
 @Component({
   selector: 'app-confirmation',

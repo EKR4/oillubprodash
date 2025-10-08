@@ -85,19 +85,10 @@ export const serverRoutes: ServerRoute[] = [
     }
   },
   {
-    path: 'product-detail',
+    path: 'product-detail/:id',
     renderMode: RenderMode.Server,
     headers: {
       'Cache-Control': 'public, max-age=60'
-    }
-  },
-
-  // Not found routes handling
-  {
-    path: 'not-found',
-    renderMode: RenderMode.Server,
-    headers: {
-      'Cache-Control': 'no-store'
     }
   },
   {

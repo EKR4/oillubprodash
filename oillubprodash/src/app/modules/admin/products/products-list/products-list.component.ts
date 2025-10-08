@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { ReplacePipe } from '../../../pipes/replace.pipe';
+import { ReplacePipe } from '../../../../shared/pipes/replace.pipe';
 import { Subscription } from 'rxjs';
 import { 
   Product, 
@@ -10,8 +10,8 @@ import {
   ViscosityGrade,
   ProductPackage,
   ProductCertification 
-} from '../../../cores/models/product';
-import { SupabaseService } from '../../../cores/services/supabase.service';
+} from '../../../../cores/models/product';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
 
 // Define product category constants for use in the component
 const PRODUCT_CATEGORIES = {
@@ -81,7 +81,12 @@ export class ProductsListComponent implements OnInit, OnDestroy {
     this.errorMessage = null;
     
     try {
-      const { data: productsData, error } = await this.supabaseService.getItems('products');
+      const supabase = this.supabaseService.getSupabase();
+      
+      const { data: productsData, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       if (!productsData) throw new Error('No products found');
@@ -93,12 +98,14 @@ export class ProductsListComponent implements OnInit, OnDestroy {
       const productsWithDetails = await Promise.all(
         typedProducts.map(async (product) => {
           const [packagesData, certificationsData] = await Promise.all([
-            this.supabaseService.getItems('product_packages', {
-              filters: [{ column: 'product_id', operator: 'eq', value: product.id }]
-            }),
-            this.supabaseService.getItems('product_certifications', {
-              filters: [{ column: 'product_id', operator: 'eq', value: product.id }]
-            })
+            supabase
+              .from('product_packages')
+              .select('*')
+              .eq('product_id', product.id),
+            supabase
+              .from('product_certifications')
+              .select('*')
+              .eq('product_id', product.id)
           ]);
 
           // Type assertions for related data
@@ -270,14 +277,13 @@ export class ProductsListComponent implements OnInit, OnDestroy {
     event.stopPropagation(); // Prevent row click
     
     try {
-      const { error } = await this.supabaseService.updateItem(
-        'products',
-        product.id,
-        { 
+      const { error } = await this.supabaseService.getSupabase()
+        .from('products')
+        .update({ 
           is_active: !product.is_active,
-          updated_at: new Date()
-        }
-      );
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', product.id);
       
       if (error) throw error;
       

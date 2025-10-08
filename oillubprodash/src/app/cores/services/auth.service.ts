@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, catchError, map, of } from 'rxjs';
+import { BehaviorSubject, Observable, from, map, of } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { AuthError, User as SupabaseAuthUser, Session } from '@supabase/supabase-js';
 
@@ -31,15 +31,80 @@ export interface AuthResponse {
 })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
-  private sessionSubject = new BehaviorSubject<Session | null>(null);
   private isInitialized = false;
+  private sessionSubject = new BehaviorSubject<Session | null>(null);
+
+  public currentUser$ = this.currentUserSubject.asObservable();
+  public session$ = this.sessionSubject.asObservable();
 
   constructor(
     private supabaseService: SupabaseService,
     private router: Router
   ) {
+    // Handle hash params for email verification flow
+    if (typeof window !== 'undefined') {
+      this.handleAuthParams();
+    }
+    
+    // Initialize auth state
     this.initAuthState();
+  }
+
+  /**
+   * Handle URL parameters after email verification
+   */
+  private async handleAuthParams() {
+    if (typeof window === 'undefined') return;
+
+    const hash = window.location.hash;
+    if (!hash) return;
+
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get('access_token');
+    const tokenType = params.get('token_type');
+    const expiresIn = params.get('expires_in');
+    const refreshToken = params.get('refresh_token');
+
+    if (accessToken && tokenType) {
+      try {
+        // Set the session in Supabase
+        const { data, error } = await this.supabaseService.getSupabase().auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || ''
+        });
+
+        if (error) throw error;
+
+        // Clear the URL hash
+        window.location.hash = '';
+
+        // Load user data
+        if (data.user) {
+          await this.loadUserData(data.user.id);
+        }
+
+        // Redirect based on user role
+        const user = this.currentUserSubject.value;
+        if (user) {
+          switch (user.role) {
+            case 'admin':
+              await this.router.navigate(['/admin/dashboard']);
+              break;
+            case 'company':
+              await this.router.navigate(['/company/dashboard']);
+              break;
+            case 'customer':
+              await this.router.navigate(['/customer/dashboard']);
+              break;
+            default:
+              await this.router.navigate(['/']);
+          }
+        }
+      } catch (error) {
+        console.error('Error setting session:', error);
+        await this.router.navigate(['/auth/login']);
+      }
+    }
   }
 
   /**

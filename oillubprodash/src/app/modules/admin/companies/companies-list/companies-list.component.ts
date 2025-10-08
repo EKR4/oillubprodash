@@ -3,8 +3,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Company, CompanyStatus, CompanyType } from '../../../cores/models/company';
-import { SupabaseService } from '../../../cores/services/supabase.service';
+import { Company, CompanyStatus, CompanyType } from '../../../../cores/models/company';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
 
 @Component({
   selector: 'app-companies-list',

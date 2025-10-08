@@ -4,3 +4,4 @@ export * from './product';
 export * from './order';
 export * from './company';
 export * from './log';
+export * from './ticket'

@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { Company, CompanyStatus, CompanyType } from '../../../cores/models/company';
-import { SupabaseService } from '../../../cores/services/supabase.service';
+import { Company, CompanyStatus, CompanyType } from '../../../../cores/models/company';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
 
 @Component({
   selector: 'app-company-form',
@@ -15,25 +15,56 @@ import { SupabaseService } from '../../../cores/services/supabase.service';
 })
 export class CompanyFormComponent implements OnInit, OnDestroy {
   private supabase = inject(SupabaseService);
-  private fb = inject(FormBuilder);
+  private fb = inject(NonNullableFormBuilder);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  companyForm!: FormGroup;
-  isLoading: boolean = false;
-  isEditMode: boolean = false;
+  companyForm!: FormGroup<{
+    name: FormControl<string>;
+    company_type: FormControl<CompanyType>;
+    business_registration_number: FormControl<string>;
+    tax_id: FormControl<string | null>;
+    industry: FormControl<string | null>;
+    year_established: FormControl<number | null>;
+    website: FormControl<string | null>;
+    logo_url: FormControl<string | null>;
+    description: FormControl<string | null>;
+    email: FormControl<string>;
+    phone: FormControl<string>;
+    alternative_phone: FormControl<string | null>;
+    primary_address: FormGroup<{
+      street: FormControl<string>;
+      city: FormControl<string>;
+      state: FormControl<string | null>;
+      postal_code: FormControl<string>;
+      country: FormControl<string>;
+      is_default: FormControl<boolean>;
+    }>;
+    status: FormControl<CompanyStatus>;
+    verification_status: FormControl<'unverified' | 'pending' | 'verified' | 'rejected'>;
+    credit_status: FormControl<'good' | 'warning' | 'hold'>;
+    credit_limit: FormControl<number>;
+    payment_terms: FormControl<string | null>;
+    discount_rate: FormControl<number>;
+    notes: FormControl<string | null>;
+    verified: FormControl<boolean>;
+    verification_date: FormControl<Date | null>;
+  }>;
+  
+  isLoading = false;
+  isEditMode = false;
   companyId: string | null = null;
   errorMessage: string | null = null;
   successMessage: string | null = null;
   
   // Make Date available in template
-  currentYear = new Date().getFullYear();
+  readonly currentYear = new Date().getFullYear();
   
   // For select dropdowns
-  companyTypes: CompanyType[] = ['distributor', 'retailer', 'workshop', 'fleet_operator', 'manufacturer', 'other'];
-  statuses: CompanyStatus[] = ['active', 'pending', 'suspended', 'inactive'];
-  verificationStatuses = ['unverified', 'pending', 'verified', 'rejected'];
-  creditStatuses = ['good', 'warning', 'hold'];
+  readonly companyTypes: CompanyType[] = ['distributor', 'retailer', 'workshop', 'fleet_operator', 'manufacturer', 'other'];
+  readonly statuses: CompanyStatus[] = ['active', 'pending', 'suspended', 'inactive'];
+  readonly verificationStatuses = ['unverified', 'pending', 'verified', 'rejected'] as const;
+  readonly creditStatuses = ['good', 'warning', 'hold'] as const;
   industries = [
     'Automotive',
     'Aviation',
@@ -70,42 +101,43 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
 
   initializeForm(): void {
     this.companyForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(100)]],
-      company_type: ['manufacturer', Validators.required],
-      business_registration_number: ['', [Validators.required, Validators.pattern('^[A-Za-z0-9-]{5,20}$')]],
-      tax_id: ['', Validators.pattern('^[A-Za-z0-9-]{5,20}$')],
-      industry: [''],
-      year_established: [null],
-      website: ['', Validators.pattern('https?://.+')],
-      logo_url: [''],
-      description: ['', Validators.maxLength(500)],
+      name: this.fb.control('', [Validators.required, Validators.maxLength(100)]) as FormControl<string>,
+      company_type: this.fb.control('manufacturer' as CompanyType, Validators.required),
+      business_registration_number: this.fb.control('', [Validators.required, Validators.pattern('^[A-Za-z0-9-]{5,20}$')]),
+      tax_id: this.fb.control<string | null>('', Validators.pattern('^[A-Za-z0-9-]{5,20}$')),
+      industry: this.fb.control<string | null>(''),
+      year_established: this.fb.control<number | null>(null),
+      website: this.fb.control<string | null>('', Validators.pattern('https?://.+')),
+      logo_url: this.fb.control<string | null>(''),
+      description: this.fb.control<string | null>('', Validators.maxLength(500)),
       
       // Contact Details
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.pattern('^[+]?[0-9\\s-]{10,15}$')]],
-      alternative_phone: ['', Validators.pattern('^[+]?[0-9\\s-]{10,15}$')],
+      email: this.fb.control('', [Validators.required, Validators.email]),
+      phone: this.fb.control('', [Validators.required, Validators.pattern('^[+]?[0-9\\s-]{10,15}$')]),
+      alternative_phone: this.fb.control<string | null>('', Validators.pattern('^[+]?[0-9\\s-]{10,15}$')),
       
       // Address
       primary_address: this.fb.group({
-        street: ['', Validators.required],
-        city: ['', Validators.required],
-        state: [''],
-        postal_code: ['', Validators.required],
-        country: ['Kenya', Validators.required],
+        street: this.fb.control('', Validators.required),
+        city: this.fb.control('', Validators.required),
+        state: this.fb.control<string | null>(''),
+        postal_code: this.fb.control('', Validators.required),
+        country: this.fb.control('Kenya', Validators.required),
+        is_default: this.fb.control(true),
       }),
       
       // Company Settings
-      status: ['active'],
-      verification_status: ['unverified'],
-      credit_status: ['good'],
-      credit_limit: [0, [Validators.min(0)]],
-      payment_terms: ['30 days'],
-      discount_rate: [0, [Validators.min(0), Validators.max(100)]],
+      status: this.fb.control('active' as CompanyStatus),
+      verification_status: this.fb.control<'unverified' | 'pending' | 'verified' | 'rejected'>('unverified'),
+      credit_status: this.fb.control<'good' | 'warning' | 'hold'>('good'),
+      credit_limit: this.fb.control(0, [Validators.min(0)]),
+      payment_terms: this.fb.control<string | null>('30 days'),
+      discount_rate: this.fb.control(0, [Validators.min(0), Validators.max(100)]),
       
       // Additional Information
-      notes: [''],
-      verified: [false],
-      verification_date: [null],
+      notes: this.fb.control<string | null>(''),
+      verified: this.fb.control(false),
+      verification_date: this.fb.control<Date | null>(null),
     });
   }
 
@@ -114,13 +146,25 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
     this.errorMessage = null;
 
     try {
-      const { data: company, error } = await this.supabase
-        .getItemById('companies', this.companyId!);
+      const supabase = this.supabase.getSupabase();
+      const { data: company, error } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('id', this.companyId!)
+        .single();
       
       if (error) throw error;
       if (!company) throw new Error('Company not found');
       
-      this.companyForm.patchValue(company);
+      // Transform dates back to Date objects
+      const formattedCompany = {
+        ...company,
+        created_at: company.created_at ? new Date(company.created_at) : undefined,
+        updated_at: company.updated_at ? new Date(company.updated_at) : undefined,
+        verification_date: company.verification_date ? new Date(company.verification_date) : null
+      };
+      
+      this.companyForm.patchValue(formattedCompany);
     } catch (error: any) {
       this.errorMessage = error.message;
     } finally {
@@ -138,18 +182,53 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
     this.errorMessage = null;
     this.successMessage = null;
     
-    const formData = this.companyForm.value;
+    const formData = this.companyForm.getRawValue();
     
-    // Set verification date if verified checkbox is true
-    if (formData.verified && !formData.verification_date) {
-      formData.verification_date = new Date();
-    }
+    // Transform data to match Company interface
+    const companyData: Partial<Company> = {
+      name: formData.name,
+      company_type: formData.company_type,
+      business_registration_number: formData.business_registration_number,
+      email: formData.email,
+      phone: formData.phone,
+      status: formData.status,
+      credit_status: formData.credit_status,
+      credit_limit: formData.credit_limit,
+      discount_rate: formData.discount_rate,
+      verified: formData.verified,
+      verification_status: formData.verification_status,
+      
+      // Handle optional fields
+      tax_id: formData.tax_id || undefined,
+      industry: formData.industry || undefined,
+      year_established: formData.year_established || undefined,
+      website: formData.website || undefined,
+      logo_url: formData.logo_url || undefined,
+      description: formData.description || undefined,
+      alternative_phone: formData.alternative_phone || undefined,
+      payment_terms: formData.payment_terms || undefined,
+      notes: formData.notes || undefined,
+      
+      // Handle dates
+      verification_date: formData.verified && !formData.verification_date ? 
+        new Date() : formData.verification_date || undefined,
+      
+      // Handle address with proper null/undefined conversion
+      primary_address: {
+        street: formData.primary_address.street,
+        city: formData.primary_address.city,
+        postal_code: formData.primary_address.postal_code,
+        country: formData.primary_address.country,
+        is_default: formData.primary_address.is_default,
+        state: formData.primary_address.state || undefined
+      }
+    };
     
     try {
       if (this.isEditMode) {
-        await this.updateCompany(formData);
+        await this.updateCompany(companyData);
       } else {
-        await this.createCompany(formData);
+        await this.createCompany(companyData);
       }
       
       this.successMessage = `Company ${this.isEditMode ? 'updated' : 'created'} successfully!`;
@@ -166,20 +245,27 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
   }
   
   private async createCompany(data: Partial<Company>): Promise<void> {
-    const { error } = await this.supabase.createItem('companies', {
-      ...data,
-      created_at: new Date(),
-      updated_at: new Date()
-    });
+    const supabase = this.supabase.getSupabase();
+    const { error } = await supabase
+      .from('companies')
+      .insert([{
+        ...data,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }]);
     
     if (error) throw error;
   }
   
   private async updateCompany(data: Partial<Company>): Promise<void> {
-    const { error } = await this.supabase.updateItem('companies', this.companyId!, {
-      ...data,
-      updated_at: new Date()
-    });
+    const supabase = this.supabase.getSupabase();
+    const { error } = await supabase
+      .from('companies')
+      .update({
+        ...data,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', this.companyId!);
     
     if (error) throw error;
   }

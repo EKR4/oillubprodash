@@ -3,8 +3,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Cart } from '../../../cores/models/cart';
-import { CartService } from '../../../cart.service';
+import { Cart } from '../../../../cores/models/cart';
+import { CartService } from '../../../../shared/services/cart.service';
 
 @Component({
   selector: 'app-shipping',

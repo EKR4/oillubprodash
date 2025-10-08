@@ -3,9 +3,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
-import { Cart } from '../../../cores/models/cart';
-import { CartService } from '../../../cart.service';
-import { MulaflowService, PaymentResponse } from '../../../mulaflow.service';
+import { Cart } from '../../../../cores/models/cart';
+import { CartService } from '../../../../shared/services/cart.service';
+import { PaymentService, PaymentResponse } from '../../../../shared/services/payment.service';
 
 @Component({
   selector: 'app-payment',
@@ -68,7 +68,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
   
   constructor(
     private cartService: CartService,
-    private mulaflowService: MulaflowService,
+    private mulaflowService: PaymentService,
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute

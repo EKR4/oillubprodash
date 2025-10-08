@@ -3,7 +3,14 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription, interval } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
-import { SupabaseService } from '../../../cores/services/supabase.service';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
+
+interface SupabaseError {
+  message: string;
+  details?: string;
+  hint?: string;
+  code?: string;
+}
 
 interface BackupConfig {
   frequency: 'daily' | 'weekly' | 'monthly';
@@ -69,9 +76,10 @@ export class BackupComponent implements OnInit, OnDestroy {
 
   private async loadBackupHistory(): Promise<void> {
     try {
-      const { data, error } = await this.supabaseService.getItems('system_backups', {
-        orderBy: [{ column: 'created_at', order: 'desc' }]
-      });
+      const { data, error } = await this.supabaseService.getSupabase()
+        .from('system_backups')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       
@@ -103,19 +111,22 @@ export class BackupComponent implements OnInit, OnDestroy {
 
   private async loadBackupConfig(): Promise<void> {
     try {
-      const { data, error } = await this.supabaseService.getItems('system_config', {
-        filters: [{ column: 'type', operator: 'eq', value: 'backup' }]
-      });
+      const { data, error } = await this.supabaseService.getSupabase()
+        .from('system_config')
+        .select('*')
+        .eq('type', 'backup')
+        .single();
 
       if (error) throw error;
-      if (data && data.length > 0) {
-        const typedConfig = data[0] as unknown as { settings: BackupConfig };
+      if (data) {
+        const typedConfig = data as unknown as { settings: BackupConfig };
         const config = typedConfig.settings;
         this.backupForm.patchValue(config);
       }
-    } catch (error: any) {
-      this.errorMessage = `Error loading backup configuration: ${error.message}`;
-      console.error('Error loading backup configuration:', error);
+    } catch (error) {
+      const supabaseError = error as SupabaseError;
+      this.errorMessage = `Error loading backup configuration: ${supabaseError.message}`;
+      console.error('Error loading backup configuration:', supabaseError);
     }
   }
 
@@ -134,7 +145,11 @@ export class BackupComponent implements OnInit, OnDestroy {
 
   private async checkBackupStatus(backupId: string): Promise<void> {
     try {
-      const { data, error } = await this.supabaseService.getItemById('system_backups', backupId);
+      const { data, error } = await this.supabaseService.getSupabase()
+        .from('system_backups')
+        .select('*')
+        .eq('id', backupId)
+        .single();
 
       if (error) throw error;
       if (!data) throw new Error('Backup not found');
@@ -167,16 +182,19 @@ export class BackupComponent implements OnInit, OnDestroy {
     this.successMessage = null;
 
     try {
+      const supabase = this.supabaseService.getSupabase();
+      
       // Create backup record
-      const { data: backupData, error } = await this.supabaseService.createItem(
-        'system_backups',
-        {
+      const { data: backupData, error } = await supabase
+        .from('system_backups')
+        .insert({
           status: 'pending',
           type: 'manual',
-          created_at: new Date(),
+          created_at: new Date().toISOString(),
           size_mb: 0
-        }
-      );
+        })
+        .select()
+        .single();
 
       if (error) throw error;
       if (!backupData) throw new Error('Failed to create backup record');
@@ -185,22 +203,25 @@ export class BackupComponent implements OnInit, OnDestroy {
         id: string;
         status: 'pending';
         type: 'manual';
-        created_at: Date;
+        created_at: string;
         size_mb: number;
       };
 
-      this.currentBackup = typedBackupData as BackupHistory;
+      this.currentBackup = {
+        ...typedBackupData,
+        created_at: new Date(typedBackupData.created_at)
+      } as BackupHistory;
+      
       this.startBackupStatusCheck();
       
       // Trigger the actual backup process
-      const { error: backupError } = await this.supabaseService.createItem(
-        'system_jobs',
-        {
+      const { error: backupError } = await supabase
+        .from('system_jobs')
+        .insert({
           type: 'backup',
           payload: { backup_id: typedBackupData.id },
           status: 'pending'
-        }
-      );
+        });
 
       if (backupError) throw backupError;
 
@@ -222,15 +243,14 @@ export class BackupComponent implements OnInit, OnDestroy {
     try {
       const config = this.backupForm.value;
       
-      const { error } = await this.supabaseService.updateItem(
-        'system_config',
-        'backup',
-        {
+      const { error } = await this.supabaseService.getSupabase()
+        .from('system_config')
+        .update({
           type: 'backup',
           settings: config,
-          updated_at: new Date()
-        }
-      );
+          updated_at: new Date().toISOString()
+        })
+        .eq('type', 'backup');
 
       if (error) throw error;
       
@@ -254,14 +274,13 @@ export class BackupComponent implements OnInit, OnDestroy {
 
     try {
       // Create restore job
-      const { error } = await this.supabaseService.createItem(
-        'system_jobs',
-        {
+      const { error } = await this.supabaseService.getSupabase()
+        .from('system_jobs')
+        .insert({
           type: 'restore',
           payload: { backup_id: backupId },
           status: 'pending'
-        }
-      );
+        });
 
       if (error) throw error;
       
@@ -276,7 +295,11 @@ export class BackupComponent implements OnInit, OnDestroy {
 
   async downloadBackup(backupId: string): Promise<void> {
     try {
-      const { data, error } = await this.supabaseService.getItemById('system_backups', backupId);
+      const { data, error } = await this.supabaseService.getSupabase()
+        .from('system_backups')
+        .select('*')
+        .eq('id', backupId)
+        .single();
 
       if (error) throw error;
       const typedData = data as unknown as { download_url?: string };

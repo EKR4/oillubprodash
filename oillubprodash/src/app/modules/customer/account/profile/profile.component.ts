@@ -1,7 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../../../cores/services/auth.service';
+
+// Import FontAwesome - make sure you have @fortawesome/angular-fontawesome installed
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faKey, faMapMarkerAlt, faStar, faHeadset } from '@fortawesome/free-solid-svg-icons';
 
 interface ExtendedUser extends User {
   preferences?: {
@@ -19,11 +24,22 @@ interface UserStats {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule, 
+    RouterModule,
+    FormsModule,
+    FontAwesomeModule
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
+  // Icons
+  faKey = faKey;
+  faMapMarkerAlt = faMapMarkerAlt;
+  faStar = faStar;
+  faHeadset = faHeadset;
+
   user: ExtendedUser | null = null;
   stats: UserStats = {
     totalOrders: 0,

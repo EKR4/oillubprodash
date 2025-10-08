@@ -5,8 +5,7 @@ export const routes: Routes = [
   // Public routes
   {
     path: '',
-    loadChildren: () => import('./pages/routes').then(m => m.PUBLIC_ROUTES),
-    pathMatch: 'prefix'
+    loadChildren: () => import('./pages/routes').then(m => m.PUBLIC_ROUTES)
   },
   
   // Auth routes
@@ -18,40 +17,35 @@ export const routes: Routes = [
   // Admin routes (protected)
   {
     path: 'admin',
-    loadChildren: () => import('./modules/admin/routes').then(m => m.ADMIN_ROUTES),
+    loadChildren: () => import('./modules/admin/routes').then(m => m.ADMIN_ROUTES)
+  },
+
+  // Company routes (protected)
+  {
+    path: 'company',
+    loadChildren: () => import('./modules/company/routes').then(m => m.COMPANY_ROUTES)
+  },
+
+  // Customer routes (protected)
+  {
+    path: 'customer',
+    loadChildren: () => import('./modules/customer/routes').then(m => m.CUSTOMER_ROUTES)
+  },
+
+  // Redirect authenticated users based on role
+  {
+    path: 'dashboard',
     canActivate: [authGuard],
-    data: { role: 'admin' }
-  },
-
-  // Profile route
-  {
-    path: 'profile',
-    loadChildren: () => import('./modules/customer/account/profile/profile.component').then(m => m.ProfileComponent),
-    canActivate: [authGuard]
-  },
-
-  // Product routes
-  {
-    path: 'product-catalog',
-    loadChildren: () => import('./pages/product-catalog/product-catalog.component').then(m => m.ProductCatalogComponent)
-  },
-  {
-    path: 'product-detail/:id',
-    loadChildren: () => import('./pages/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
-  },
-
-  // Static pages
-  {
-    path: 'about',
-    loadChildren: () => import('./pages/about/about.component').then(m => m.AboutComponent)
-  },
-  {
-    path: 'contact',
-    loadChildren: () => import('./pages/contact/contact.component').then(m => m.ContactComponent)
-  },
-  {
-    path: 'faq',
-    loadChildren: () => import('./pages/faq/faq.component').then(m => m.FaqComponent)
+    children: [
+      {
+        path: '',
+        resolve: {
+          role: () => localStorage.getItem('userRole') || 'customer'
+        },
+        loadComponent: () => import('./shared/components/role-redirect/role-redirect.component')
+          .then(m => m.RoleRedirectComponent)
+      }
+    ]
   },
 
   // Home redirect
@@ -64,6 +58,7 @@ export const routes: Routes = [
   // Not found - with proper status code handling
   {
     path: '**',
-    loadChildren: () => import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent)
+    loadComponent: () => import('./pages/not-found/not-found.component')
+      .then(m => m.NotFoundComponent)
   }
 ];

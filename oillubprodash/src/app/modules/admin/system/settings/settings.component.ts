@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SupabaseService } from '../../../cores/services/supabase.service';
-import { ReplacePipe } from '../../../pipes/replace.pipe';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
+import { ReplacePipe } from '../../../../shared/pipes/replace.pipe';
 
 interface EmailSettings {
   smtp_host: string;
@@ -183,7 +183,9 @@ export class SettingsComponent implements OnInit {
     this.errorMessage = null;
 
     try {
-      const { data, error } = await this.supabaseService.getItems('system_settings');
+      const { data, error } = await this.supabaseService.getSupabase()
+        .from('system_settings')
+        .select('*');
       
       if (error) throw error;
       
@@ -251,15 +253,14 @@ export class SettingsComponent implements OnInit {
     this.successMessage = null;
 
     try {
-      const { error } = await this.supabaseService.updateItem(
-        'system_settings',
-        section,
-        {
+      const { error } = await this.supabaseService.getSupabase()
+        .from('system_settings')
+        .update({
           type: section,
           settings: form.value,
-          updated_at: new Date()
-        }
-      );
+          updated_at: new Date().toISOString()
+        })
+        .eq('type', section);
 
       if (error) throw error;
       

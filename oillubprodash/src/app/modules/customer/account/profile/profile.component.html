@@ -10,8 +10,8 @@
                 <!-- Profile Picture -->
                 <div class="absolute -top-16">
                     <div class="h-32 w-32 rounded-full ring-4 ring-white bg-gray-200 flex items-center justify-center overflow-hidden">
-                        <img alt="" *ngIf="user?.photoUrl" [src]="user?.photoUrl" [alt]="user?.name" class="h-full w-full object-cover">
-                        <span *ngIf="!user?.photoUrl" class="text-4xl font-bold text-gray-400">{{user?.name?.charAt(0) | uppercase}}</span>
+                        <img alt="" *ngIf="user?.profile_image_url" [src]="user?.profile_image_url" [alt]="user?.full_name" class="h-full w-full object-cover">
+                        <span *ngIf="!user?.profile_image_url" class="text-4xl font-bold text-gray-400">{{user?.full_name?.charAt(0) | uppercase}}</span>
                     </div>
                 </div>
 
@@ -19,7 +19,7 @@
                 <div class="mt-16">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-900">{{user?.name}}</h1>
+                            <h1 class="text-2xl font-bold text-gray-900">{{user?.full_name}}</h1>
                             <p class="text-sm text-gray-500">{{user?.email}}</p>
                         </div>
                         <button routerLink="../edit-profile" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
@@ -31,15 +31,15 @@
                     <dl class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
                         <div class="px-4 py-5 bg-gray-50 shadow rounded-lg overflow-hidden sm:p-6">
                             <dt class="text-sm font-medium text-gray-500 truncate">Total Orders</dt>
-                            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{stats?.totalOrders || 0}}</dd>
+                            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{stats.totalOrders || 0}}</dd>
                         </div>
                         <div class="px-4 py-5 bg-gray-50 shadow rounded-lg overflow-hidden sm:p-6">
                             <dt class="text-sm font-medium text-gray-500 truncate">Loyalty Points</dt>
-                            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{stats?.loyaltyPoints || 0}}</dd>
+                            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{stats.loyaltyPoints || 0}}</dd>
                         </div>
                         <div class="px-4 py-5 bg-gray-50 shadow rounded-lg overflow-hidden sm:p-6">
                             <dt class="text-sm font-medium text-gray-500 truncate">Support Tickets</dt>
-                            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{stats?.supportTickets || 0}}</dd>
+                            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{stats.supportTickets || 0}}</dd>
                         </div>
                     </dl>
                 </div>
@@ -50,25 +50,25 @@
                     <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <a routerLink="../change-password" class="quick-action-card">
                             <span class="icon-container bg-yellow-100">
-                <i class="fas fa-key text-yellow-600"></i>
+                <fa-icon [icon]="faKey" class="text-yellow-600"></fa-icon>
               </span>
                             <span class="text-sm font-medium text-gray-900">Change Password</span>
                         </a>
                         <a routerLink="../addresses" class="quick-action-card">
                             <span class="icon-container bg-yellow-100">
-                <i class="fas fa-map-marker-alt text-yellow-600"></i>
+                <fa-icon [icon]="faMapMarkerAlt" class="text-yellow-600"></fa-icon>
               </span>
                             <span class="text-sm font-medium text-gray-900">Manage Addresses</span>
                         </a>
                         <a routerLink="../loyalty" class="quick-action-card">
                             <span class="icon-container bg-yellow-100">
-                <i class="fas fa-star text-yellow-600"></i>
+                <fa-icon [icon]="faStar" class="text-yellow-600"></fa-icon>
               </span>
                             <span class="text-sm font-medium text-gray-900">Loyalty Program</span>
                         </a>
                         <a routerLink="../../support" class="quick-action-card">
                             <span class="icon-container bg-yellow-100">
-                <i class="fas fa-headset text-yellow-600"></i>
+                <fa-icon [icon]="faHeadset" class="text-yellow-600"></fa-icon>
               </span>
                             <span class="text-sm font-medium text-gray-900">Get Support</span>
                         </a>

@@ -127,21 +127,23 @@ export class CartService {
       const authToken = this.authService.getAccessToken();
       // Only set token if it's non-null
       if (authToken) {
-        // We can't directly set headers, instead set auth token in localStorage
-        // Supabase will automatically use it
-        localStorage.setItem('supabase.auth.token', authToken);
+        // We can keep track of auth state but let Supabase handle the token
+        options.headers = {
+          'Authorization': `Bearer ${authToken}`
+        };
       }
     }
     
     return from(
       this.supabaseService.getSupabase()
-        .rpc('create_cart_token', {})
-        .single()
+        .rpc('create_cart_token', {}, options)
+        .select()
     ).pipe(
       map(({ data, error }) => {
         if (error) throw error;
+        if (!data) throw new Error('No data returned from create_cart_token');
         
-        const response = data as CartTokenResponse;
+        const response = data[0] as CartTokenResponse;
         this.cartToken = response.token;
         this.tokenExpiry = response.expires_at ? new Date(response.expires_at) : null;
         
@@ -425,6 +427,7 @@ export class CartService {
             package_id: packageItem.id,
             package: packageItem,
             quantity,
+            price: packageItem.unit_price,
             added_at: new Date(),
             updated_at: new Date()
           });

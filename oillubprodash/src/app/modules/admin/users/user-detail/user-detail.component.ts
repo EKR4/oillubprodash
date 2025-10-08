@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { User } from '../../../cores/models/user';
-import { SupabaseService } from '../../../cores/services/supabase.service';
+import { User } from '../../../../cores/models/user';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
 
 // Define UserRole enum for consistency with user-form component
 enum UserRole {

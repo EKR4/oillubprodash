@@ -20,4 +20,9 @@ export interface Environment {
       user_profiles: string;
     };
   };
+  mulaflow: {
+    apiUrl: string;
+    apiKey: string;
+    webhookSecret: string;
+  };
 }

@@ -7,6 +7,11 @@ export const environment: Environment = {
     key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Ym9jc2VybXJqdWh3b21neHdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzAwNzAsImV4cCI6MjA3NDg0NjA3MH0.1gWvr1yxZgm7sXHBJRM6bjYrYPLN7rVgkXJnsKwzGEE',
     // Database connection is only included in server-side code
   },
+  mulaflow: {
+    apiUrl: 'https://api.mulaflow.co.ke/v1',
+    apiKey: 'test_api_key', // Replace with your development API key
+    webhookSecret: 'test_webhook_secret' // Replace with your development webhook secret
+  },
   schema: {
     auth: {
       users: 'auth.users',

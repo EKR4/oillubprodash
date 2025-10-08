@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ReplacePipe } from '../../../pipes/replace.pipe';
+import { ReplacePipe } from '../../../../shared/pipes/replace.pipe';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { Product, ProductCategory, ProductPackage, ProductCertification, ViscosityGrade, ProductSpecifications } from '../../../cores/models/product';
-import { SupabaseService } from '../../../cores/services/supabase.service';
+import { Product, ProductCategory, ProductPackage, ProductCertification, ViscosityGrade, ProductSpecifications } from '../../../../cores/models/product';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
 
 // Define product category constants for use in the component
 const PRODUCT_CATEGORIES = {
@@ -184,11 +184,15 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       
       try {
         // Load product data from Supabase
-        const { data: product, error } = await this.supabaseService
-          .getItemById('products', this.productId);
+        const supabase = this.supabaseService.getSupabase();
+        const { data: product, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', this.productId)
+          .single();
 
-        if (error && typeof error === 'object' && 'message' in error) {
-          this.errorMessage = error.message as string;
+        if (error) {
+          this.errorMessage = error.message;
           return;
         }
 
@@ -199,12 +203,14 @@ export class ProductFormComponent implements OnInit, OnDestroy {
 
         // Load related data
         const [packagesData, certificationsData] = await Promise.all([
-          this.supabaseService.getItems('product_packages', {
-            filters: [{ column: 'product_id', operator: 'eq', value: this.productId }]
-          }),
-          this.supabaseService.getItems('product_certifications', {
-            filters: [{ column: 'product_id', operator: 'eq', value: this.productId }]
-          })
+          supabase
+            .from('product_packages')
+            .select('*')
+            .eq('product_id', this.productId),
+          supabase
+            .from('product_certifications')
+            .select('*')
+            .eq('product_id', this.productId)
         ]);
 
         if (packagesData.error) throw packagesData.error;
@@ -330,43 +336,67 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   }
 
   private async updateRelatedData(productId: string, productData: Partial<Product>): Promise<void> {
+    const supabase = this.supabaseService.getSupabase();
+    
     // Update packages
     if (productData.packages) {
-      const { error: packagesError } = await this.supabaseService.updateItem(
-        'product_packages',
-        productId,
-        { packages: productData.packages }
-      );
-      if (packagesError) throw packagesError;
+      // Delete existing packages
+      const { error: deletePackagesError } = await supabase
+        .from('product_packages')
+        .delete()
+        .eq('product_id', productId);
+      
+      if (deletePackagesError) throw deletePackagesError;
+
+      // Insert new packages
+      if (productData.packages.length > 0) {
+        const { error: packagesError } = await supabase
+          .from('product_packages')
+          .insert(productData.packages.map(pkg => ({ ...pkg, product_id: productId })));
+        
+        if (packagesError) throw packagesError;
+      }
     }
 
     // Update certifications
     if (productData.certifications) {
-      const { error: certificationsError } = await this.supabaseService.updateItem(
-        'product_certifications',
-        productId,
-        { certifications: productData.certifications }
-      );
-      if (certificationsError) throw certificationsError;
+      // Delete existing certifications
+      const { error: deleteCertError } = await supabase
+        .from('product_certifications')
+        .delete()
+        .eq('product_id', productId);
+      
+      if (deleteCertError) throw deleteCertError;
+
+      // Insert new certifications
+      if (productData.certifications.length > 0) {
+        const { error: certError } = await supabase
+          .from('product_certifications')
+          .insert(productData.certifications.map(cert => ({ ...cert, product_id: productId })));
+        
+        if (certError) throw certError;
+      }
     }
   }
 
   private async createRelatedData(productId: string, productData: Partial<Product>): Promise<void> {
+    const supabase = this.supabaseService.getSupabase();
+    
     // Create packages
-    if (productData.packages) {
-      const { error: packagesError } = await this.supabaseService.createItem(
-        'product_packages',
-        productData.packages.map(pkg => ({ ...pkg, product_id: productId }))
-      );
+    if (productData.packages && productData.packages.length > 0) {
+      const { error: packagesError } = await supabase
+        .from('product_packages')
+        .insert(productData.packages.map(pkg => ({ ...pkg, product_id: productId })));
+      
       if (packagesError) throw packagesError;
     }
 
     // Create certifications
-    if (productData.certifications) {
-      const { error: certificationsError } = await this.supabaseService.createItem(
-        'product_certifications',
-        productData.certifications.map(cert => ({ ...cert, product_id: productId }))
-      );
+    if (productData.certifications && productData.certifications.length > 0) {
+      const { error: certificationsError } = await supabase
+        .from('product_certifications')
+        .insert(productData.certifications.map(cert => ({ ...cert, product_id: productId })));
+      
       if (certificationsError) throw certificationsError;
     }
   }
@@ -428,13 +458,17 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     try {
       const productData = this.prepareProductData();
 
+      const supabase = this.supabaseService.getSupabase();
+      
       if (this.isEditMode && this.productId) {
         // Update existing product
-        const { error: updateError } = await this.supabaseService
-          .updateItem('products', this.productId, {
+        const { error: updateError } = await supabase
+          .from('products')
+          .update({
             ...productData,
-            updated_at: new Date()
-          });
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', this.productId);
 
         if (updateError) throw updateError;
 
@@ -444,16 +478,21 @@ export class ProductFormComponent implements OnInit, OnDestroy {
         this.successMessage = 'Product updated successfully!';
       } else {
         // Create new product
-        const { data: newProduct, error: createError } = await this.supabaseService
-          .createItem('products', {
+        const currentUser = await firstValueFrom(this.supabaseService.currentUser$.pipe(take(1)));
+        
+        const { data: newProduct, error: createError } = await supabase
+          .from('products')
+          .insert({
             ...productData,
-            created_at: new Date(),
-            updated_at: new Date(),
-            created_by: (await firstValueFrom(this.supabaseService.currentUser$.pipe(take(1))))?.id || 'system'
-          });
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            created_by: currentUser?.id || 'system'
+          })
+          .select()
+          .single();
 
         if (createError) throw createError;
-        if (!newProduct || !('id' in newProduct)) throw new Error('Failed to create product');
+        if (!newProduct) throw new Error('Failed to create product');
 
         // Create packages and certifications
         await this.createRelatedData(newProduct.id as string, productData);

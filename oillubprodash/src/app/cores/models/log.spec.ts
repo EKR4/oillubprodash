@@ -1,7 +1,14 @@
-import { Log } from './log';
+import { LogEntry } from './log';
 
 describe('Log', () => {
   it('should create an instance', () => {
-    expect(new Log()).toBeTruthy();
+    const log: LogEntry = {
+      id: '1',
+      timestamp: new Date(),
+      level: 'info',
+      message: 'Test log',
+      source: 'test'
+    };
+    expect(log).toBeTruthy();
   });
 });

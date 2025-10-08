@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { LogLevel } from '../../../cores/models/log';
+import { LogLevel } from '../../../../cores/models/log';
 import { Subscription, interval } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
-import { SupabaseService } from '../../../cores/services/supabase.service';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
 
 
 interface LogEntry {
@@ -99,11 +99,14 @@ export class LogsComponent implements OnInit, OnDestroy {
     this.errorMessage = null;
 
     try {
-      const { data, error } = await this.supabaseService.getItems('system_logs', {
-        orderBy: [{ column: 'timestamp', order: 'desc' }],
-        limit: this.pageSize,
-        offset: (this.currentPage - 1) * this.pageSize
-      });
+      const { data, error } = await this.supabaseService.getSupabase()
+        .from('system_logs')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .range(
+          (this.currentPage - 1) * this.pageSize,
+          this.currentPage * this.pageSize - 1
+        );
 
       if (error) throw error;
       
@@ -155,10 +158,11 @@ export class LogsComponent implements OnInit, OnDestroy {
     try {
       const latestTimestamp = this.logs[0].timestamp;
       
-      const { data, error } = await this.supabaseService.getItems('system_logs', {
-        filters: [{ column: 'timestamp', operator: 'gt', value: latestTimestamp.toISOString() }],
-        orderBy: [{ column: 'timestamp', order: 'desc' }]
-      });
+      const { data, error } = await this.supabaseService.getSupabase()
+        .from('system_logs')
+        .select('*')
+        .gt('timestamp', latestTimestamp.toISOString())
+        .order('timestamp', { ascending: false });
 
       if (error) throw error;
       

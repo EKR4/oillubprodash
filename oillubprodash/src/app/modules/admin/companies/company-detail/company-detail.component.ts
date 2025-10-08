@@ -2,9 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { SupabaseService } from '../../../cores/services/supabase.service';
-import { Company, CompanyContact, CompanyDocument, CompanyTransaction, CompanyPriceTier, PriceTier } from '../../../cores/models/company';
-import { switchMap, catchError, of, take, map } from 'rxjs';
+import { SupabaseService } from '../../../../cores/services/supabase.service';
+import { Company, CompanyContact, CompanyDocument, CompanyTransaction, CompanyPriceTier, PriceTier } from '../../../../cores/models/company';
+import { switchMap, catchError, of, take, map, firstValueFrom } from 'rxjs';
 
 interface CompanyPriceTierWithBase extends CompanyPriceTier {
   baseTier?: PriceTier;
@@ -77,9 +77,14 @@ export class CompanyDetailComponent implements OnInit {
 
   private async loadCompanyData(companyId: string): Promise<void> {
     try {
+      const supabase = this.supabase.getSupabase();
+      
       // Load company details
-      const { data: companyData, error: companyError } = await this.supabase
-        .getItemById('companies', companyId);
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('id', companyId)
+        .single();
       
       if (companyError) throw companyError;
       if (!companyData) throw new Error('Company not found');
@@ -89,60 +94,64 @@ export class CompanyDetailComponent implements OnInit {
       this.company = company;
 
       // Load company contacts
-      const { data: contactsData, error: contactsError } = await this.supabase
-        .getItems('company_contacts', {
-          filters: [{ column: 'company_id', operator: 'eq', value: companyId }]
-        });
+      const { data: contactsData, error: contactsError } = await supabase
+        .from('company_contacts')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false });
       
       if (contactsError) throw contactsError;
       this.contacts = this.filterAndCastArray<CompanyContact>(
-        contactsData as any[],
+        contactsData || [],
         this.isCompanyContact
       );
 
       // Load company documents
-      const { data: documentsData, error: documentsError } = await this.supabase
-        .getItems('company_documents', {
-          filters: [{ column: 'company_id', operator: 'eq', value: companyId }]
-        });
+      const { data: documentsData, error: documentsError } = await supabase
+        .from('company_documents')
+        .select('*')
+        .eq('company_id', companyId);
       
       if (documentsError) throw documentsError;
       this.documents = this.filterAndCastArray<CompanyDocument>(
-        documentsData as any[],
+        documentsData || [],
         this.isCompanyDocument
       );
 
       // Load company transactions
-      const { data: transactionsData, error: transactionsError } = await this.supabase
-        .getItems('company_transactions', {
-          filters: [{ column: 'company_id', operator: 'eq', value: companyId }],
-          order: { column: 'transaction_date', ascending: false }
-        });
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('company_transactions')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('transaction_date', { ascending: false });
       
       if (transactionsError) throw transactionsError;
       this.transactions = this.filterAndCastArray<CompanyTransaction>(
-        transactionsData as any[],
+        transactionsData || [],
         this.isCompanyTransaction
       );
 
       // Load price tiers with base tier data
-      const { data: priceTiersData, error: priceTiersError } = await this.supabase
-        .getItems('company_price_tiers', {
-          filters: [{ column: 'company_id', operator: 'eq', value: companyId }],
-          order: { column: 'effective_from', ascending: false }
-        });
+      const { data: priceTiersData, error: priceTiersError } = await supabase
+        .from('company_price_tiers')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('effective_from', { ascending: false });
       
       if (priceTiersError) throw priceTiersError;
       
       const companyTiers = this.filterAndCastArray<CompanyPriceTier>(
-        priceTiersData as any[],
+        priceTiersData || [],
         this.isCompanyPriceTier
       );
 
       // Load base tier data for each company tier
       const baseTierPromises = companyTiers.map(async (companyTier) => {
-        const { data: baseTier, error: baseTierError } = await this.supabase
-          .getItemById('price_tiers', companyTier.price_tier_id);
+        const { data: baseTier, error: baseTierError } = await supabase
+          .from('price_tiers')
+          .select('*')
+          .eq('id', companyTier.price_tier_id)
+          .single();
         
         if (baseTierError) throw baseTierError;
         
@@ -163,11 +172,14 @@ export class CompanyDetailComponent implements OnInit {
     if (!this.company) return;
     
     try {
-      const { error } = await this.supabase
-        .updateItem('companies', this.company.id, { 
+      const supabase = this.supabase.getSupabase();
+      const { error } = await supabase
+        .from('companies')
+        .update({ 
           status,
-          updated_at: new Date()
-        });
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', this.company.id);
       
       if (error) throw error;
       
@@ -183,19 +195,23 @@ export class CompanyDetailComponent implements OnInit {
     
     try {
       // Get current user ID first
-      const userId = await this.supabase.currentUser$.pipe(
-        take(1),
-        map(user => user?.id)
-      ).toPromise();
+      const userId = await firstValueFrom(
+        this.supabase.currentUser$.pipe(
+          take(1),
+          map(user => user?.id || undefined)
+        ))
 
-      const { error } = await this.supabase
-        .updateItem('companies', this.company.id, {
+      const supabase = this.supabase.getSupabase();
+      const { error } = await supabase
+        .from('companies')
+        .update({
           verified,
           verification_status: verified ? 'verified' : 'rejected',
-          verification_date: new Date(),
+          verification_date: new Date().toISOString(),
           verified_by: userId,
-          updated_at: new Date()
-        });
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', this.company.id);
       
       if (error) throw error;
       
@@ -213,11 +229,14 @@ export class CompanyDetailComponent implements OnInit {
     if (!this.company) return;
     
     try {
-      const { error } = await this.supabase
-        .updateItem('companies', this.company.id, {
+      const supabase = this.supabase.getSupabase();
+      const { error } = await supabase
+        .from('companies')
+        .update({
           credit_status: creditStatus,
-          updated_at: new Date()
-        });
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', this.company.id);
       
       if (error) throw error;
       
