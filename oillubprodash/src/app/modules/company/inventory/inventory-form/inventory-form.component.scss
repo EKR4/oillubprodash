@@ -1,0 +1,216 @@
+// Variables
+$primary-yellow: #FFD700;
+$secondary-yellow: #FFC800;
+$hover-yellow: #FFE44D;
+$black: #000000;
+$dark-gray: #333333;
+$medium-gray: #666666;
+$light-gray: #E5E5E5;
+$error-red: #FF4444;
+$success-green: #4CAF50;
+$white: #FFFFFF;
+.inventory-form-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    position: relative;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    h1 {
+        font-size: 2rem;
+        color: $black;
+    }
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+    }
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid $light-gray;
+        border-top: 4px solid $primary-yellow;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    p {
+        margin-top: 1rem;
+        color: $medium-gray;
+    }
+}
+
+.form-grid {
+    display: grid;
+    gap: 2rem;
+    background: $white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+    h2 {
+        font-size: 1.25rem;
+        color: $black;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid $primary-yellow;
+    }
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: $dark-gray;
+        font-weight: 500;
+    }
+    input,
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid $light-gray;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        &:focus {
+            outline: none;
+            border-color: $primary-yellow;
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+        }
+        &.error {
+            border-color: $error-red;
+        }
+    }
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+}
+
+.error-message {
+    display: block;
+    color: $error-red;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.form-error {
+    color: $error-red;
+    background: rgba($error-red, 0.1);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid $light-gray;
+}
+
+// Buttons
+.primary-button,
+.secondary-button,
+.submit-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    i {
+        font-size: 1rem;
+    }
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.primary-button {
+    background: $black;
+    color: $primary-yellow;
+    &:hover:not(:disabled) {
+        background: $dark-gray;
+    }
+}
+
+.secondary-button {
+    background: $light-gray;
+    color: $dark-gray;
+    &:hover:not(:disabled) {
+        background: darken($light-gray, 5%);
+    }
+}
+
+.submit-button {
+    background: $primary-yellow;
+    color: $black;
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    &:hover:not(:disabled) {
+        background: $hover-yellow;
+        transform: translateY(-1px);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+// Responsive Adjustments
+@media (max-width: 768px) {
+    .inventory-form-container {
+        margin: 1rem;
+        padding: 0;
+    }
+    .form-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        .header-actions {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+    .form-grid {
+        padding: 1rem;
+    }
+}

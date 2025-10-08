@@ -1,1 +1,153 @@
-<p>compliance works!</p>
+<div class="compliance-container">
+    <div class="header">
+        <div class="title-section">
+            <h1>Compliance Management</h1>
+            <p class="subtitle">Track and manage certificates, licenses, and compliance documents</p>
+        </div>
+        <button class="add-button">
+            <i class="fas fa-plus"></i>
+            Add New Document
+        </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{stats.total}}</div>
+                <div class="stat-label">Total Documents</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon active">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{stats.active}}</div>
+                <div class="stat-label">Active</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{stats.expiring}}</div>
+                <div class="stat-label">Expiring Soon</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon danger">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{stats.expired}}</div>
+                <div class="stat-label">Expired</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" [(ngModel)]="searchTerm" placeholder="Search documents...">
+        </div>
+        <div class="filter-buttons">
+            <button [class.active]="selectedFilter === 'all'" (click)="selectedFilter = 'all'">
+                All
+            </button>
+            <button [class.active]="selectedFilter === 'certificate'" (click)="selectedFilter = 'certificate'">
+                Certificates
+            </button>
+            <button [class.active]="selectedFilter === 'license'" (click)="selectedFilter = 'license'">
+                Licenses
+            </button>
+            <button [class.active]="selectedFilter === 'permit'" (click)="selectedFilter = 'permit'">
+                Permits
+            </button>
+            <button [class.active]="selectedFilter === 'audit'" (click)="selectedFilter = 'audit'">
+                Audits
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading compliance documents...</p>
+    </div>
+
+    <!-- Documents Table -->
+    <div class="table-container" *ngIf="!loading">
+        <table>
+            <thead>
+                <tr>
+                    <th (click)="toggleSort('name')">
+                        Document Name
+                        <i class="fas" [class.fa-sort-up]="sortBy === 'name' && sortDirection === 'asc'" [class.fa-sort-down]="sortBy === 'name' && sortDirection === 'desc'" [class.fa-sort]="sortBy !== 'name'"></i>
+                    </th>
+                    <th (click)="toggleSort('issuer')">
+                        Issuer
+                        <i class="fas" [class.fa-sort-up]="sortBy === 'issuer' && sortDirection === 'asc'" [class.fa-sort-down]="sortBy === 'issuer' && sortDirection === 'desc'" [class.fa-sort]="sortBy !== 'issuer'"></i>
+                    </th>
+                    <th (click)="toggleSort('issuedDate')">
+                        Issue Date
+                        <i class="fas" [class.fa-sort-up]="sortBy === 'issuedDate' && sortDirection === 'asc'" [class.fa-sort-down]="sortBy === 'issuedDate' && sortDirection === 'desc'" [class.fa-sort]="sortBy !== 'issuedDate'"></i>
+                    </th>
+                    <th (click)="toggleSort('expiryDate')">
+                        Expiry Date
+                        <i class="fas" [class.fa-sort-up]="sortBy === 'expiryDate' && sortDirection === 'asc'" [class.fa-sort-down]="sortBy === 'expiryDate' && sortDirection === 'desc'" [class.fa-sort]="sortBy !== 'expiryDate'"></i>
+                    </th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let doc of filteredDocuments">
+                    <td>
+                        <div class="document-name">
+                            <i class="fas" [class.fa-certificate]="doc.type === 'certificate'" [class.fa-id-card]="doc.type === 'license'" [class.fa-file-contract]="doc.type === 'permit'" [class.fa-clipboard-check]="doc.type === 'audit'"></i> {{doc.name}}
+                        </div>
+                    </td>
+                    <td>{{doc.issuer}}</td>
+                    <td>{{doc.issuedDate | date:'mediumDate'}}</td>
+                    <td>
+                        <div class="expiry-date" [class.expiring]="getDaysUntilExpiry(doc.expiryDate) <= 30">
+                            {{doc.expiryDate | date:'mediumDate'}}
+                            <span class="days-left" *ngIf="getDaysUntilExpiry(doc.expiryDate) > 0">
+                                ({{getDaysUntilExpiry(doc.expiryDate)}} days left)
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge" [style.backgroundColor]="getStatusColor(doc.status)">
+                            {{doc.status}}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        <button class="icon-button" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="icon-button" (click)="downloadDocument(doc.documentUrl!)" *ngIf="doc.documentUrl" title="Download Document">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="icon-button" (click)="scheduleAudit(doc)" *ngIf="doc.type === 'audit'" title="Schedule Audit">
+                            <i class="fas fa-calendar-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && filteredDocuments.length === 0">
+        <i class="fas fa-folder-open"></i>
+        <p>No compliance documents found</p>
+        <button class="add-button">Add Your First Document</button>
+    </div>
+</div>

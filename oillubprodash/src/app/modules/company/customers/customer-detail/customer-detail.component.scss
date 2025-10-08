@@ -1,0 +1,373 @@
+// Variables
+$primary-yellow: #FFD700;
+$secondary-yellow: #FFC800;
+$hover-yellow: #FFE44D;
+$black: #000000;
+$dark-gray: #333333;
+$medium-gray: #666666;
+$light-gray: #E5E5E5;
+$white: #FFFFFF;
+// Status Colors
+:root {
+    --primary-color: #{$primary-yellow};
+    --success-color: #4CAF50;
+    --warning-color: #FF9800;
+    --error-color: #F44336;
+    --info-color: #2196F3;
+    --text-color: #{$dark-gray};
+}
+
+.customer-detail-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+// Header Styles
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        h1 {
+            font-size: 2rem;
+            color: $black;
+            margin: 0;
+        }
+    }
+}
+
+// Button Styles
+.back-button,
+.edit-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    i {
+        font-size: 1rem;
+    }
+}
+
+.back-button {
+    background-color: $light-gray;
+    color: $dark-gray;
+    &:hover {
+        background-color: darken($light-gray, 5%);
+    }
+}
+
+.edit-button {
+    background-color: $primary-yellow;
+    color: $black;
+    &:hover {
+        background-color: $hover-yellow;
+        transform: translateY(-1px);
+    }
+}
+
+// Loading State
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4rem 0;
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid $light-gray;
+        border-top: 4px solid $primary-yellow;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    p {
+        margin-top: 1rem;
+        color: $medium-gray;
+    }
+}
+
+// Customer Header Card
+.customer-header-card {
+    background: $white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    .customer-basic-info {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .customer-avatar {
+        width: 80px;
+        height: 80px;
+        background: $primary-yellow;
+        color: $black;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    .customer-main-details {
+        h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.75rem;
+        }
+        .company {
+            color: $medium-gray;
+            margin: 0 0 1rem 0;
+        }
+    }
+    .customer-quick-info {
+        display: flex;
+        gap: 2rem;
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            i {
+                color: $primary-yellow;
+            }
+            a {
+                color: $dark-gray;
+                text-decoration: none;
+                &:hover {
+                    color: $primary-yellow;
+                }
+            }
+        }
+    }
+}
+
+// Badges
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    color: $white;
+    margin-right: 0.5rem;
+}
+
+.type-badge {
+    background-color: $black;
+    color: $primary-yellow;
+}
+
+// Tabs
+.tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid $light-gray;
+    padding-bottom: 1rem;
+    button {
+        background: none;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        cursor: pointer;
+        color: $medium-gray;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        i {
+            font-size: 1rem;
+        }
+        &:hover {
+            color: $dark-gray;
+        }
+        &.active {
+            color: $primary-yellow;
+            position: relative;
+            &:after {
+                content: '';
+                position: absolute;
+                bottom: -1rem;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background-color: $primary-yellow;
+            }
+        }
+    }
+}
+
+// Stats Grid
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    .stat-card {
+        background: $white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .stat-header {
+            color: $medium-gray;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: $black;
+            margin-bottom: 0.5rem;
+        }
+        .stat-footer {
+            color: $medium-gray;
+            font-size: 0.875rem;
+        }
+    }
+}
+
+// Tables
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: $white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    th {
+        background: $black;
+        color: $primary-yellow;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 500;
+    }
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid $light-gray;
+    }
+    tbody tr:hover {
+        background-color: rgba($primary-yellow, 0.05);
+    }
+}
+
+// Address Cards
+.address-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    .address-card {
+        background: $white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .address-type {
+            font-weight: 500;
+            color: $black;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            .default-badge {
+                background: $primary-yellow;
+                color: $black;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                font-size: 0.75rem;
+            }
+        }
+        .address-content {
+            color: $medium-gray;
+            p {
+                margin: 0.25rem 0;
+            }
+        }
+    }
+}
+
+// Billing Info
+.billing-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    .info-card {
+        background: $white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        h3 {
+            color: $black;
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+        }
+        p {
+            color: $medium-gray;
+            margin: 0;
+        }
+    }
+}
+
+// Notes Section
+.notes-section {
+    background: $white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+    h3 {
+        color: $black;
+        margin: 0 0 1rem 0;
+    }
+    p {
+        color: $medium-gray;
+        margin: 0;
+        line-height: 1.6;
+    }
+}
+
+// Animation
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+// Responsive Adjustments
+@media (max-width: 768px) {
+    .customer-detail-container {
+        padding: 1rem;
+    }
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    .customer-header-card {
+        .customer-basic-info {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .customer-quick-info {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+    .tabs {
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        button {
+            white-space: nowrap;
+        }
+    }
+}

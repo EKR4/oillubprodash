@@ -1,1 +1,139 @@
-<p>inventory-form works!</p>
+<div class="inventory-form-container">
+    <div class="form-header">
+        <h1>{{isEditMode ? 'Edit' : 'Add'}} Inventory Item</h1>
+        <div class="header-actions">
+            <button class="secondary-button" (click)="resetForm()" [disabled]="loading">
+                <i class="fas fa-undo"></i>
+                Reset
+            </button>
+            <button class="primary-button" routerLink="../">
+                <i class="fas fa-arrow-left"></i>
+                Back to List
+            </button>
+        </div>
+    </div>
+
+    <div class="loading-overlay" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>{{isEditMode ? 'Loading inventory item...' : 'Saving...'}}</p>
+    </div>
+
+    <form [formGroup]="inventoryForm" (ngSubmit)="onSubmit()" class="form-grid">
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h2>Basic Information</h2>
+            <div class="form-group">
+                <label for="productName">Product Name*</label>
+                <input id="productName" type="text" formControlName="productName" [class.error]="submitted && inventoryForm.get('productName')?.errors">
+                <span class="error-message" *ngIf="submitted && inventoryForm.get('productName')?.errors">
+                    {{getErrorMessage('productName')}}
+                </span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Category*</label>
+                    <select id="category" formControlName="category" [class.error]="submitted && inventoryForm.get('category')?.errors">
+                        <option value="">Select Category</option>
+                        <option *ngFor="let cat of categories" [value]="cat">{{cat}}</option>
+                    </select>
+                    <span class="error-message" *ngIf="submitted && inventoryForm.get('category')?.errors">
+                        {{getErrorMessage('category')}}
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="supplier">Supplier*</label>
+                    <input id="supplier" type="text" formControlName="supplier" [class.error]="submitted && inventoryForm.get('supplier')?.errors">
+                    <span class="error-message" *ngIf="submitted && inventoryForm.get('supplier')?.errors">
+                        {{getErrorMessage('supplier')}}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantity Management -->
+        <div class="form-section">
+            <h2>Quantity Management</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="quantity">Current Quantity*</label>
+                    <input id="quantity" type="number" formControlName="quantity" [class.error]="submitted && inventoryForm.get('quantity')?.errors">
+                    <span class="error-message" *ngIf="submitted && inventoryForm.get('quantity')?.errors">
+                        {{getErrorMessage('quantity')}}
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="minQuantity">Minimum Quantity*</label>
+                    <input id="minQuantity" type="number" formControlName="minQuantity" [class.error]="submitted && inventoryForm.get('minQuantity')?.errors">
+                    <span class="error-message" *ngIf="submitted && inventoryForm.get('minQuantity')?.errors">
+                        {{getErrorMessage('minQuantity')}}
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="maxQuantity">Maximum Quantity*</label>
+                    <input id="maxQuantity" type="number" formControlName="maxQuantity" [class.error]="submitted && inventoryForm.get('maxQuantity')?.errors">
+                    <span class="error-message" *ngIf="submitted && inventoryForm.get('maxQuantity')?.errors">
+                        {{getErrorMessage('maxQuantity')}}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Details -->
+        <div class="form-section">
+            <h2>Additional Details</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="location">Storage Location*</label>
+                    <select id="location" formControlName="location" [class.error]="submitted && inventoryForm.get('location')?.errors">
+                        <option value="">Select Location</option>
+                        <option *ngFor="let loc of locations" [value]="loc">{{loc}}</option>
+                    </select>
+                    <span class="error-message" *ngIf="submitted && inventoryForm.get('location')?.errors">
+                        {{getErrorMessage('location')}}
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="unitPrice">Unit Price ($)*</label>
+                    <input id="unitPrice" type="number" step="0.01" formControlName="unitPrice" [class.error]="submitted && inventoryForm.get('unitPrice')?.errors">
+                    <span class="error-message" *ngIf="submitted && inventoryForm.get('unitPrice')?.errors">
+                        {{getErrorMessage('unitPrice')}}
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastRestocked">Last Restocked*</label>
+                    <input id="lastRestocked" type="date" formControlName="lastRestocked" [class.error]="submitted && inventoryForm.get('lastRestocked')?.errors">
+                    <span class="error-message" *ngIf="submitted && inventoryForm.get('lastRestocked')?.errors">
+                        {{getErrorMessage('lastRestocked')}}
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" formControlName="notes" rows="4" placeholder="Enter any additional notes about this inventory item..."></textarea>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="submit-button" [disabled]="loading">
+                <i class="fas fa-save"></i>
+                {{isEditMode ? 'Update' : 'Save'}} Inventory Item
+            </button>
+        </div>
+
+        <!-- Form-level Errors -->
+        <div class="form-error" *ngIf="submitted && inventoryForm.errors?.['minGreaterThanMax']">
+            Minimum quantity cannot be greater than maximum quantity
+        </div>
+        <div class="form-error" *ngIf="submitted && inventoryForm.errors?.['quantityOutOfRange']">
+            Current quantity must be between minimum and maximum quantities
+        </div>
+    </form>
+</div>

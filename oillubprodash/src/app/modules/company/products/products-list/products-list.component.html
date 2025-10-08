@@ -1,1 +1,100 @@
-<p>products-list works!</p>
+<div class="products-container">
+    <!-- Header -->
+    <div class="header">
+        <h1>Products</h1>
+        <button class="add-button" [routerLink]="['./new']">
+            <i class="fas fa-plus"></i>
+            Add Product
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="filterProducts()" placeholder="Search products...">
+        </div>
+        <div class="category-filters">
+            <button [class.active]="selectedCategory === 'all'" (click)="setCategory('all')">
+                All
+            </button>
+            <button *ngFor="let category of categories" [class.active]="selectedCategory === category" (click)="setCategory(category)">
+                {{category}}
+            </button>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="table-container">
+        <table *ngIf="!loading && filteredProducts.length > 0">
+            <thead>
+                <tr>
+                    <th (click)="toggleSort('name')">
+                        Product Name
+                        <i class="fas" [class]="getSortIcon('name')"></i>
+                    </th>
+                    <th (click)="toggleSort('category')">
+                        Category
+                        <i class="fas" [class]="getSortIcon('category')"></i>
+                    </th>
+                    <th (click)="toggleSort('price')">
+                        Price
+                        <i class="fas" [class]="getSortIcon('price')"></i>
+                    </th>
+                    <th (click)="toggleSort('stock')">
+                        Stock
+                        <i class="fas" [class]="getSortIcon('stock')"></i>
+                    </th>
+                    <th (click)="toggleSort('status')">
+                        Status
+                        <i class="fas" [class]="getSortIcon('status')"></i>
+                    </th>
+                    <th (click)="toggleSort('lastUpdated')">
+                        Last Updated
+                        <i class="fas" [class]="getSortIcon('lastUpdated')"></i>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let product of filteredProducts">
+                    <td>{{product.name}}</td>
+                    <td>{{product.category}}</td>
+                    <td>${{product.price.toFixed(2)}}</td>
+                    <td>
+                        <span class="stock" [class.low]="product.stock < 10">
+                            {{product.stock}} units
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status" [class.active]="product.status === 'active'">
+                            {{product.status}}
+                        </span>
+                    </td>
+                    <td>{{product.lastUpdated | date:'short'}}</td>
+                    <td class="actions">
+                        <button aria-label="button" class="icon-button" [routerLink]="['./', product.id]">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button aria-label="button" class="icon-button" (click)="editProduct(product.id)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button aria-label="button" class="icon-button delete" (click)="deleteProduct(product.id)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Loading State -->
+        <div class="loading" *ngIf="loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading products...
+        </div>
+
+        <!-- Empty State -->
+        <div class="loading" *ngIf="!loading && filteredProducts.length === 0">
+            <i class="fas fa-box-open"></i> No products found
+        </div>
+    </div>
+</div>

@@ -1,1 +1,177 @@
-<p>customer-detail works!</p>
+<div class="customer-detail-container">
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <button class="back-button" (click)="goBack()">
+                <i class="fas fa-arrow-left"></i>
+                Back to Customers
+            </button>
+            <h1>Customer Details</h1>
+        </div>
+        <button class="edit-button" (click)="editCustomer()" *ngIf="customer">
+            <i class="fas fa-edit"></i>
+            Edit Customer
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading customer details...</p>
+    </div>
+
+    <!-- Customer Content -->
+    <div class="customer-content" *ngIf="!loading && customer">
+        <!-- Customer Header Card -->
+        <div class="customer-header-card">
+            <div class="customer-basic-info">
+                <div class="customer-avatar">
+                    {{ customer.firstName[0] }}{{ customer.lastName[0] }}
+                </div>
+                <div class="customer-main-details">
+                    <h2>{{ customer.firstName }} {{ customer.lastName }}</h2>
+                    <p class="company" *ngIf="customer.company">{{ customer.company }}</p>
+                    <div class="badges">
+                        <span class="badge" [style.backgroundColor]="getStatusColor(customer.status)">
+                            {{ customer.status }}
+                        </span>
+                        <span class="badge type-badge">
+                            {{ customer.type }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="customer-quick-info">
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <a [href]="'mailto:' + customer.email">{{ customer.email }}</a>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <a [href]="'tel:' + customer.phone">{{ customer.phone }}</a>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>Customer since {{ customer.customerSince | date:'mediumDate' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button [class.active]="activeTab === 'overview'" (click)="setActiveTab('overview')">
+                <i class="fas fa-home"></i>
+                Overview
+            </button>
+            <button [class.active]="activeTab === 'orders'" (click)="setActiveTab('orders')">
+                <i class="fas fa-shopping-cart"></i>
+                Orders
+            </button>
+            <button [class.active]="activeTab === 'addresses'" (click)="setActiveTab('addresses')">
+                <i class="fas fa-map-marker-alt"></i>
+                Addresses
+            </button>
+            <button [class.active]="activeTab === 'billing'" (click)="setActiveTab('billing')">
+                <i class="fas fa-file-invoice-dollar"></i>
+                Billing
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" [ngSwitch]="activeTab">
+            <!-- Overview Tab -->
+            <div class="overview-tab" *ngSwitchCase="'overview'">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">Total Purchases</div>
+                        <div class="stat-value">{{ customer.totalPurchases | currency }}</div>
+                        <div class="stat-footer">Lifetime value</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">Current Balance</div>
+                        <div class="stat-value">{{ customer.currentBalance | currency }}</div>
+                        <div class="stat-footer">Outstanding amount</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">Last Purchase</div>
+                        <div class="stat-value">{{ customer.lastPurchase | date:'shortDate' }}</div>
+                        <div class="stat-footer">Most recent order</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">Credit Limit</div>
+                        <div class="stat-value">{{ customer.creditLimit | currency }}</div>
+                        <div class="stat-footer">Available credit</div>
+                    </div>
+                </div>
+
+                <div class="notes-section" *ngIf="customer.notes">
+                    <h3>Notes</h3>
+                    <p>{{ customer.notes }}</p>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div class="orders-tab" *ngSwitchCase="'orders'">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let order of customer.orders">
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.date | date:'mediumDate' }}</td>
+                            <td>{{ order.items }}</td>
+                            <td>{{ order.total | currency }}</td>
+                            <td>
+                                <span class="status-badge" [style.backgroundColor]="getStatusColor(order.status)">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Addresses Tab -->
+            <div class="addresses-tab" *ngSwitchCase="'addresses'">
+                <div class="address-grid">
+                    <div class="address-card" *ngFor="let address of customer.addresses">
+                        <div class="address-type">
+                            {{ address.type | titlecase }} Address
+                            <span class="default-badge" *ngIf="address.isDefault">Default</span>
+                        </div>
+                        <div class="address-content">
+                            <p>{{ address.street }}</p>
+                            <p>{{ address.city }}, {{ address.state }} {{ address.postalCode }}</p>
+                            <p>{{ address.country }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Tab -->
+            <div class="billing-tab" *ngSwitchCase="'billing'">
+                <div class="billing-info-grid">
+                    <div class="info-card">
+                        <h3>Payment Terms</h3>
+                        <p>{{ customer.paymentTerms || 'Not specified' }}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>Tax ID</h3>
+                        <p>{{ customer.taxId || 'Not specified' }}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>Preferred Payment Method</h3>
+                        <p>{{ customer.preferredPaymentMethod || 'Not specified' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
