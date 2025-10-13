@@ -1,6 +1,7 @@
+@use 'sass:color';
 // Variables
 $primary-color: #FFD700; // Yellow
-$primary-hover: darken(#FFD700, 10%);
+$primary-hover: color.scale($primary-color, $lightness: -10%);
 $secondary-color: #1A1A1A; // Black
 $text-color: #4A5568;
 $light-gray: #F7FAFC;

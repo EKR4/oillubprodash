@@ -1,5 +1,5 @@
 <div class="order-detail" *ngIf="order">
-    <div class="head                                              <span>${{ order.total_amount.toFixed(2) }}</span>                <span>${{ order.shipping_amount.toFixed(2) }}</span>                <span>${{ order.tax_amount.toFixed(2) }}</span>              <td>${{ item.unit_price.toFixed(2) }}</td>                         <td>{{ item.product_name }}</td>                               <td>${{ item.unit_price.toFixed(2) }}</td>                         <td>{{ item.product_name }}</td>r">
+    <div class="header">
         <div class="title-section">
             <h1>Order #{{ order.order_number }}</h1>
             <div class="status-badges">
@@ -60,11 +60,11 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let item of order.items">
-                            <td>{{ item.productName }}</td>
-                            <td>{{ item.sku }}</td>
+                            <td>{{ item.product_name }}</td>
+                            <td>{{ item.product_sku }}</td>
                             <td>{{ item.quantity }}</td>
-                            <td>${{ item.unitPrice.toFixed(2) }}</td>
-                            <td>${{ item.total.toFixed(2) }}</td>
+                            <td>${{ item.unit_price.toFixed(2) }}</td>
+                            <td>${{ (item.unit_price * item.quantity).toFixed(2) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -77,15 +77,15 @@
                 </div>
                 <div class="summary-row">
                     <span>Tax</span>
-                    <span>${{ order.tax.toFixed(2) }}</span>
+                    <span>${{ order.tax_amount.toFixed(2) }}</span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping</span>
-                    <span>${{ order.shipping.toFixed(2) }}</span>
+                    <span>${{ order.shipping_fee.toFixed(2) }}</span>
                 </div>
                 <div class="summary-row total">
                     <span>Total</span>
-                    <span>${{ order.total.toFixed(2) }}</span>
+                    <span>${{ order.total_amount.toFixed(2) }}</span>
                 </div>
             </div>
         </div>

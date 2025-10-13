@@ -1,6 +1,6 @@
 <div class="orders-container">
     <div class="header">
-                              {{ order.payment_status }}{{ order.order_number }}      <h1>Orders</h1>
+        <h1>Orders</h1>
         <div class="stats">
             <div class="stat-card">
                 <span class="value">152</span>
@@ -25,7 +25,7 @@
 
         <div class="status-filters">
             <button *ngFor="let status of statusFilters" [class.active]="selectedStatus === status.id" (click)="filterByStatus(status.id)">
-        {{ status.name }}
+        {{ status.label }}
       </button>
         </div>
     </div>
@@ -57,21 +57,21 @@
                 <tr *ngFor="let order of orders">
                     <td>
                         <a [routerLink]="['/orders', order.id]" class="order-link">
-              {{ order.orderNumber }}
+              {{ order.order_number }}
             </a>
                     </td>
-                    <td>{{ order.customerName }}</td>
-                    <td>{{ order.date | date:'medium' }}</td>
-                    <td>${{ order.total.toFixed(2) }}</td>
-                    <td>{{ order.items }} items</td>
+                    <td>{{ order.user?.full_name || 'Unknown Customer' }}</td>
+                    <td>{{ order.created_at | date:'medium' }}</td>
+                    <td>${{ order.total_amount.toFixed(2) }}</td>
+                    <td>{{ order.items.length }} items</td>
                     <td>
                         <span class="status-badge" [class]="getStatusColor(order.status)">
               {{ order.status }}
             </span>
                     </td>
                     <td>
-                        <span class="status-badge" [class]="getPaymentStatusColor(order.paymentStatus)">
-              {{ order.paymentStatus }}
+                        <span class="status-badge" [class]="getPaymentStatusColor(order.payment_status)">
+              {{ order.payment_status }}
             </span>
                     </td>
                     <td class="actions">

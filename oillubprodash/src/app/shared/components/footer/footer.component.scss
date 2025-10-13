@@ -1,0 +1,36 @@
+:host {
+    display: block;
+}
+
+// Hover effects for social media icons
+a svg {
+    transition: transform 0.2s ease;
+    &:hover {
+        transform: scale(1.1);
+    }
+}
+
+// Animate underline for links
+a:not([class*="hover"]) {
+    position: relative;
+    &:after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 1px;
+        bottom: -2px;
+        left: 0;
+        background-color: #EAB308; // Yellow-500
+        transition: width 0.3s ease;
+    }
+    &:hover:after {
+        width: 100%;
+    }
+}
+
+// Responsive grid adjustments
+@media (max-width: 768px) {
+    .grid {
+        gap: 2rem;
+    }
+}

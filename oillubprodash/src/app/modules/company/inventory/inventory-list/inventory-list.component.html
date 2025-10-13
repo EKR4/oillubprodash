@@ -25,7 +25,7 @@
 
         <div class="category-filters">
             <button *ngFor="let category of categories" [class.active]="selectedCategory === category.id" (click)="filterByCategory(category.id)">
-        {{ category.name }}
+        {{ category.label }}
       </button>
         </div>
 

@@ -289,7 +289,7 @@
                     <div class="divide-y divide-gray-200 mb-4">
                         <div *ngFor="let item of cart.items" class="py-3 flex items-center">
                             <div class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
-                                <img alt="" [src]="item.product.image_url || 'assets/images/product-placeholder.jpg'" [alt]="item.product.name" [title]="item.product.name" class="w-full h-full object-cover">
+                                <img alt="" [src]="item.product.image_urls[0] || 'assets/images/product-placeholder.png'" [alt]="item.product.name" [title]="item.product.name" class="w-full h-full object-cover">
                             </div>
                             <div class="ml-4 flex-1">
                                 <h3 class="text-sm font-medium text-gray-800 truncate">{{ item.product.name }}</h3>

@@ -68,7 +68,7 @@ export const serverRoutes: ServerRoute[] = [
     }
   },
   {
-    path: 'profile',
+    path: 'dashboard',
     renderMode: RenderMode.Server,
     headers: {
       'Cache-Control': 'private, no-cache',
@@ -76,19 +76,41 @@ export const serverRoutes: ServerRoute[] = [
     }
   },
 
-  // Product catalog - Hybrid rendering
+  // Product routes - Hybrid rendering
   {
-    path: 'product-catalog',
+    path: 'products',
     renderMode: RenderMode.Client,
     headers: {
       'Cache-Control': 'public, max-age=300'
     }
   },
   {
-    path: 'product-detail/:id',
+    path: 'products/category/:category',
+    renderMode: RenderMode.Client,
+    headers: {
+      'Cache-Control': 'public, max-age=300'
+    }
+  },
+  {
+    path: 'products/:id',
     renderMode: RenderMode.Server,
     headers: {
-      'Cache-Control': 'public, max-age=60'
+      'Cache-Control': 'public, max-age=60, stale-while-revalidate=30'
+    }
+  },
+  // Legacy routes redirects
+  {
+    path: 'product-catalog',
+    renderMode: RenderMode.Client,
+    headers: {
+      'Cache-Control': 'no-store'
+    }
+  },
+  {
+    path: 'product-detail/:id',
+    renderMode: RenderMode.Client,
+    headers: {
+      'Cache-Control': 'no-store'
     }
   },
   {

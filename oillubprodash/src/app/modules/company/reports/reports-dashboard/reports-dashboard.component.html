@@ -84,7 +84,7 @@
                 <div class="product-item" *ngFor="let product of salesMetrics.topProducts">
                     <div class="product-info">
                         <span class="name">{{ product.name }}</span>
-                        <span class="sales">{{ product.sales }} sales</span>
+                        <span class="sales">{{ product.quantity }} sales</span>
                     </div>
                     <div class="revenue">
                         {{ formatCurrency(product.revenue) }}
@@ -99,7 +99,7 @@
                 <div class="category-item" *ngFor="let category of inventoryMetrics.topCategories">
                     <div class="category-info">
                         <span class="name">{{ category.name }}</span>
-                        <span class="count">{{ category.count }} items</span>
+                        <span class="count">{{ category.itemCount }} items</span>
                     </div>
                     <div class="value">
                         {{ formatCurrency(category.value) }}

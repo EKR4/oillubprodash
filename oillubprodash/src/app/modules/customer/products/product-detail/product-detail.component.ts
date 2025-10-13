@@ -143,11 +143,11 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   getProductImage(product: Product): string {
-    return product.image_url || 'assets/images/placeholder.jpg';
+    return product.image_urls?.[0] || 'assets/images/placeholder.jpg';
   }
 
-  setActiveTab(tab: 'description' | 'specifications' | 'reviews'): void {
-    this.activeTab = tab;
+  setActiveTab(tab: string): void {
+    this.activeTab = tab as 'description' | 'specifications' | 'reviews';
   }
 
   isPackageSelected(pkg: ProductPackage): boolean {
@@ -170,5 +170,17 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     // Implementation to be added
     console.log('Added to favorites:', this.product);
     alert('Product added to favorites');
+  }
+
+  isPackageInStock(pkg: ProductPackage): boolean {
+    return pkg.stock_level > 0;
+  }
+
+  getFormattedPrice(pkg: ProductPackage): string {
+    return this.formatCurrency(pkg.unit_price);
+  }
+
+  getOEMApprovalsList(): string[] {
+    return this.product?.specifications?.oem_approvals || [];
   }
 }

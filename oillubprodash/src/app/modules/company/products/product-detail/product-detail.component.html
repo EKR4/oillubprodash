@@ -22,7 +22,7 @@
         <!-- Product Info -->
         <div class="product-info">
             <h1 class="product-name">{{product.name}}</h1>
-            <div class="price">${{selectedPackage?.unit_price.toFixed(2) || '0.00'}}</div>
+            <div class="price">${{selectedPackage?.unit_price ? (selectedPackage?.unit_price ?? 0).toFixed(2) : '0.00'}}</div>
 
             <div class="description">
                 <h2>Description</h2>
@@ -41,12 +41,12 @@
                         <span class="value">{{selectedPackage?.size}}</span>
                     </div>
                     <div class="spec-item">
-                        <span class="label">Type:</span>
-                        <span class="value">{{product.specs.type}}</span>
+                        <span class="label">Base Type:</span>
+                        <span class="value">{{product.specifications.base_oil_type}}</span>
                     </div>
                     <div class="spec-item">
-                        <span class="label">Manufacturer:</span>
-                        <span class="value">{{product.specs.manufacturer}}</span>
+                        <span class="label">Performance Level:</span>
+                        <span class="value">{{product.specifications.performance_level}}</span>
                     </div>
                 </div>
             </div>
@@ -63,7 +63,7 @@
         </button>
             </div>
 
-            <div class="stock-info" [class.low-stock]="selectedPackage?.stock_level || 0 < selectedPackage?.low_stock_threshold || 20">
+            <div class="stock-info" [class.low-stock]="(selectedPackage?.stock_level || 0) < (selectedPackage?.low_stock_threshold || 20)">
                 {{selectedPackage?.stock_level || 0}} units in stock
             </div>
         </div>

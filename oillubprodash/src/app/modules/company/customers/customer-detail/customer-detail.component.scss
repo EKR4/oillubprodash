@@ -1,3 +1,4 @@
+@use 'sass:color';
 // Variables
 $primary-yellow: #FFD700;
 $secondary-yellow: #FFC800;
@@ -62,7 +63,7 @@ $white: #FFFFFF;
     background-color: $light-gray;
     color: $dark-gray;
     &:hover {
-        background-color: darken($light-gray, 5%);
+        background-color: color.scale($light-gray, $lightness: -5%);
     }
 }
 

@@ -52,11 +52,11 @@
             <div class="lg:col-span-8">
                 <div class="bg-white shadow-sm rounded-lg">
                     <ul class="divide-y divide-gray-200">
-                        <li *ngFor="let item of cart.items" class="p-6">
+                        <li *ngFor="let item of cart?.items" class="p-6">
                             <div class="flex items-center">
                                 <!-- Product Image -->
                                 <div class="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32">
-                                    <img [src]="item.product.image_urls[0] || '/assets/images/placeholder.jpg'" [alt]="item.product.name" class="w-full h-full object-cover rounded-md">
+                                    <img alt [src]="item.product.image_urls[0] || '/assets/images/placeholder.jpg'" [alt]="item.product.name" class="w-full h-full object-cover rounded-md">
                                 </div>
 
                                 <!-- Product Details -->

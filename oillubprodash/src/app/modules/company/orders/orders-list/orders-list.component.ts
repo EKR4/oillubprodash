@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Order, OrderStatus, PaymentStatus } from '../../../../cores/models';
+import { Order, OrderStatus, PaymentStatus, OrderWithRelations } from '../../../../cores/models';
 
 @Component({
   selector: 'app-orders-list',
@@ -13,17 +13,13 @@ import { Order, OrderStatus, PaymentStatus } from '../../../../cores/models';
 })
 export class OrdersListComponent implements OnInit {
   isLoading = false;
-  filterByStatus(status: OrderStatus | 'all'): void {
-    this.selectedStatus = status;
-    // Implement filtering logic
-  }
-  orders: Order[] = [];
+  orders: OrderWithRelations[] = [];
   searchControl = new FormControl('');
   selectedStatus: OrderStatus | 'all' = 'all';
   sortField: 'date' | 'total' | 'status' = 'date';
   sortDirection: 'asc' | 'desc' = 'desc';
 
-  statusFilters = [
+  statusFilters: Array<{ id: OrderStatus | 'all', label: string }> = [
     { id: 'all', label: 'All Orders' },
     { id: 'pending', label: 'Pending' },
     { id: 'processing', label: 'Processing' },

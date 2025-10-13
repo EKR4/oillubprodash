@@ -1,3 +1,4 @@
+@use 'sass:color';
 // Variables
 $primary-yellow: #FFD700;
 $secondary-yellow: #FFC800;
@@ -188,7 +189,7 @@ $info-color: #2196F3;
                 margin-left: 0.5rem;
             }
             &:hover {
-                background: lighten($black, 10%);
+                background: color.scale($black, $lightness: 10%);
             }
         }
         td {

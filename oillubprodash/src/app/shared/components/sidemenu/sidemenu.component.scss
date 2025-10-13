@@ -1,0 +1,68 @@
+:host {
+    display: block;
+    position: relative;
+}
+
+aside {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: #1a1a1a;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #4a4a4a;
+        border-radius: 3px;
+        &:hover {
+            background: #5a5a5a;
+        }
+    }
+}
+
+// Navigation item animations
+nav a {
+    position: relative;
+    overflow: hidden;
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 2px;
+        width: 0;
+        background-color: #EAB308; // Yellow-500
+        transition: width 0.3s ease;
+    }
+    &:hover::before {
+        width: 100%;
+    }
+    svg {
+        transition: transform 0.2s ease;
+    }
+    &:hover svg {
+        transform: scale(1.1);
+    }
+}
+
+// Active state styling
+.active-link {
+    background-color: rgba(255, 255, 255, 0.1);
+    &::before {
+        width: 100%;
+    }
+}
+
+// Toggle button animation
+button svg {
+    transition: transform 0.3s ease;
+}
+
+button:hover svg {
+    transform: scale(1.1);
+}

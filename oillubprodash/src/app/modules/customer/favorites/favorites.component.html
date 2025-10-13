@@ -51,7 +51,7 @@
             <div *ngFor="let product of favorites" class="product-card">
                 <!-- Product Image -->
                 <div class="image-container">
-                    <img alt [src]="product.image_url" [alt]="product.name">
+                    <img alt [src]="product.image_urls[0] || 'assets/images/placeholder.png'" [alt]="product.name">
 
                     <!-- Remove from Favorites Button -->
                     <button (click)="removeFromFavorites(product.id)" class="favorite-button" title="Remove from favorites">
@@ -67,7 +67,7 @@
                     <p>{{ product.description }}</p>
 
                     <div class="actions">
-                        <span class="price">{{ formatCurrency(product.price) }}</span>
+                        <span class="price">{{ formatCurrency(product.packages[0]?.unit_price || 0) }}</span>
                         <button (click)="addToCart(product)" class="action-button">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />

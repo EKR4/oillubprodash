@@ -29,12 +29,33 @@ export const PUBLIC_ROUTES: Routes = [
   },
   {
     path: 'products',
-    component: ProductCatalogComponent,
-    title: 'Products'
+    children: [
+      {
+        path: '',
+        component: ProductCatalogComponent,
+        title: 'Products'
+      },
+      {
+        path: 'category/:category',
+        component: ProductCatalogComponent,
+        title: 'Products by Category'
+      },
+      {
+        path: ':id',
+        component: ProductDetailComponent,
+        title: 'Product Details'
+      }
+    ]
+  },
+  // Redirect old URLs to new structure
+  {
+    path: 'product-catalog',
+    redirectTo: 'products',
+    pathMatch: 'full'
   },
   {
-    path: 'products/:id',
-    component: ProductDetailComponent,
-    title: 'Product Details'
+    path: 'product-detail/:id',
+    redirectTo: 'products/:id',
+    pathMatch: 'prefix'
   }
 ];
