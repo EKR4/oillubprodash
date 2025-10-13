@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Product, ProductPackage } from '../../../../cores/models/product';
+import { Product, ProductPackage, VehicleType } from '../../../../cores/models/product';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -18,6 +18,8 @@ export class ProductDetailComponent implements OnInit {
   loading: boolean = true;
   quantity: number = 1;
   selectedPackage: ProductPackage | null = null;
+  selectedImage: string = '';
+  images: string[] = [];
   
   constructor(
     private route: ActivatedRoute,
@@ -32,81 +34,12 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
-  private loadProductDetails(id: string): void {
-    // Simulated product data - replace with actual service call
-    setTimeout(() => {
-      try {
-        this.product = {
-          id: id,
-          sku: 'EO-5W30-5L',
-          name: 'Premium Engine Oil',
-          description: 'High-performance synthetic engine oil suitable for all types of engines.',
-          brand: 'OilTech Pro',
-          category: 'engine_oil',
-          viscosity_grade: '5W-30',
-          is_active: true,
-          created_at: new Date(),
-          created_by: 'system',
-          image_url: 'assets/product-1.jpg',
-          specifications: {
-            base_oil_type: 'synthetic',
-            api_classification: 'API SP',
-            acea_classification: 'ACEA A3/B4',
-            oem_approvals: ['MB-Approval 229.5', 'BMW LL-01']
-          },
-          packages: [
-            {
-              id: '1',
-              product_id: id,
-              size: '5L',
-              unit: 'L',
-              unit_price: 49.99,
-              currency: 'USD',
-              weight_kg: 5.2,
-              stock_level: 150,
-              low_stock_threshold: 20,
-              reorder_quantity: 50,
-              is_available: true
-            }
-          ],
-          certifications: [
-            {
-              id: '1',
-              product_id: id,
-              certification_type: 'API',
-              certification_number: 'API-SP-2021',
-              issuing_body: 'API',
-              issue_date: new Date(),
-              expiry_date: new Date(2026, 0, 1),
-              is_active: true
-            }
-          ],
-          compatible_vehicles: ['petrol', 'diesel'],
-          benefits: [
-            'Superior engine protection',
-            'Improved fuel economy',
-            'Extended drain intervals'
-          ],
-          recommended_for: [
-            'Modern gasoline engines',
-            'Light-duty diesel engines'
-          ]
-        };
-        this.selectedPackage = this.product.packages[0];
-
-      } catch (error) {
-        console.error('Error loading product:', error);
-        this.router.navigate(['../'], { relativeTo: this.route });
-      } finally {
-        this.loading = false;
-      }  
-    }, 1000);
+  setSelectedImage(image: string): void {
+    this.selectedImage = image;
   }
 
-
-
   incrementQuantity(): void {
-    if (this.selectedPackage && this.quantity < this.selectedPackage.stock_level) {
+    if (this.selectedPackage && this.quantity < (this.selectedPackage.stock_level || 0)) {
       this.quantity++;
     }
   }
@@ -117,8 +50,91 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
+  private async loadProductDetails(id: string): Promise<void> {
+    try {
+      this.loading = true;
+      // Simulated product data - replace with actual service call
+      const productData = await new Promise<Product>((resolve) => {
+        setTimeout(() => {
+          resolve({
+            id: id,
+            sku: 'EO-5W30-5L',
+            name: 'Premium Engine Oil',
+            description: 'High-performance synthetic engine oil suitable for all types of engines.',
+            brand: 'OilTech Pro',
+            category: 'engine_oil',
+            created_by: 'system',
+            viscosity_grade: '5W-30',
+            specifications: {
+              base_oil_type: 'synthetic',
+              api_classification: 'API SP',
+              acea_classification: 'ACEA A3/B4',
+              oem_approvals: ['MB-Approval 229.5', 'BMW LL-01']
+            },
+            packages: [
+              {
+                id: '1',
+                product_id: id,
+                size: '5L',
+                unit: 'L',
+                unit_price: 49.99,
+                currency: 'USD',
+                weight_kg: 5.2,
+                stock_level: 150,
+                low_stock_threshold: 20,
+                reorder_quantity: 50,
+                is_available: true
+              }
+            ],
+            certifications: [
+              {
+                id: '1',
+                product_id: id,
+                certification_type: 'API',
+                certification_number: 'API-SP-2021',
+                issuing_body: 'API',
+                issue_date: new Date(),
+                expiry_date: new Date(2026, 0, 1),
+                is_active: true
+              }
+            ],
+            compatible_vehicles: ['petrol', 'diesel'] as VehicleType[],
+            benefits: [
+              'Superior engine protection',
+              'Improved fuel economy',
+              'Extended drain intervals'
+            ],
+            recommended_for: [
+              'Modern gasoline engines',
+              'Light-duty diesel engines'
+            ],
+            image_urls: [
+              'assets/product-1.jpg',
+              'assets/product-2.jpg',
+              'assets/product-3.jpg'
+            ],
+            is_active: true,
+            created_at: new Date()
+          });
+        }, 1000);
+      });
+
+      this.product = productData;
+      if (this.product) {
+        this.selectedImage = this.product.image_urls[0];
+        this.images = this.product.image_urls;
+        this.selectedPackage = this.product.packages[0];
+      }
+    } catch (error) {
+      console.error('Error loading product:', error);
+      this.router.navigate(['../'], { relativeTo: this.route });
+    } finally {
+      this.loading = false;
+    }
+  }
+
   addToCart(): void {
-    if (!this.product) return;
+    if (!this.product || !this.selectedPackage) return;
     
     try {
       // Implement cart functionality

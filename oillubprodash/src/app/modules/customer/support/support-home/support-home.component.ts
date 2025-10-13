@@ -1,4 +1,6 @@
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Ticket } from '../../../../cores/models/ticket';
@@ -6,6 +8,8 @@ import { TicketService } from '../../../../shared/services/ticket.service';
 
 @Component({
   selector: 'app-support-home',
+  standalone: true,
+  imports: [CommonModule, RouterModule, DatePipe],
   templateUrl: './support-home.component.html',
   styleUrls: ['./support-home.component.scss']
 })

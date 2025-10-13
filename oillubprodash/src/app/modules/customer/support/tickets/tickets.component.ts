@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Ticket } from '../../../../cores/models/ticket';
 import { TicketService } from '../../../../shared/services/ticket.service';
@@ -7,7 +10,14 @@ import { TicketService } from '../../../../shared/services/ticket.service';
 @Component({
   selector: 'app-tickets',
   templateUrl: './tickets.component.html',
-  styleUrls: ['./tickets.component.scss']
+  styleUrls: ['./tickets.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    ReactiveFormsModule
+  ]
 })
 export class TicketsComponent implements OnInit {
   tickets$: Observable<Ticket[]>;

@@ -70,7 +70,7 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   getProductImageUrl(item: CartItem): string {
-    return item.product?.image_url || 'assets/images/product-placeholder.jpg';
+    return item.product?.image_urls?.[0] || 'assets/images/product-placeholder.jpg';
   }
 
   // Cart Operations

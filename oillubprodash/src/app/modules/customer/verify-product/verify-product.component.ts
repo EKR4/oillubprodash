@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 
 interface VerificationResult {
   serialNumber: string;
@@ -14,7 +15,9 @@ interface VerificationResult {
 @Component({
   selector: 'app-verify-product',
   templateUrl: './verify-product.component.html',
-  styleUrls: ['./verify-product.component.scss']
+  styleUrls: ['./verify-product.component.scss'],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule]
 })
 export class VerifyProductComponent implements OnInit {
   verifyForm: FormGroup;

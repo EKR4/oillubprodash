@@ -326,7 +326,7 @@ export class CustomerDashboardComponent implements OnInit, OnDestroy {
           description: p.description,
           brand: p.brand,
           category: p.category as ProductCategory,
-          image_url: p.image_url,
+          image_urls: p.image_urls || [],
           sku: (p as any).sku || `SKU-${p.id}`,
           packages: (p.packages || []).map(pkg => ({
             id: pkg.id || `pkg-${p.id}-${Math.random().toString(36).substring(2, 7)}`,
@@ -366,7 +366,7 @@ export class CustomerDashboardComponent implements OnInit, OnDestroy {
             brand: 'MaxPro',
             category: 'engine_oil',
             viscosity_grade: '5W-30',
-            image_url: '/assets/images/products/engine-oil-1.jpg',
+            image_urls: ['/assets/images/products/engine-oil-1.jpg'],
             is_active: true,
             created_at: now,
             created_by: 'system',
@@ -648,7 +648,7 @@ export class CustomerDashboardComponent implements OnInit, OnDestroy {
   }
 
   getProductImage(product: any): string {
-    return product.image_url || `/assets/images/products/default-${product.category}.jpg`;
+    return product.image_urls?.[0] || `/assets/images/products/default-${product.category}.jpg`;
   }
 
   getProductPrice(product: any): number {

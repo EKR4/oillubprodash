@@ -109,7 +109,7 @@
                 </h2>
 
                 <div formArrayName="specifications">
-                    <div class="spec-row" *ngFor="let spec of productForm.get('specifications').controls; let i = index" [formGroupName]="i">
+                    <div class="spec-row" *ngFor="let spec of (productForm.get('specifications') as FormArray).controls; let i = index" [formGroupName]="i">
                         <input type="text" formControlName="key" placeholder="Key">
                         <input type="text" formControlName="value" placeholder="Value">
                         <button aria-label="button" type="button" class="remove-spec" (click)="removeSpecification(i)">

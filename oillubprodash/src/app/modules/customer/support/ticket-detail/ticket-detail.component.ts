@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Ticket } from '../../../../cores/models/ticket';
 import { TicketService } from '../../../../shared/services/ticket.service';
@@ -15,11 +15,18 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule, FormsModule, ReactiveFormsModule]
 })
 export class TicketDetailComponent implements OnInit, OnDestroy {
-  ticket: Ticket | null = null;
-  newMessage = '';
+  ticket$ = new BehaviorSubject<Ticket | null>(null);
+  replyForm: FormGroup;
   selectedFiles: File[] = [];
+
+  addReply(): void {
+    if (this.replyForm.valid) {
+      // Implement reply submission logic
+      console.log('Reply submitted:', this.replyForm.value);
+    }
+  }
   isLoading = true;
-  isSending = false;
+  isSubmitting = false;
   error: string | null = null;
 
   private destroy$ = new Subject<void>();
@@ -27,8 +34,14 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private ticketService: TicketService
-  ) {}
+    private ticketService: TicketService,
+    private fb: FormBuilder
+  ) {
+    this.replyForm = this.fb.group({
+      message: ['', [Validators.required]],
+      attachments: [[]]
+    });
+  }
 
   ngOnInit(): void {
     this.route.params.pipe(
@@ -57,7 +70,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
           if (!ticket) {
             this.error = 'Ticket not found';
           } else {
-            this.ticket = ticket;
+            this.ticket$.next(ticket);
           }
           this.isLoading = false;
         },
@@ -70,35 +83,39 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   async sendMessage(): Promise<void> {
-    if (!this.ticket || !this.newMessage.trim()) return;
+    if (this.replyForm.invalid || this.isSubmitting) return;
 
-    this.isSending = true;
+    this.isSubmitting = true;
     this.error = null;
+
+    const currentTicket = this.ticket$.getValue();
+    if (!currentTicket) return;
 
     try {
       await this.ticketService.addMessage(
-        this.ticket.id,
-        this.newMessage,
+        currentTicket.id,
+        this.replyForm.get('message')?.value,
         this.selectedFiles
       );
 
-      this.newMessage = '';
+      this.replyForm.reset();
       this.selectedFiles = [];
-      await this.loadTicket(this.ticket.id);
+      await this.loadTicket(currentTicket.id);
     } catch (error) {
       this.error = 'Failed to send message';
       console.error('Error sending message:', error);
     } finally {
-      this.isSending = false;
+      this.isSubmitting = false;
     }
   }
 
   async closeTicket(): Promise<void> {
-    if (!this.ticket) return;
+    const currentTicket = this.ticket$.getValue();
+    if (!currentTicket) return;
 
     try {
-      await this.ticketService.closeTicket(this.ticket.id);
-      await this.loadTicket(this.ticket.id);
+      await this.ticketService.closeTicket(currentTicket.id);
+      await this.loadTicket(currentTicket.id);
     } catch (error) {
       this.error = 'Failed to close ticket';
       console.error('Error closing ticket:', error);
@@ -106,11 +123,12 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   async reopenTicket(): Promise<void> {
-    if (!this.ticket) return;
+    const currentTicket = this.ticket$.getValue();
+    if (!currentTicket) return;
 
     try {
-      await this.ticketService.reopenTicket(this.ticket.id);
-      await this.loadTicket(this.ticket.id);
+      await this.ticketService.reopenTicket(currentTicket.id);
+      await this.loadTicket(currentTicket.id);
     } catch (error) {
       this.error = 'Failed to reopen ticket';
       console.error('Error reopening ticket:', error);

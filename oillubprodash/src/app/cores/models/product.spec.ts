@@ -11,6 +11,7 @@ describe('Product interface', () => {
       category: 'engine_oil',
       viscosity_grade: '5W-30',
       is_active: true,
+      image_urls: ['test-image-1.jpg', 'test-image-2.jpg'],
       created_at: new Date(),
       created_by: 'test-user',
       specifications: {

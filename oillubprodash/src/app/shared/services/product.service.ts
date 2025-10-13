@@ -140,7 +140,8 @@ export class ProductService {
                 certifications: certs.data || [],
                 compatible_vehicles: vehicles.data?.map(v => v.vehicle_type as VehicleType) || [],
                 created_at: new Date(base.created_at),
-                updated_at: base.updated_at ? new Date(base.updated_at) : undefined
+                updated_at: base.updated_at ? new Date(base.updated_at) : undefined,
+                image_urls: base['image_urls'] || []
               };
               
               // Ensure all packages use KES currency
@@ -205,7 +206,8 @@ export class ProductService {
           ...data,
           compatible_vehicles: data.compatible_vehicles?.map((v: any) => v.vehicle_type as VehicleType) || [],
           created_at: new Date(data.created_at),
-          updated_at: data.updated_at ? new Date(data.updated_at) : undefined
+          updated_at: data.updated_at ? new Date(data.updated_at) : undefined,
+          image_urls: data['image_urls'] || []
         };
         
         // Ensure all packages use KES currency
@@ -362,7 +364,7 @@ export class ProductService {
    * Helper function to get product image URL (with fallback)
    */
   getProductImageUrl(product: Product): string {
-    return product.image_url || 'assets/images/product-placeholder.jpg';
+        return product.image_urls?.[0] || 'assets/images/product-placeholder.jpg';
   }
 
   /**

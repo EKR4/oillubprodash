@@ -13,7 +13,7 @@
                 <img alt [src]="selectedImage" [alt]="product.name">
             </div>
             <div class="thumbnail-grid">
-                <div *ngFor="let image of product.images" class="thumbnail" [class.active]="image === selectedImage" (click)="setSelectedImage(image)">
+                <div *ngFor="let image of product.image_urls" class="thumbnail" [class.active]="image === selectedImage" (click)="setSelectedImage(image)">
                     <img alt [src]="image" [alt]="product.name">
                 </div>
             </div>
@@ -22,7 +22,7 @@
         <!-- Product Info -->
         <div class="product-info">
             <h1 class="product-name">{{product.name}}</h1>
-            <div class="price">${{product.price.toFixed(2)}}</div>
+            <div class="price">${{selectedPackage?.unit_price.toFixed(2) || '0.00'}}</div>
 
             <div class="description">
                 <h2>Description</h2>
@@ -34,11 +34,11 @@
                 <div class="spec-grid">
                     <div class="spec-item">
                         <span class="label">Viscosity:</span>
-                        <span class="value">{{product.specs.viscosity}}</span>
+                        <span class="value">{{product.specifications.viscosity_grade}}</span>
                     </div>
                     <div class="spec-item">
                         <span class="label">Volume:</span>
-                        <span class="value">{{product.specs.volume}}</span>
+                        <span class="value">{{selectedPackage?.size}}</span>
                     </div>
                     <div class="spec-item">
                         <span class="label">Type:</span>
@@ -55,7 +55,7 @@
                 <div class="quantity-selector">
                     <button (click)="decrementQuantity()" [disabled]="quantity <= 1">-</button>
                     <span>{{quantity}}</span>
-                    <button (click)="incrementQuantity()" [disabled]="quantity >= product.stock">+</button>
+                    <button (click)="incrementQuantity()" [disabled]="quantity >= (selectedPackage?.stock_level || 0)">+</button>
                 </div>
 
                 <button class="add-to-cart" (click)="addToCart()">
@@ -63,8 +63,8 @@
         </button>
             </div>
 
-            <div class="stock-info" [class.low-stock]="product.stock < 20">
-                {{product.stock}} units in stock
+            <div class="stock-info" [class.low-stock]="selectedPackage?.stock_level || 0 < selectedPackage?.low_stock_threshold || 20">
+                {{selectedPackage?.stock_level || 0}} units in stock
             </div>
         </div>
     </div>

@@ -68,10 +68,10 @@
                 <!-- Actions -->
                 <div class="flex justify-between items-center">
                     <div class="space-x-4">
-                        <button *ngIf="ticket.status === 'OPEN'" type="button" (click)="closeTicket()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                        <button *ngIf="ticket.status === 'open'" type="button" (click)="closeTicket()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
               Close Ticket
             </button>
-                        <button *ngIf="ticket.status === 'CLOSED'" type="button" (click)="reopenTicket()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                        <button *ngIf="ticket.status === 'closed'" type="button" (click)="reopenTicket()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
               Reopen Ticket
             </button>
                     </div>
