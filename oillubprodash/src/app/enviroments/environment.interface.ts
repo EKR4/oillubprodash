@@ -3,6 +3,7 @@ export interface Environment {
   supabase: {
     url: string;
     key: string;
+    redirectUrl: string;
     database?: {
       url?: string; // Optional for client-side code
     };

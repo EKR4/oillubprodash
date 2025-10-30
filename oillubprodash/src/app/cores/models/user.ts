@@ -13,6 +13,13 @@ export interface User {
   last_login?: Date;
   is_active: boolean;
   loyalty_points?: number;
+  user_metadata?: {
+    full_name?: string;
+    phone?: string;
+    [key: string]: any;
+  };
+  profile?: UserProfile;
+  company?: Company;
 }
 
 export interface UserProfile extends Omit<User, 'id' | 'email'> {
@@ -36,6 +43,19 @@ export interface UserPreferences {
   email_notifications: boolean;
   preferred_language: string;
   preferred_currency: string;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  created_at: Date;
+  is_active: boolean;
+  industry?: string;
+  status?: string;
+  registration_number?: string;
+  vat_number?: string;
+  type?: string;
+  size?: string;
 }
 
 export interface AdminUser extends User {

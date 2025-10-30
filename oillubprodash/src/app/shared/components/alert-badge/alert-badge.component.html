@@ -1,0 +1,6 @@
+<div [class]="getAlertClass()">
+    @if (heading) {
+    <h3 class="font-medium" [class]="getHeadingClass()">{{ heading }}</h3>
+    }
+    <p [class]="getMessageClass()">{{ message }}</p>
+</div>

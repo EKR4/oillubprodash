@@ -3,8 +3,9 @@ import { Environment } from './environment.interface';
 export const environment: Environment = {
   production: true,
   supabase: {
-    url: 'https://hzbocsermrjuhwomgxwl.supabase.co',
-    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Ym9jc2VybXJqdWh3b21neHdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzAwNzAsImV4cCI6MjA3NDg0NjA3MH0.1gWvr1yxZgm7sXHBJRM6bjYrYPLN7rVgkXJnsKwzGEE',
+    url: 'https://cpmnnfmdwitakudydwtk.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbW5uZm1kd2l0YWt1ZHlkd3RrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2NDgwMzksImV4cCI6MjA3NzIyNDAzOX0.IjUt0DLg0877e7wCT7Xr8_vNhhWMgMVqO61KLbhxqds',
+    redirectUrl: 'https://oillubprodash.vercel.app/auth/callback',
     // Database connection is only included in server-side code
   },
   mulaflow: {

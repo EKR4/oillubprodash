@@ -1,0 +1,16 @@
+{
+  "name": "oillubprodash-backend",
+  "version": "1.0.0",
+  "description": "Supabase Backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.76.1",
+    "deno": "^2.5.4",
+    "supabase": "^2.51.0"
+  }
+}

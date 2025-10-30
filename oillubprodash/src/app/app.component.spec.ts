@@ -1,10 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { AuthService } from './cores/services/auth.service';
+import { BehaviorSubject } from 'rxjs';
 
 describe('AppComponent', () => {
+  let mockAuthService: jasmine.SpyObj<AuthService>;
+
   beforeEach(async () => {
+    mockAuthService = jasmine.createSpyObj('AuthService', ['isAuthenticated']);
+    mockAuthService.isAuthenticated.and.returnValue(new BehaviorSubject(false));
+
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [
+        { provide: AuthService, useValue: mockAuthService }
+      ]
     }).compileComponents();
   });
 
@@ -14,16 +24,9 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'oillubprodash' title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('oillubprodash');
-  });
-
-  it('should render title', () => {
+  it('should initialize authentication state', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, oillubprodash');
+    expect(mockAuthService.isAuthenticated).toHaveBeenCalled();
   });
 });

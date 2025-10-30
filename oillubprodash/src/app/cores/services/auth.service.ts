@@ -1,8 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from, map, of } from 'rxjs';
 import { SupabaseService } from './supabase.service';
-import { AuthError, User as SupabaseAuthUser, Session } from '@supabase/supabase-js';
+import { AuthError as SupabaseAuthError, User as SupabaseAuthUser, Session } from '@supabase/supabase-js';
+import { AuthState, initialAuthState } from '../models/auth-state';
+import { AuthError } from '../models/auth-error';
+import { AuthErrorService } from './auth-error.service';
 
 // Define types locally to avoid TSX import issues
 export interface User {
@@ -29,17 +32,77 @@ export interface AuthResponse {
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  private isInitialized = false;
-  private sessionSubject = new BehaviorSubject<Session | null>(null);
+  export class AuthService {
+  private authStateSubject = new BehaviorSubject<AuthState>(initialAuthState);
+  private sessionRefreshTimer: any;
+  private readonly SESSION_REFRESH_INTERVAL = 1000 * 60 * 30; // 30 minutes
 
-  public currentUser$ = this.currentUserSubject.asObservable();
-  public session$ = this.sessionSubject.asObservable();
+  // Handle the authentication callback from Supabase
+  handleCallback(access_token: string): Observable<{ user: User | null; error: Error | null }> {
+    return new Observable(observer => {
+      this.updateAuthState({ loading: true });
+
+      this.supabaseService.getSupabase().auth.setSession({
+        access_token,
+        refresh_token: ''
+      }).then(async ({ data, error }) => {
+        if (error) {
+          const authError = this.authErrorService.handleError(error);
+          this.updateAuthState({ 
+            error: authError.message,
+            loading: false 
+          });
+          observer.next({ user: null, error: new Error(authError.message) });
+          observer.complete();
+          return;
+        }
+
+        try {
+          if (data?.user) {
+            await this.loadUserData(data.user.id);
+            const currentState = this.authStateSubject.getValue();
+            observer.next({ 
+              user: currentState.user,
+              error: null 
+            });
+          } else {
+            observer.next({ 
+              user: null,
+              error: new Error('No user data received') 
+            });
+          }
+        } catch (error) {
+          const authError = this.authErrorService.handleError(error);
+          observer.next({ 
+            user: null,
+            error: new Error(authError.message)
+          });
+        }
+
+        observer.complete();
+      }).catch(error => {
+        const authError = this.authErrorService.handleError(error);
+        this.updateAuthState({ 
+          error: authError.message,
+          loading: false 
+        });
+        observer.next({ 
+          user: null,
+          error: new Error(authError.message)
+        });
+        observer.complete();
+      });
+    });
+  }  public authState$ = this.authStateSubject.asObservable();
+  public currentUser$ = this.authState$.pipe(map(state => state.user));
+  public session$ = this.authState$.pipe(map(state => state.session));
+  public loading$ = this.authState$.pipe(map(state => state.loading));
+  public error$ = this.authState$.pipe(map(state => state.error));
 
   constructor(
     private supabaseService: SupabaseService,
-    private router: Router
+    private router: Router,
+    private authErrorService: AuthErrorService
   ) {
     // Handle hash params for email verification flow
     if (typeof window !== 'undefined') {
@@ -48,6 +111,44 @@ export class AuthService {
     
     // Initialize auth state
     this.initAuthState();
+    
+    // Setup session refresh
+    this.setupSessionRefresh();
+  }
+
+  ngOnDestroy() {
+    if (this.sessionRefreshTimer) {
+      clearInterval(this.sessionRefreshTimer);
+    }
+  }
+
+  private updateAuthState(update: Partial<AuthState>) {
+    const currentState = this.authStateSubject.getValue();
+    this.authStateSubject.next({ ...currentState, ...update });
+  }
+
+  private setupSessionRefresh() {
+    this.sessionRefreshTimer = setInterval(async () => {
+      try {
+        const currentState = this.authStateSubject.getValue();
+        if (currentState.session) {
+          const { data: { session }, error } = 
+            await this.supabaseService.getSupabase().auth.refreshSession();
+          
+          if (error) {
+            throw error;
+          }
+
+          if (session) {
+            this.updateAuthState({ session });
+          }
+        }
+      } catch (error) {
+        this.authErrorService.handleError(error);
+        // If session refresh fails, log out the user
+        this.logout().subscribe();
+      }
+    }, this.SESSION_REFRESH_INTERVAL);
   }
 
   /**
@@ -67,6 +168,8 @@ export class AuthService {
 
     if (accessToken && tokenType) {
       try {
+        this.updateAuthState({ loading: true });
+
         // Set the session in Supabase
         const { data, error } = await this.supabaseService.getSupabase().auth.setSession({
           access_token: accessToken,
@@ -83,10 +186,9 @@ export class AuthService {
           await this.loadUserData(data.user.id);
         }
 
-        // Redirect based on user role
-        const user = this.currentUserSubject.value;
-        if (user) {
-          switch (user.role) {
+        const currentState = this.authStateSubject.getValue();
+        if (currentState.user) {
+          switch (currentState.user.role) {
             case 'admin':
               await this.router.navigate(['/admin/dashboard']);
               break;
@@ -101,9 +203,42 @@ export class AuthService {
           }
         }
       } catch (error) {
-        console.error('Error setting session:', error);
+        const authError = this.authErrorService.handleError(error);
+        this.updateAuthState({ error: authError.message });
         await this.router.navigate(['/auth/login']);
+      } finally {
+        this.updateAuthState({ loading: false });
       }
+    }
+  }
+
+  /**
+   * Set the session after authentication callback
+   */
+  async setSession(session: { 
+    access_token: string; 
+    refresh_token: string; 
+  }): Promise<{ data: any; error: any }> {
+    try {
+      this.updateAuthState({ loading: true });
+      
+      const response = await this.supabaseService.getSupabase().auth.setSession(session);
+      
+      if (response.error) {
+        throw response.error;
+      }
+
+      if (response.data.user) {
+        await this.loadUserData(response.data.user.id);
+      }
+
+      return { data: response.data, error: null };
+    } catch (error) {
+      const authError = this.authErrorService.handleError(error);
+      this.updateAuthState({ error: authError.message });
+      return { data: null, error: authError };
+    } finally {
+      this.updateAuthState({ loading: false });
     }
   }
 
@@ -111,43 +246,65 @@ export class AuthService {
    * Get the current access token for API calls
    */
   getAccessToken(): string | null {
-    const session = this.sessionSubject.value;
-    return session?.access_token || null;
+    const currentState = this.authStateSubject.getValue();
+    return currentState.session?.access_token || null;
   }
 
   /**
    * Initialize auth state by listening for Supabase auth changes
    */
-  private initAuthState(): void {
-    if (this.isInitialized) return;
+  private async initAuthState(): Promise<void> {
+    const currentState = this.authStateSubject.getValue();
+    if (currentState.initialized) return;
 
-    // Initialize session state
-    this.supabaseService.getSupabase().auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
-      this.sessionSubject.next(session);
-      if (session?.user) {
-        this.loadUserData(session.user.id);
-      }
-    });
+    try {
+      this.updateAuthState({ loading: true });
 
-    // Listen for auth changes
-    this.supabaseService.getSupabase().auth.onAuthStateChange((event, session) => {
-      this.sessionSubject.next(session);
+      // Initialize session state
+      const { data: { session }, error: sessionError } = 
+        await this.supabaseService.getSupabase().auth.getSession();
       
-      switch (event) {
-        case 'SIGNED_OUT':
-          this.currentUserSubject.next(null);
-          this.router.navigateByUrl('/');
-          break;
-        case 'SIGNED_IN':
-        case 'USER_UPDATED':
-          if (session?.user) {
-            this.loadUserData(session.user.id);
-          }
-          break;
-      }
-    });
+      if (sessionError) throw sessionError;
 
-    this.isInitialized = true;
+      this.updateAuthState({ session });
+      
+      if (session?.user) {
+        await this.loadUserData(session.user.id);
+      }
+
+      // Listen for auth changes
+      this.supabaseService.getSupabase().auth.onAuthStateChange(async (event, session) => {
+        this.updateAuthState({ session });
+        
+        switch (event) {
+          case 'SIGNED_OUT':
+            this.updateAuthState({ 
+              user: null, 
+              session: null,
+              error: null 
+            });
+            this.router.navigateByUrl('/');
+            break;
+            
+          case 'SIGNED_IN':
+          case 'USER_UPDATED':
+            if (session?.user) {
+              await this.loadUserData(session.user.id);
+            }
+            break;
+        }
+      });
+
+      this.updateAuthState({ initialized: true, error: null });
+    } catch (error) {
+      const authError = this.authErrorService.handleError(error);
+      this.updateAuthState({ 
+        error: authError.message,
+        initialized: true 
+      });
+    } finally {
+      this.updateAuthState({ loading: false });
+    }
   }
 
   /**
@@ -157,6 +314,8 @@ export class AuthService {
     if (!userId) return;
 
     try {
+      this.updateAuthState({ loading: true });
+
       // Get user from profiles table (linked to auth.users)
       const { data: profileData, error: profileError } = await this.supabaseService
         .getSupabase()
@@ -165,22 +324,27 @@ export class AuthService {
         .eq('id', userId)
         .single();
 
-      if (profileError) {
-        console.error('Error fetching profile data:', profileError);
-        return;
-      }
+      if (profileError) throw profileError;
 
-      const session = this.sessionSubject.value;
-      const authUser = session?.user;
+      const currentState = this.authStateSubject.getValue();
+      const authUser = currentState.session?.user;
 
       if (profileData && authUser) {
         // Create user object from profile data
         const appUser: User = this.mapToAppUser(profileData, authUser);
-        this.currentUserSubject.next(appUser);
+        this.updateAuthState({ 
+          user: appUser,
+          error: null
+        });
       }
     } catch (error) {
-      console.error('Error in loadUserData:', error);
-      this.currentUserSubject.next(null);
+      const authError = this.authErrorService.handleError(error);
+      this.updateAuthState({ 
+        user: null,
+        error: authError.message
+      });
+    } finally {
+      this.updateAuthState({ loading: false });
     }
   }
 
@@ -216,12 +380,36 @@ export class AuthService {
   }
 
   /**
+   * Handle email verification token
+   */
+  async handleEmailVerification(token: string): Promise<void> {
+    try {
+      const { data, error } = await this.supabaseService.getSupabase().auth.verifyOtp({
+        token_hash: token,
+        type: 'email'
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Update local auth state if verification successful
+      if (data?.user) {
+        await this.loadUserData(data.user.id);
+      }
+    } catch (error) {
+      console.error('Error verifying email:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Register a new user using Supabase auth with profile integration
    */
   register(email: string, password: string, userData: Partial<User>): Observable<AuthResponse> {
     return new Observable<AuthResponse>(observer => {
       // SupabaseService handles role determination with server-side RPC
-      this.supabaseService.signUp(email, password, userData)
+      this.supabaseService.signUp(email, password)
         .then(response => {
           if (response.error) {
             observer.error(response.error);
@@ -293,31 +481,33 @@ export class AuthService {
    */
   logout(): Observable<{ success: boolean; error: Error | null }> {
     return new Observable(observer => {
+      this.updateAuthState({ loading: true });
+      
       this.supabaseService.signOut()
         .then(response => {
           if (response.error) {
-            const errorObj = response.error instanceof Error 
-              ? response.error 
-              : new Error(typeof response.error === 'string' 
-                  ? response.error 
-                  : JSON.stringify(response.error));
-            
-            observer.next({ success: false, error: errorObj });
+            const authError = this.authErrorService.handleError(response.error);
+            this.updateAuthState({ error: authError.message });
+            observer.next({ success: false, error: new Error(authError.message) });
           } else {
-            this.sessionSubject.next(null);
-            this.currentUserSubject.next(null);
+            this.updateAuthState({
+              user: null,
+              session: null,
+              error: null
+            });
             observer.next({ success: true, error: null });
             this.router.navigateByUrl('/');
           }
           observer.complete();
         })
         .catch(error => {
-          const errorObj = error instanceof Error 
-            ? error 
-            : new Error(typeof error === 'string' ? error : JSON.stringify(error));
-            
-          observer.next({ success: false, error: errorObj });
+          const authError = this.authErrorService.handleError(error);
+          this.updateAuthState({ error: authError.message });
+          observer.next({ success: false, error: new Error(authError.message) });
           observer.complete();
+        })
+        .finally(() => {
+          this.updateAuthState({ loading: false });
         });
     });
   }
@@ -326,7 +516,8 @@ export class AuthService {
    * Get current logged in user
    */
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    const currentState = this.authStateSubject.getValue();
+    return currentState.user;
   }
 
   /**
@@ -379,12 +570,14 @@ export class AuthService {
    * Update user profile in the profiles table
    */
   updateUserProfile(userData: Partial<User>): Observable<User | null> {
-    const currentUser = this.getCurrentUser();
-    if (!currentUser) {
+    const currentState = this.authStateSubject.getValue();
+    if (!currentState.user) {
       return of(null);
     }
 
     return new Observable<User | null>(observer => {
+      this.updateAuthState({ loading: true });
+
       try {
         // Create the query
         const query = this.supabaseService
@@ -397,7 +590,7 @@ export class AuthService {
             profile_image_url: userData.profile_image_url,
             updated_at: new Date().toISOString()
           })
-          .eq('id', currentUser.id)
+          .eq('id', currentState.user!.id)
           .select('*')
           .single();
         
@@ -406,23 +599,33 @@ export class AuthService {
           // Success handler
           (response) => {
             if (response.error) {
-              observer.error(response.error);
+              const authError = this.authErrorService.handleError(response.error);
+              this.updateAuthState({ 
+                error: authError.message,
+                loading: false
+              });
+              observer.error(new Error(authError.message));
               observer.complete();
               return;
             }
 
             if (response.data) {
-              const session = this.sessionSubject.value;
-              const authUser = session?.user;
+              const authUser = currentState.session?.user;
               
               if (authUser) {
                 const updatedUser = this.mapToAppUser(response.data, authUser);
-                this.currentUserSubject.next(updatedUser);
+                this.updateAuthState({ 
+                  user: updatedUser,
+                  error: null,
+                  loading: false
+                });
                 observer.next(updatedUser);
               } else {
+                this.updateAuthState({ loading: false });
                 observer.next(null);
               }
             } else {
+              this.updateAuthState({ loading: false });
               observer.next(null);
             }
             
@@ -430,13 +633,23 @@ export class AuthService {
           },
           // Error handler
           (error: unknown) => {
-            observer.error(error instanceof Error ? error : new Error(String(error)));
+            const authError = this.authErrorService.handleError(error);
+            this.updateAuthState({ 
+              error: authError.message,
+              loading: false
+            });
+            observer.error(new Error(authError.message));
             observer.complete();
           }
         );
       } catch (error: unknown) {
         // Fallback error handler for synchronous errors
-        observer.error(error instanceof Error ? error : new Error(String(error)));
+        const authError = this.authErrorService.handleError(error);
+        this.updateAuthState({ 
+          error: authError.message,
+          loading: false
+        });
+        observer.error(new Error(authError.message));
         observer.complete();
       }
     });

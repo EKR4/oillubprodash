@@ -27,6 +27,11 @@ export const AUTH_ROUTES: Routes = [
     title: 'Verify Email'
   },
   {
+    path: 'callback',
+    loadComponent: () => import('./callback/callback.component').then(m => m.AuthCallbackComponent),
+    title: 'Authenticating...'
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'
